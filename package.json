@@ -1,0 +1,22 @@
+{
+  "name": "secnd",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others --names api,web --prefix-colors cyan,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "uv run uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000",
+    "dev:web": "npm run dev --workspace @secnd/frontend",
+    "build": "npm run build --workspace @secnd/frontend",
+    "lint": "npm run lint --workspace @secnd/frontend",
+    "check": "uv run ruff check backend && uv run ruff format --check backend && uv run pytest && npm run lint && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}
