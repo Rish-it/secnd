@@ -1,0 +1,45 @@
+[project]
+name = "secnd"
+version = "0.1.0"
+description = "A companion that learns your recurring decisions and knows when to ask."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "httpx>=0.28,<1",
+    "numpy>=2,<3",
+    "pandas>=2.2,<4",
+    "pydantic-settings>=2.7,<3",
+    "python-multipart>=0.0.20,<1",
+    "scikit-learn>=1.6,<2",
+    "sentence-transformers>=3,<6",
+    "torch>=2.6,<3",
+    "uvicorn[standard]>=0.34,<1",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.9,<1"]
+
+[tool.uv]
+package = false
+
+# Avoid installing CUDA libraries on Linux and Windows. macOS wheels are CPU-capable.
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
