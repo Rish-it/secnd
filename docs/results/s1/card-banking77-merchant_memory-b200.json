@@ -1,0 +1,49 @@
+{
+  "provenance": {
+    "dataset": "banking77",
+    "model": "merchant_memory",
+    "budget": 200,
+    "train_rows": 200,
+    "seed": 0,
+    "split_hash": "99a7451cd906ef7b193bcce77a470e9227bc593168795bf7e61db7caf902c591",
+    "git_sha": "8d9e33b"
+  },
+  "quality": {
+    "accuracy": 0.0153,
+    "macro_f1": 0.0004,
+    "nll": 4.3545,
+    "brier": 0.9873,
+    "ece": 0.0047,
+    "classwise_ece": 0.0034,
+    "aurc": 0.9756
+  },
+  "claim": {
+    "tau": 0.99,
+    "coverage": 0.0,
+    "precision_above": null,
+    "calib_auto": {
+      "n": 0,
+      "correct": 0
+    },
+    "calib_cp_lower": 0.0
+  },
+  "slices": {
+    "unseen_merchant": {
+      "rows": 1962,
+      "accuracy": 0.0153
+    }
+  },
+  "worst_classes": {
+    "Refund_not_showing_up": 0.0,
+    "getting_spare_card": 0.0,
+    "lost_or_stolen_card": 0.0,
+    "lost_or_stolen_phone": 0.0,
+    "order_physical_card": 0.0
+  },
+  "speed": {
+    "fit_seconds": 0.001,
+    "predict_ms_p50": 0.038,
+    "predict_ms_p99": 0.066,
+    "peak_rss_mb": 167.7
+  }
+}
