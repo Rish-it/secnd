@@ -1,0 +1,49 @@
+{
+  "provenance": {
+    "dataset": "us_bank_v2",
+    "model": "tfidf_lr",
+    "budget": 200,
+    "train_rows": 200,
+    "seed": 0,
+    "split_hash": "7c14a573dd76f3190ea4848a4e0efaa5e191c366634db6cd383aaf5aeca3df75",
+    "git_sha": "8d9e33b"
+  },
+  "quality": {
+    "accuracy": 0.465,
+    "macro_f1": 0.4459,
+    "nll": 2.3848,
+    "brier": 0.8583,
+    "ece": 0.3419,
+    "classwise_ece": 0.0414,
+    "aurc": 0.3096
+  },
+  "claim": {
+    "tau": 0.99,
+    "coverage": 0.0,
+    "precision_above": null,
+    "calib_auto": {
+      "n": 0,
+      "correct": 0
+    },
+    "calib_cp_lower": 0.0
+  },
+  "slices": {
+    "unseen_merchant": {
+      "rows": 10200,
+      "accuracy": 0.465
+    }
+  },
+  "worst_classes": {
+    "Transfer": 0.0963,
+    "Restaurants": 0.1161,
+    "Entertainment": 0.1474,
+    "Subscription": 0.2274,
+    "Transportation": 0.2779
+  },
+  "speed": {
+    "fit_seconds": 0.055,
+    "predict_ms_p50": 0.242,
+    "predict_ms_p99": 0.366,
+    "peak_rss_mb": 254.6
+  }
+}
