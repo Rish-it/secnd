@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import io
+import json
 import re
 import sys
 import urllib.request
@@ -194,6 +195,78 @@ def load_dataset(name: str, data_dir: Path) -> pd.DataFrame:
     raise KeyError(name)
 
 
+SPLITS = ("seed", "stream", "calib", "test")
+SEED_ROWS = 200
+
+
+def _tail_by_group(frame: pd.DataFrame, fraction: float, seed: int) -> pd.Index:
+    """Pick whole merchant groups in a seeded random order until `fraction` of rows is reached."""
+    groups = frame["merchant_key"].where(frame["merchant_key"] != "", "#" + frame["id"].astype(str))
+    sizes = groups.value_counts().sort_index().sample(frac=1, random_state=seed)
+    chosen = sizes.index[sizes.cumsum() <= fraction * len(frame)]
+    return frame.index[groups.isin(chosen)]
+
+
+def split_dataset(frame: pd.DataFrame, seed: int = 0) -> pd.Series:
+    """Assign every row to seed, stream, calib or test; same frame and seed give the same split.
+
+    Dated data splits by time: test is the last 15%, calib the 15% of the rest just before it,
+    so calib looks like test. Undated data splits by merchant group, so no payee spans
+    calib and test. Seed is 200 rows, stratified by label, from the earliest pool rows.
+    """
+    dated = frame["date"].notna().all()
+    order = frame.sort_values(["date", "id"]) if dated else frame.sample(frac=1, random_state=seed)
+    split = pd.Series("stream", index=frame.index)
+    if dated:
+        n_test = round(0.15 * len(order))
+        n_calib = round(0.15 * (len(order) - n_test))
+        split[order.index[len(order) - n_test :]] = "test"
+        split[order.index[len(order) - n_test - n_calib : len(order) - n_test]] = "calib"
+    else:
+        split[_tail_by_group(frame, 0.15, seed)] = "test"
+        rest = frame[split == "stream"]
+        split[_tail_by_group(rest, 0.15, seed + 1)] = "calib"
+
+    pool = order[split[order.index] == "stream"]
+    early = pool.iloc[: max(10 * SEED_ROWS, len(pool) // 10)]
+    share = early["label"].value_counts(normalize=True) * SEED_ROWS
+    quota = share.astype(int)
+    quota[(share - quota).sort_values(ascending=False).index[: SEED_ROWS - quota.sum()]] += 1
+    picked = [
+        rows.sample(quota[label], random_state=seed).index
+        for label, rows in early.groupby("label")
+        if quota[label]
+    ]
+    split[pd.Index([i for index in picked for i in index])] = "seed"
+    return split
+
+
+def split_manifest(name: str, frame: pd.DataFrame, split: pd.Series) -> dict:
+    """Counts per split and class plus a hash of the row ids in each split."""
+    lines = "\n".join(f"{i}:{s}" for i, s in sorted(zip(frame["id"], split, strict=True)))
+    manifest = {
+        "dataset": name,
+        "rows": len(frame),
+        "hash": hashlib.sha256(lines.encode()).hexdigest(),
+        "sources": {file: digest for file, _, digest in DATASETS.get(name, [])},
+        "splits": {},
+    }
+    for part in SPLITS:
+        rows = frame[split == part]
+        manifest["splits"][part] = {
+            "rows": len(rows),
+            "first_date": str(rows["date"].min().date()) if rows["date"].notna().any() else None,
+            "last_date": str(rows["date"].max().date()) if rows["date"].notna().any() else None,
+            "classes": rows["label"].value_counts().sort_index().to_dict(),
+        }
+    return manifest
+
+
 if __name__ == "__main__":
+    out = Path("docs/results/s1")
+    out.mkdir(parents=True, exist_ok=True)
     for dataset in sys.argv[1:] or DATASETS:
-        print(download_dataset(dataset, Settings().data_dir))
+        frame = load_dataset(dataset, Settings().data_dir)
+        manifest = split_manifest(dataset, frame, split_dataset(frame))
+        (out / f"split-{dataset}.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        print(dataset, manifest["hash"], {k: v["rows"] for k, v in manifest["splits"].items()})

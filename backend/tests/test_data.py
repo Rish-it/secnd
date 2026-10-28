@@ -1,5 +1,6 @@
 import hashlib
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -61,3 +62,55 @@ def test_load_dataset_maps_ipsa_columns(tmp_path, monkeypatch):
     assert row.date == pd.Timestamp("2024-10-08")
     assert row.merchant_key == "office rent"
     assert set(frame.label) == {"Rent"}
+
+
+def _frame(n, dated):
+    rng = np.random.default_rng(0)
+    keys = rng.integers(0, 400, n)
+    return data._frame(
+        pd.Series(
+            [f"payee {chr(97 + k % 26)}{chr(97 + k // 26)} #{i}" for i, k in enumerate(keys)]
+        ),
+        pd.Series([f"class {k % 12}" for k in keys]),
+        date=pd.date_range("2024-01-01", periods=n, freq="h") if dated else None,
+    )
+
+
+@pytest.mark.parametrize("dated", [True, False])
+def test_split_dataset_is_disjoint_sized_and_stable(dated):
+    frame = _frame(30000, dated)
+    split = data.split_dataset(frame)
+
+    counts = split.value_counts()
+    assert set(counts.index) == set(data.SPLITS)
+    assert counts["seed"] == data.SEED_ROWS
+    assert 0.12 < counts["test"] / len(frame) < 0.18
+    assert data.split_manifest("x", frame, split) == data.split_manifest(
+        "x", frame, data.split_dataset(frame.copy())
+    )
+
+    seed_keys = set(frame.merchant_key[split == "seed"])
+    calib_keys = set(frame.merchant_key[split == "calib"])
+    test_keys = set(frame.merchant_key[split == "test"])
+    if dated:
+        assert frame.date[split == "test"].min() >= frame.date[split != "test"].max()
+        assert (
+            frame.date[split == "calib"].min() >= frame.date[split.isin(["seed", "stream"])].max()
+        )
+        assert frame.date[split == "seed"].max() <= frame.date[split == "stream"].quantile(0.2)
+    else:
+        assert not calib_keys & test_keys
+        assert not (seed_keys | set(frame.merchant_key[split == "stream"])) & (
+            calib_keys | test_keys
+        )
+
+
+def test_split_manifest_hash_changes_with_assignment():
+    frame = _frame(1000, True)
+    split = data.split_dataset(frame)
+    moved = split.copy()
+    moved.iloc[0] = "test"
+    assert (
+        data.split_manifest("x", frame, split)["hash"]
+        != data.split_manifest("x", frame, moved)["hash"]
+    )
