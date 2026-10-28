@@ -1,4 +1,7 @@
-"""Eval card: `uv run python -m backend.eval --model tfidf_lr --budget 200 [--dataset ipsa]`."""
+"""Eval card: `uv run python -m backend.eval --model tfidf_lr --budget 200 [--dataset ipsa]`.
+
+Leakage audit: `uv run python -m backend.eval --leakage [--dataset ipsa]`.
+"""
 
 import argparse
 import json
@@ -14,7 +17,7 @@ import pandas as pd
 from backend import metrics
 from backend.baselines import BASELINES
 from backend.config import Settings
-from backend.data import load_dataset, split_dataset, split_manifest
+from backend.data import DATASETS, download_dataset, load_dataset, split_dataset, split_manifest
 
 TAU = 0.99
 
@@ -112,14 +115,83 @@ def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
     }
 
 
+def _lookup_accuracy(column: pd.Series, label: pd.Series, train: pd.Series) -> float:
+    """Accuracy of answering with the commonest training label for each non-empty column value."""
+    filled = column != ""
+    best = label[train & filled].groupby(column[train & filled]).agg(lambda v: v.mode()[0])
+    test = ~train & filled & column.isin(best.index)
+    return round(float((column[test].map(best) == label[test]).mean()), 4)
+
+
+def leakage(dataset: str, seed: int = 0) -> dict:
+    """How much test shares with training, and whether any side column gives the label away."""
+    frame = load_dataset(dataset, Settings().data_dir)
+    split = split_dataset(frame, seed)
+    labels = sorted(frame["label"].unique())
+    test = frame[split == "test"]
+    report = {"dataset": dataset, "test_rows": len(test), "budgets": {}}
+    for budget in (200, 5000, int((split.isin(["seed", "stream"])).sum())):
+        train = training_rows(frame, split, budget, seed)
+        keys = set(train["merchant_key"]) - {""}
+        seen = test["merchant_key"].isin(keys)
+        memory = BASELINES["merchant_memory"](labels).fit(train)
+        p = memory.predict_proba(test[seen])
+        report["budgets"][budget] = {
+            "test_rows_with_seen_merchant": round(float(seen.mean()), 4),
+            "test_keys_seen": round(
+                len(set(test["merchant_key"]) & keys) / test["merchant_key"].nunique(), 4
+            ),
+            "test_text_exact_in_train": round(
+                float(test["text"].isin(set(train["text"])).mean()), 4
+            ),
+            "memory_accuracy_all_test": round(
+                metrics.accuracy(memory.encode(test), memory.predict_proba(test)), 4
+            ),
+            "memory_accuracy_seen": round(metrics.accuracy(memory.encode(test[seen]), p), 4)
+            if seen.any()
+            else None,
+        }
+    report["empty_text_test"] = round(float((test["text"] == "").mean()), 4)
+    if dataset == "ipsa":
+        folder = download_dataset(dataset, Settings().data_dir)
+        raw = pd.concat(
+            [
+                pd.read_csv(folder / f, encoding="utf-8-sig", dtype=str)
+                for f, _, _ in DATASETS[dataset]
+            ],
+            ignore_index=True,
+        )
+        train = split.isin(["seed", "stream"])
+        report["side_columns"] = {
+            column: {
+                "filled": round(float(raw[column].notna().mean()), 4),
+                "values": int(raw[column].nunique()),
+                "lookup_accuracy_on_test": _lookup_accuracy(
+                    raw[column].fillna(""), frame["label"], train
+                ),
+            }
+            for column in ("Short Description", "Category")
+        }
+    return report
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", choices=BASELINES, required=True)
+    parser.add_argument("--model", choices=BASELINES)
+    parser.add_argument("--leakage", action="store_true")
     parser.add_argument("--budget", type=int, default=200)
     parser.add_argument("--dataset", default="ipsa")
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
+    if args.leakage:
+        report = leakage(args.dataset, args.seed)
+        out = Path("docs/results/s1") / f"leakage-{args.dataset}.json"
+        out.write_text(json.dumps(report, indent=2) + "\n")
+        print(json.dumps(report, indent=2))
+        return
+    if not args.model:
+        parser.error("--model is required unless --leakage is given")
     result = card(args.dataset, args.model, args.budget, args.seed)
     out = Path("docs/results/s1") / f"card-{args.dataset}-{args.model}-b{args.budget}.json"
     out.parent.mkdir(parents=True, exist_ok=True)

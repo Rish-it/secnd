@@ -15,3 +15,11 @@ def test_training_rows_take_seed_then_earliest_stream():
 
     # Dates run backwards, so the earliest stream rows are ids 3 then 1, not 0 then 1.
     assert rows["id"].tolist() == [2, 3, 1]
+
+
+def test_lookup_accuracy_scores_a_label_revealing_column():
+    column = pd.Series(["gas", "gas", "water", "gas", "water", ""])
+    label = pd.Series(["utilities", "utilities", "utilities", "utilities", "rent", "rent"])
+    train = pd.Series([True, True, True, False, False, False])
+    # Test rows: gas -> utilities (right), water -> utilities (wrong), empty is skipped.
+    assert eval._lookup_accuracy(column, label, train) == 0.5
