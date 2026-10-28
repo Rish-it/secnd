@@ -1,0 +1,17 @@
+*
+!Dockerfile
+!package.json
+!package-lock.json
+!pyproject.toml
+!uv.lock
+!backend/
+!backend/**
+!frontend/
+!frontend/**
+**/node_modules
+**/dist
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.env*
+frontend/src/assets/
