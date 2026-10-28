@@ -1,0 +1,21 @@
+backend/metrics.py
+  s_99a14fdaab2d15::t_e89022848c23ff 1-66
+backend/tests/test_metrics.py
+  s_99a14fdaab2d15::t_e72f69b5f377ba 1-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "067745886897317cd58b38d7974d1bafee3bf404",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
