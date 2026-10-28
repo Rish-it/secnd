@@ -1,0 +1,53 @@
+{
+  "provenance": {
+    "dataset": "ipsa",
+    "model": "random",
+    "budget": 5000,
+    "train_rows": 5000,
+    "seed": 0,
+    "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
+    "git_sha": "8d9e33b"
+  },
+  "quality": {
+    "accuracy": 0.0198,
+    "macro_f1": 0.0006,
+    "nll": 4.1271,
+    "brier": 0.9839,
+    "ece": 0.0037,
+    "classwise_ece": 0.0178,
+    "aurc": 0.9793
+  },
+  "claim": {
+    "tau": 0.99,
+    "coverage": 0.0,
+    "precision_above": null,
+    "calib_auto": {
+      "n": 0,
+      "correct": 0
+    },
+    "calib_cp_lower": 0.0
+  },
+  "slices": {
+    "seen_merchant": {
+      "rows": 13257,
+      "accuracy": 0.019
+    },
+    "unseen_merchant": {
+      "rows": 29295,
+      "accuracy": 0.0202
+    }
+  },
+  "worst_classes": {
+    "Other public transport": 0.0,
+    "Pooled staffing services": 0.0,
+    "Postage & couriers": 0.0,
+    "Rail": 0.0,
+    "Railcard": 0.0
+  },
+  "speed": {
+    "fit_seconds": 0.0,
+    "predict_ms_p50": 0.028,
+    "predict_ms_p99": 0.08,
+    "peak_rss_mb": 531.3
+  }
+}

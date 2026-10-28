@@ -1,0 +1,53 @@
+{
+  "provenance": {
+    "dataset": "ipsa",
+    "model": "merchant_memory",
+    "budget": 5000,
+    "train_rows": 5000,
+    "seed": 0,
+    "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
+    "git_sha": "8d9e33b"
+  },
+  "quality": {
+    "accuracy": 0.311,
+    "macro_f1": 0.1415,
+    "nll": 6.4213,
+    "brier": 0.8056,
+    "ece": 0.2216,
+    "classwise_ece": 0.0129,
+    "aurc": 0.386
+  },
+  "claim": {
+    "tau": 0.99,
+    "coverage": 0.3115,
+    "precision_above": 0.8764,
+    "calib_auto": {
+      "n": 14824,
+      "correct": 13822
+    },
+    "calib_cp_lower": 0.9289
+  },
+  "slices": {
+    "seen_merchant": {
+      "rows": 13257,
+      "accuracy": 0.8764
+    },
+    "unseen_merchant": {
+      "rows": 29295,
+      "accuracy": 0.0551
+    }
+  },
+  "worst_classes": {
+    "Other public transport": 0.0,
+    "Other": 0.0,
+    "Parking": 0.0,
+    "Payroll": 0.0,
+    "Rail": 0.0
+  },
+  "speed": {
+    "fit_seconds": 0.003,
+    "predict_ms_p50": 0.04,
+    "predict_ms_p99": 0.084,
+    "peak_rss_mb": 532.7
+  }
+}

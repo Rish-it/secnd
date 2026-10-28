@@ -1,0 +1,53 @@
+{
+  "provenance": {
+    "dataset": "ipsa",
+    "model": "majority",
+    "budget": 200,
+    "train_rows": 200,
+    "seed": 0,
+    "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
+    "git_sha": "8d9e33b"
+  },
+  "quality": {
+    "accuracy": 0.2256,
+    "macro_f1": 0.0061,
+    "nll": 8.9317,
+    "brier": 0.9365,
+    "ece": 0.0056,
+    "classwise_ece": 0.0103,
+    "aurc": 0.7742
+  },
+  "claim": {
+    "tau": 0.99,
+    "coverage": 0.0,
+    "precision_above": null,
+    "calib_auto": {
+      "n": 0,
+      "correct": 0
+    },
+    "calib_cp_lower": 0.0
+  },
+  "slices": {
+    "seen_merchant": {
+      "rows": 10045,
+      "accuracy": 0.7585
+    },
+    "unseen_merchant": {
+      "rows": 32507,
+      "accuracy": 0.061
+    }
+  },
+  "worst_classes": {
+    "Advertising and contact cards": 0.0,
+    "Payroll": 0.0,
+    "Pooled staffing services": 0.0,
+    "Postage & couriers": 0.0,
+    "Rail": 0.0
+  },
+  "speed": {
+    "fit_seconds": 0.0,
+    "predict_ms_p50": 0.027,
+    "predict_ms_p99": 0.078,
+    "peak_rss_mb": 535.3
+  }
+}
