@@ -1,7 +1,13 @@
 import csv
+import hashlib
 import io
+import sys
+import urllib.request
+from pathlib import Path
 
 from pydantic import BaseModel
+
+from backend.config import Settings
 
 MAX_CSV_BYTES = 5 * 1024 * 1024
 MAX_COLUMNS = 100
@@ -58,3 +64,52 @@ def preview_csv(content: bytes, filename: str) -> CSVPreview:
         raise ValueError("Your CSV has a header but no decisions. Add at least one row.")
 
     return CSVPreview(filename=filename, columns=columns, row_count=row_count, rows=rows)
+
+
+_DODATA = "https://huggingface.co/datasets/DoDataThings/us-bank-transaction-categories-v2/resolve/3e8d052cb7b362fb1a04b6064d2331982553ea56"
+_BANKING77 = "https://raw.githubusercontent.com/PolyAI-LDN/task-specific-datasets/57ec275d8078af65b7731c2a98be812d844a6d6b/banking_data"
+
+# Public datasets pinned to a revision: name -> [(file name, URL, sha256)].
+DATASETS: dict[str, list[tuple[str, str, str]]] = {
+    "us_bank_v2": [
+        (
+            "transactions.csv",
+            f"{_DODATA}/transactions-synthetic.csv",
+            "0424aed6e76f74a5b3b1ff61ccec43bc321622e6806da353b910b3b2c8108f6e",
+        ),
+    ],
+    "banking77": [
+        (
+            "train.csv",
+            f"{_BANKING77}/train.csv",
+            "b06e26ac675513959a63135f11b94ea7786ed02da65db93a5650d8838cbc664b",
+        ),
+        (
+            "test.csv",
+            f"{_BANKING77}/test.csv",
+            "d12d6e3bc4c3103966ae786dc435913c0c563dfa328f5a3646d0e62cfeeb474d",
+        ),
+    ],
+}
+
+
+def download_dataset(name: str, data_dir: Path) -> Path:
+    """Fetch a dataset into data_dir/datasets/<name>/ and refuse any file whose sha256 differs."""
+    folder = data_dir / "datasets" / name
+    folder.mkdir(parents=True, exist_ok=True)
+    for filename, url, expected in DATASETS[name]:
+        path = folder / filename
+        if path.exists() and hashlib.sha256(path.read_bytes()).hexdigest() == expected:
+            continue
+        with urllib.request.urlopen(url, timeout=60) as response:
+            content = response.read()
+        actual = hashlib.sha256(content).hexdigest()
+        if actual != expected:
+            raise ValueError(f"{name}/{filename}: sha256 {actual} does not match {expected}")
+        path.write_bytes(content)
+    return folder
+
+
+if __name__ == "__main__":
+    for dataset in sys.argv[1:] or DATASETS:
+        print(download_dataset(dataset, Settings().data_dir))
