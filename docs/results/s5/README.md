@@ -56,3 +56,41 @@ Any probabilities requested in generated JSON are self-reported estimates,
 not token likelihoods or calibrated classifier probabilities. Baseline NLL and
 ECE remain unmeasured unless a suitable probability source becomes available.
 No baseline accuracy, speed or coverage result is available here yet.
+
+## Client calls
+
+`backend.muse.MuseClient` is a synchronous context manager. Pass `Settings`, an
+active `BudgetRun`, and optionally an HTTP transport for tests. The existing
+HTTP and validation dependencies are sufficient; no additional SDK is needed.
+
+| Method | Input | Result |
+| --- | --- | --- |
+| `zero_shot(items, labels)` | `MuseItem[]`, distinct allowed labels | `LabelResult[]` in input order |
+| `cold_start(items, labels)` | Same | Same, including label and confidence |
+| `explain(item, top3, neighbours)` | One item, up to three probabilities and three `LabelledItem` examples | Short explanation text |
+| `chat(question, tools)` | Question and workspace-scoped read-only callbacks | `ChatReply` with answer and tool names used |
+
+`MuseItem` contains `item_id`, `text`, optional `amount` and optional ISO `date`.
+Empty descriptions are supported when the source only has numeric/date fields.
+Label results include the full requested label distribution, the winning
+confidence, `confidence_source: self_reported`, successful-response usage and
+elapsed milliseconds. Out-of-set labels, missing classes, non-finite values,
+invalid probability sums and partial responses are rejected. Costs for retries
+are included in the run ledger; per-result usage describes the successful call.
+
+Each request has a five-second connection timeout and a 30-second HTTP timeout.
+Transient network failures and HTTP 429/500/502/503/504 are retried with backoff,
+at most three attempts. The budget is checked before every attempt. Unknown
+usage from failed attempts is charged conservatively in the ledger. The smoke
+command makes only one attempt.
+
+Chat accepts only `count`, `mistakes` and `stats` callbacks. Each receives one
+validated dictionary. `count` takes a `filter` with optional `label`, `auto`,
+`model_version`, `start_date` and `end_date`. `mistakes` and `stats` take a
+`period`: `today`, `week`, `month` or `all`. Callbacks must already be scoped to
+the current workspace. No SQL or arbitrary function names are accepted.
+Chat stops after four completion rounds; tool replies are capped at 32 KiB.
+
+Before using the client, measure tokens on a representative small sample. Then
+provide those measurements and the planned row count to `BudgetRun`. Neither
+the labeling baseline nor the learning-loop weighting is connected yet.
