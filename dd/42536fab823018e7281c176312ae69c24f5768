@@ -1,0 +1,21 @@
+docs/results/s1/card-banking77-merchant_memory-b200.json
+  s_99a14fdaab2d15::t_7e74c40d07b8f0 1-49
+docs/results/s1/card-banking77-tfidf_lr-b200.json
+  s_99a14fdaab2d15::t_c8712c018bc224 1-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dd42536fab823018e7281c176312ae69c24f5768",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
