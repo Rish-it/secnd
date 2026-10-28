@@ -67,10 +67,30 @@ def preview_csv(content: bytes, filename: str) -> CSVPreview:
 
 
 _DODATA = "https://huggingface.co/datasets/DoDataThings/us-bank-transaction-categories-v2/resolve/3e8d052cb7b362fb1a04b6064d2331982553ea56"
+_IPSA = "https://www.theipsa.org.uk/api/download?type=individualBusinessCosts&year="
 _BANKING77 = "https://raw.githubusercontent.com/PolyAI-LDN/task-specific-datasets/57ec275d8078af65b7731c2a98be812d844a6d6b/banking_data"
 
 # Public datasets pinned to a revision: name -> [(file name, URL, sha256)].
 DATASETS: dict[str, list[tuple[str, str, str]]] = {
+    # UK MP business-cost claims, Open Government Licence v3.0. IPSA may republish a year with
+    # corrections; a hash mismatch then means re-pinning, never silently accepting new rows.
+    "ipsa": [
+        (
+            "22_23.csv",
+            f"{_IPSA}22_23",
+            "6ea99df7fc2b8caa6f16fdcf39631b598bc4112233f480fc76cf0cf4ccf34f0c",
+        ),
+        (
+            "23_24.csv",
+            f"{_IPSA}23_24",
+            "4f4f5f52f7850996b48d4e118af7660216eafaaa3b2d93b368a023ee244413e9",
+        ),
+        (
+            "24_25.csv",
+            f"{_IPSA}24_25",
+            "2996500d0e11696366240061ba021ac1a629c35927e6c2bf345677ce57de7cb2",
+        ),
+    ],
     "us_bank_v2": [
         (
             "transactions.csv",
