@@ -1,0 +1,31 @@
+docs/results/s1/leakage-banking77.json
+  s_99a14fdaab2d15::t_e00e621d62fba3 1-28
+docs/results/s1/leakage-us_bank_v2.json
+  s_99a14fdaab2d15::t_4145eb32f16eaf 1-28
+docs/results/s1/leakage-ipsa.json
+  s_931864dc636ea3::t_ce363bec916ad4 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f8a44ed330ef34c56a79db1a1df139fecf44e569",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
