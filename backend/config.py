@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     data_dir: Path = Path(".data")
     frontend_dist: Path = Path("frontend/dist")
     muse_api_key: SecretStr = SecretStr("")
-    muse_base_url: str = ""
-    muse_model: str = ""
+    muse_base_url: str = "https://inference.baseten.co/v1"
+    muse_model: str = "meta-models/muse-spark-open-1026"
 
     @property
     def database_path(self) -> Path:
