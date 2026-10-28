@@ -150,12 +150,15 @@ def merchant_key(text: str) -> str:
 
 def _frame(text, label, amount=None, date=None, account=None) -> pd.DataFrame:
     text = text.fillna("").astype(str).str.strip()
+    # Sources rename labels by case alone ("Pooled Staffing Services"); keep the commonest spelling.
+    label = label.astype(str).str.strip()
+    label = label.groupby(label.str.lower()).transform(lambda spelling: spelling.mode()[0])
     frame = pd.DataFrame(
         {
             "text": text,
             "amount": pd.Series(amount, index=text.index, dtype="float64"),
             "date": pd.Series(date, index=text.index, dtype="datetime64[ns]"),
-            "label": label.astype(str),
+            "label": label,
             "account": pd.Series(account, index=text.index, dtype="object"),
             "merchant_key": text.map(merchant_key),
         }

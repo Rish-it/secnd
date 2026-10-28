@@ -39,7 +39,12 @@ def test_merchant_key(text, key):
 def test_load_dataset_maps_ipsa_columns(tmp_path, monkeypatch):
     header = '"Parliamentary ID","Date","Cost Type","Details","Amount Claimed"\n'
     source = tmp_path / "22_23.csv"
-    source.write_text(header + '4837,"08/10/2024","Rent","Office rent [200013636-120]","350.5"\n')
+    source.write_text(
+        header
+        + '4837,"08/10/2024","Rent","Office rent [200013636-120]","350.5"\n'
+        + '4837,"09/10/2024","Rent","Office rent","350.5"\n'
+        + '4837,"10/10/2024","RENT","Office rent","350.5"\n'
+    )
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     monkeypatch.setitem(data.DATASETS, "ipsa", [("22_23.csv", source.as_uri(), digest)])
 
@@ -55,3 +60,4 @@ def test_load_dataset_maps_ipsa_columns(tmp_path, monkeypatch):
     )
     assert row.date == pd.Timestamp("2024-10-08")
     assert row.merchant_key == "office rent"
+    assert set(frame.label) == {"Rent"}
