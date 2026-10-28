@@ -1,0 +1,30 @@
+backend/tests/test_data.py
+  s_99a14fdaab2d15::t_9087ebe3558ecd 42-47
+  s_1f3964e6251ccb::t_a33c35849ee8c5 63
+backend/data.py
+  s_99a14fdaab2d15::t_5868b359bdd3aa 153-155,161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "04211ab1cc200d5d2a4e22d0e2413ef72c2ceb8f",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
