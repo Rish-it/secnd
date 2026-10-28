@@ -16,6 +16,24 @@ uv run python -m backend.muse --smoke
 The command outputs only HTTP status, the returned model ID and token counts.
 It does not output the key, response text or reasoning text.
 
+## Spending limits
+
+`SECND_MUSE_BUDGET_USD` limits a run to $10 by default. Before starting, callers
+provide a row count and measured input/output tokens per row; an estimate over
+the limit is rejected before any HTTP request. The client also checks each
+request against remaining funds. The shared ledger caps total spend at $30.
+
+Each run appends its token totals and full-list cost to [spend.csv](spend.csv),
+including partial runs that fail. An exclusive file lock serializes paid runs
+using that ledger on one host. Keep the same ledger across invocations. A lost
+response is charged conservatively using the request's reserved token estimate
+and marked `estimated`; actual provider billing may be lower. Restarting with
+a different ledger does not carry forward earlier spend.
+
+The [connection result](smoke.json) records one request. Its cost is computed
+from the reported input and output tokens. Reasoning is a subset of output
+tokens and is counted separately without adding it to the bill a second time.
+
 ## Provider limits
 
 Checked October 29, 2026:

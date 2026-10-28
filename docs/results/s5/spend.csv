@@ -1,0 +1,2 @@
+time,task,prompt_tokens,completion_tokens,reasoning_tokens,cached_tokens,cost_usd,status
+2026-10-28T20:55:00.512720+00:00,smoke,153,64,53,128,0.00046325,completed
