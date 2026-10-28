@@ -1,10 +1,12 @@
 import csv
 import hashlib
 import io
+import re
 import sys
 import urllib.request
 from pathlib import Path
 
+import pandas as pd
 from pydantic import BaseModel
 
 from backend.config import Settings
@@ -128,6 +130,65 @@ def download_dataset(name: str, data_dir: Path) -> Path:
             raise ValueError(f"{name}/{filename}: sha256 {actual} does not match {expected}")
         path.write_bytes(content)
     return folder
+
+
+COLUMNS = ["id", "text", "amount", "date", "label", "account", "merchant_key"]
+
+_MONTHS = "jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec"
+_MONTH_WORD = re.compile(
+    rf"\b(?:{_MONTHS}|january|february|march|april|june|july|august|september|october|november|december)\b"
+)
+_NOISE = re.compile(r"\[(?:debit|credit|\*+|[\d-]+)\]")
+
+
+def merchant_key(text: str) -> str:
+    """Reduce a description to the payee: drop ids, digits, months and punctuation."""
+    key = _NOISE.sub(" ", text.lower())
+    key = re.sub(r"[^a-z&]+", " ", key)
+    return " ".join(_MONTH_WORD.sub(" ", key).split())
+
+
+def _frame(text, label, amount=None, date=None, account=None) -> pd.DataFrame:
+    text = text.fillna("").astype(str).str.strip()
+    frame = pd.DataFrame(
+        {
+            "text": text,
+            "amount": pd.Series(amount, index=text.index, dtype="float64"),
+            "date": pd.Series(date, index=text.index, dtype="datetime64[ns]"),
+            "label": label.astype(str),
+            "account": pd.Series(account, index=text.index, dtype="object"),
+            "merchant_key": text.map(merchant_key),
+        }
+    ).reset_index(drop=True)
+    frame.insert(0, "id", range(len(frame)))
+    return frame[COLUMNS]
+
+
+def load_dataset(name: str, data_dir: Path) -> pd.DataFrame:
+    """Return one frame per dataset with the columns in COLUMNS; missing fields stay null."""
+    folder = download_dataset(name, data_dir)
+    if name == "ipsa":
+        raw = pd.concat(
+            [
+                pd.read_csv(folder / file, encoding="utf-8-sig", dtype=str)
+                for file, _, _ in DATASETS[name]
+            ],
+            ignore_index=True,
+        )
+        return _frame(
+            raw["Details"],
+            raw["Cost Type"],
+            amount=pd.to_numeric(raw["Amount Claimed"]),
+            date=pd.to_datetime(raw["Date"], format="%d/%m/%Y"),
+            account=raw["Parliamentary ID"],
+        )
+    if name == "us_bank_v2":
+        raw = pd.read_csv(folder / "transactions.csv", dtype=str)
+        return _frame(raw["description"], raw["category"])
+    if name == "banking77":
+        raw = pd.concat([pd.read_csv(folder / f, dtype=str) for f in ("train.csv", "test.csv")])
+        return _frame(raw["text"], raw["category"])
+    raise KeyError(name)
 
 
 if __name__ == "__main__":
