@@ -1,0 +1,10 @@
+services:
+  secnd:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - secnd-data:/app/.data
+
+volumes:
+  secnd-data:
