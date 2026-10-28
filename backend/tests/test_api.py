@@ -6,6 +6,16 @@ from fastapi.testclient import TestClient
 from backend.api import create_app
 from backend.config import Settings
 from backend.data import MAX_CSV_BYTES
+from backend.schemas import (
+    AnswerResult,
+    ChatResult,
+    Decision,
+    Error,
+    ImportResult,
+    MetricsResult,
+    ModelVersion,
+    Page,
+)
 
 
 @pytest.fixture
@@ -96,3 +106,81 @@ def test_api_misses_do_not_serve_frontend_html(tmp_path: Path):
         assert client.get("/assets/app.js").status_code == 200
         assert client.get("/api/missing").status_code == 404
         assert client.get("/.env").status_code == 404
+
+
+API = "/api/v1/workspaces/default"
+
+
+def test_contract_import_and_predictions_are_explicit_fixtures(client: TestClient):
+    response = client.post(
+        f"{API}/decisions:import",
+        files={"file": ("data.csv", b"text,category\nTrain,Travel\n", "text/csv")},
+        data={"target_column": "category"},
+    )
+    assert response.headers["X-Secnd-Mode"] == "fixture"
+    imported = ImportResult.model_validate(response.json())
+    assert imported.row_count == 1
+    assert imported.card.accuracy is None
+    response = client.post(
+        f"{API}/predict",
+        json={"items": [{"item_id": "a", "text": "Train", "date": "2026-10-29"}]},
+    )
+    assert response.status_code == 200
+    predicted = Decision.model_validate(response.json()[0])
+    assert predicted.item_id == "a"
+    assert predicted.item.date.isoformat() == "2026-10-29"
+    assert not predicted.auto
+    assert predicted.threshold is None
+
+
+@pytest.mark.parametrize(
+    ("route", "schema"),
+    [("feed", Page[Decision]), ("queue", Page[Decision]), ("models", Page[ModelVersion])],
+)
+def test_contract_pages(client: TestClient, route, schema):
+    response = client.get(f"{API}/{route}")
+    assert response.headers["X-Secnd-Mode"] == "fixture"
+    result = schema.model_validate(response.json())
+    assert len(result.items) == 1
+    assert result.next_cursor is None
+
+
+def test_contract_answers_metrics_rollback_and_chat(client: TestClient):
+    response = client.post(
+        f"{API}/answers",
+        json={"item_id": "a", "label": "Travel"},
+        headers={"Idempotency-Key": "answer-a"},
+    )
+    assert AnswerResult.model_validate(response.json()).retrain == "fixture"
+    card = MetricsResult.model_validate(client.get(f"{API}/metrics").json()).card
+    assert card.coverage == 0
+    assert card.precision is None
+    response = client.post(f"{API}/models/fixture-v0:rollback")
+    assert ModelVersion.model_validate(response.json()).current
+    response = client.post(f"{API}/chat", json={"question": "How many today?"})
+    assert ChatResult.model_validate(response.json()).model_version is None
+
+
+def test_contract_errors_and_boundaries(client: TestClient):
+    for response in [
+        client.post(f"{API}/predict", json={"items": []}),
+        client.post(
+            f"{API}/predict",
+            json={"items": [{"item_id": str(i), "text": "Train"} for i in range(257)]},
+        ),
+        client.post(f"{API}/answers", json={"item_id": "a", "label": "Travel"}),
+        client.get(f"{API}/queue?limit=0"),
+        client.get(f"{API}/feed?cursor=unknown"),
+        client.get("/api/v1/workspaces/bad.workspace/metrics"),
+        client.post(
+            f"{API}/decisions:import",
+            files={"file": ("data.csv", b"text,category\nTrain,Travel\n", "text/csv")},
+            data={"target_column": "missing"},
+        ),
+    ]:
+        assert response.status_code == 422
+        assert Error.model_validate(response.json()).message
+    response = client.post(f"{API}/models/missing:rollback")
+    assert response.status_code == 404
+    assert Error.model_validate(response.json()).code == "http_404"
+    assert client.get(f"{API}/queue?cursor=fixture-end").json()["items"] == []
