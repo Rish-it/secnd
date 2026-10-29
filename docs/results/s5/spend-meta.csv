@@ -11,3 +11,4 @@ time,task,prompt_tokens,completion_tokens,reasoning_tokens,cached_tokens,cost_us
 2026-10-29T08:03:36.844745+00:00,training-paraphrases,72003,73311,30362,0,0.40157550,completed
 2026-10-29T10:32:07.562908+00:00,training-paraphrases,66387,70443,27035,0,0.38236650,completed
 2026-10-29T10:32:45.910387+00:00,training-paraphrases,21577,22480,9468,0,0.12251125,completed
+2026-10-29T13:55:21.148113+00:00,s5-mtop-cold-start,486605,160069,146447,0,1.28854950,completed
