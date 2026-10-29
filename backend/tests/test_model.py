@@ -63,3 +63,4 @@ def test_tune_c_is_deterministic_and_on_the_grid():
     fitted = model.Model(labels, "char_tfidf", "lr", seed=3).fit(frame)
     again = model.Model(labels, "char_tfidf", "lr", seed=3).fit(frame)
     assert fitted.c == again.c and fitted.c in model.C_GRID
+    assert model.Model(labels, "char_tfidf", "lr", c=0.5).fit(frame).c == 0.5

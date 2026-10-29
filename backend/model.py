@@ -76,13 +76,16 @@ class Model(Baseline):
         classifier: str = "lr",
         seed: int = 0,
         cache_dir: Path | None = None,
+        c: float | None = None,
     ):
+        """`c` fixes logistic regression's C (a retrain reuses the tuned value); None tunes it."""
         super().__init__(labels)
-        self.featurizer, self.classifier, self.seed, self.cache_dir = (
+        self.featurizer, self.classifier, self.seed, self.cache_dir, self.c = (
             featurizer,
             classifier,
             seed,
             cache_dir,
+            c,
         )
         self.id = f"{featurizer}+{classifier}"
 
@@ -98,7 +101,7 @@ class Model(Baseline):
         self.columns = np.unique(x.indices)
         x = x[:, self.columns]
         if self.classifier == "lr":
-            self.c = tune_c(x, y, self.seed)
+            self.c = self.c or tune_c(x, y, self.seed)
             self.model = LogisticRegression(C=self.c, **LR)
         elif self.classifier == "sgd":
             # ponytail: one-vs-rest probabilities, renormalised; LR is the one-softmax option (R5)
