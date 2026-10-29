@@ -1,0 +1,19 @@
+docs/results/s9/webhook-demo.json
+  s_fdd70b19755bd7::t_e9cd9480aba0db 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "36d64b08dc6763e0cedca3b3fdb1f709b77e6f27",
+  "prompts": {},
+  "sessions": {
+    "s_fdd70b19755bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
