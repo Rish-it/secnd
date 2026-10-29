@@ -1,0 +1,29 @@
+backend/tests/test_workspace.py
+  s_1f3964e6251ccb::t_0b59c61d739da7 200-251
+docs/api/openapi.json
+  s_931864dc636ea3::t_f3c88d2b2701ce 1839-1848
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "952583479054238f0f660dde37b39d088ed4aee3",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
