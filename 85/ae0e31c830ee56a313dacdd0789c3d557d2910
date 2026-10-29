@@ -1,0 +1,19 @@
+docs/results/s3r/protocol.md
+  s_1327be57a67224::t_4cf6dd9151a020 76-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "85ae0e31c830ee56a313dacdd0789c3d557d2910",
+  "prompts": {},
+  "sessions": {
+    "s_1327be57a67224": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a1890a-afae-7d30-972c-76425591d4d6",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
