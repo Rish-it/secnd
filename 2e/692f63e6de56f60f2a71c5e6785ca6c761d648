@@ -1,0 +1,23 @@
+backend/tests/test_watch.py
+  s_f4216e91105995::t_2f7d03fda82176 1-71
+  s_f4216e91105995::t_d5f42fd3bb687a 72-85
+backend/watch.py
+  s_f4216e91105995::t_2f7d03fda82176 1-123
+  s_f4216e91105995::t_9f640093539753 124-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2e692f63e6de56f60f2a71c5e6785ca6c761d648",
+  "prompts": {},
+  "sessions": {
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
