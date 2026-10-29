@@ -1,0 +1,21 @@
+docs/results/s5/handoff.json
+  s_fdd70b19755bd7::t_9c25d21c5c9a26 1-982
+docs/results/s5/spend-meta.csv
+  s_fdd70b19755bd7::t_e9fcb9a146ea14 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "75364efc86c7f88ea31eec76c6dff4cbff0c2ed3",
+  "prompts": {},
+  "sessions": {
+    "s_fdd70b19755bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}

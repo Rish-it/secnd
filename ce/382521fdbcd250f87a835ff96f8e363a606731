@@ -1,0 +1,21 @@
+docs/results/s5/README.md
+  s_fdd70b19755bd7::t_9c5c92eace02b4 251-277
+docs/results/s5/plot-handoff.py
+  s_fdd70b19755bd7::t_ecf81591684578 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ce382521fdbcd250f87a835ff96f8e363a606731",
+  "prompts": {},
+  "sessions": {
+    "s_fdd70b19755bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
