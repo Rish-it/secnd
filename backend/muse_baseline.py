@@ -8,21 +8,39 @@ import json
 import math
 import subprocess
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from pydantic import BaseModel, Field
 
 from backend import metrics
 from backend.baselines import BASELINES
 from backend.config import Settings
 from backend.data import load_dataset, split_dataset, split_manifest
 from backend.eval import training_rows
-from backend.muse import SPEND_PATH, BudgetRun, LabelResult, MuseClient, MuseError, MuseItem, Usage
+from backend.muse import (
+    SPEND_PATH,
+    BudgetRun,
+    LabelResult,
+    MuseClient,
+    MuseError,
+    MuseItem,
+    MuseOutputError,
+    Usage,
+)
 
 RESULTS = Path("docs/results/s5")
+
+
+class Trial(BaseModel):
+    item_id: str
+    result: LabelResult | None
+    invalid_output: bool
+    latency_ms: float = Field(ge=0, allow_inf_nan=False)
 
 
 def digest(value) -> str:
@@ -47,24 +65,44 @@ def item(row: pd.Series) -> MuseItem:
     )
 
 
-def read_predictions(path: Path, plan: dict) -> dict[str, LabelResult]:
+def read_predictions(path: Path, plan: dict) -> dict[str, Trial]:
     results = {}
     for line in path.read_text().splitlines() if path.exists() else []:
         record = json.loads(line)
-        result = LabelResult.model_validate(record["result"])
+        trial = Trial.model_validate(record["trial"])
+        result = trial.result
         if (
             record["experiment_hash"] != digest(plan)
-            or result.item_id not in plan["row_ids"]
-            or result.item_id in results
+            or trial.item_id not in plan["row_ids"]
+            or trial.item_id in results
+            or trial.invalid_output != (result is None)
+        ):
+            raise ValueError("Prediction checkpoint does not match the fixed experiment.")
+        if result is not None and (
+            result.item_id != trial.item_id
             or set(result.probabilities) != set(plan["labels"])
             or result.label not in result.probabilities
             or abs(sum(result.probabilities.values()) - 1) > 1e-6
             or result.confidence != result.probabilities[result.label]
             or result.confidence != max(result.probabilities.values())
         ):
-            raise ValueError("Prediction checkpoint does not match the fixed experiment.")
-        results[result.item_id] = result
+            raise ValueError("Prediction checkpoint contains an invalid distribution.")
+        results[trial.item_id] = trial
     return results
+
+
+def predict(client, record, labels):
+    started = time.perf_counter()
+    try:
+        result = client.zero_shot([record], labels)[0]
+    except MuseOutputError:
+        result = None
+    return Trial(
+        item_id=record.item_id,
+        result=result,
+        invalid_output=result is None,
+        latency_ms=(time.perf_counter() - started) * 1000,
+    )
 
 
 def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
@@ -78,10 +116,17 @@ def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
     pending = test[~test["id"].isin(results)].head(limit)
     if pending.empty:
         return results
-    if results:
+    measured_results = [r.result for r in results.values() if r.result is not None]
+    pilot_path = directory / "muse-pilot-predictions.jsonl"
+    if not measured_results and pilot_path.exists():
+        measured_results = [
+            LabelResult.model_validate(json.loads(line)["result"])
+            for line in pilot_path.read_text().splitlines()
+        ]
+    if measured_results:
         measured = Usage(
             **{
-                field: math.ceil(np.mean([getattr(r.usage, field) for r in results.values()]))
+                field: math.ceil(np.mean([getattr(r.usage, field) for r in measured_results]))
                 for field in Usage.model_fields
             }
         )
@@ -104,26 +149,34 @@ def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
         ) as run,
         MuseClient(settings, run=run, transport=transport) as client,
         predictions_path.open("a") as checkpoint,
+        ThreadPoolExecutor(max_workers=8) as pool,
     ):
-        for _, row in pending.iterrows():
-            result = client.zero_shot([item(row)], plan["labels"])[0]
-            checkpoint.write(
-                json.dumps(
-                    {
-                        "experiment_hash": digest(plan),
-                        "git_sha": git_sha,
-                        "result": result.model_dump(mode="json"),
-                    },
-                    allow_nan=False,
+        futures = [
+            pool.submit(predict, client, item(row), plan["labels"]) for _, row in pending.iterrows()
+        ]
+        try:
+            for future in as_completed(futures):
+                trial = future.result()
+                checkpoint.write(
+                    json.dumps(
+                        {
+                            "experiment_hash": digest(plan),
+                            "git_sha": git_sha,
+                            "trial": trial.model_dump(mode="json"),
+                        },
+                        allow_nan=False,
+                    )
+                    + "\n"
                 )
-                + "\n"
-            )
-            checkpoint.flush()
-            results[result.item_id] = result
-            print(
-                json.dumps({"completed": len(results), "run_cost_usd": str(run.cost_usd)}),
-                flush=True,
-            )
+                checkpoint.flush()
+                results[trial.item_id] = trial
+                print(
+                    json.dumps({"completed": len(results), "run_cost_usd": str(run.cost_usd)}),
+                    flush=True,
+                )
+        finally:
+            for future in futures:
+                future.cancel()
     return results
 
 
@@ -141,8 +194,14 @@ def summarize(test, results, ledger):
     return {
         "rows": len(ordered),
         "accuracy": float(
-            np.mean([r.label == y for r, y in zip(ordered, test["label"], strict=True)])
+            np.mean(
+                [
+                    r.result is not None and r.result.label == y
+                    for r, y in zip(ordered, test["label"], strict=True)
+                ]
+            )
         ),
+        "invalid_outputs": sum(r.invalid_output for r in ordered),
         "nll": None,
         "ece": None,
         "confidence_source": "self_reported",

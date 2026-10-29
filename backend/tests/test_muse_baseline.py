@@ -42,7 +42,10 @@ def test_comparison_uses_identical_fixed_test_items_without_training_leakage():
     assert all(r["cost_per_1000_usd"] is None for r in compared)
 
 
-def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(tmp_path):
+@pytest.mark.parametrize("invalid_id", [None, "3"])
+def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(
+    tmp_path, invalid_id
+):
     settings = Settings(muse_api_key="test-only-key", _env_file=None)
     test = frame().iloc[[1, 3]].assign(id=["1", "3"])
     plan = {"row_ids": test["id"].tolist(), "labels": ["Office", "Travel"]}
@@ -56,20 +59,15 @@ def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(
         supplied = json.loads(data["messages"][1]["content"])
         assert set(supplied["item"]) == {"item_id", "text", "amount", "date"}
         requested.append(supplied["item"]["item_id"])
+        content = json.dumps({"label": "Travel", "probabilities": {"Office": 0.1, "Travel": 0.9}})
+        if supplied["item"]["item_id"] == invalid_id:
+            content = "invalid distribution"
         return httpx.Response(
             200,
             json={
                 "model": data["model"],
                 "usage": {"prompt_tokens": 100, "completion_tokens": 50},
-                "choices": [
-                    {
-                        "message": {
-                            "content": json.dumps(
-                                {"label": "Travel", "probabilities": {"Office": 0.1, "Travel": 0.9}}
-                            )
-                        }
-                    }
-                ],
+                "choices": [{"message": {"content": content}}],
             },
         )
 
@@ -98,7 +96,9 @@ def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(
     assert requested == ["1", "3"]
     assert list(result) == ["1", "3"]
     measured = summarize(test, result, tmp_path / "spend.csv")
-    assert measured["rows"] == 2 and measured["accuracy"] == 1
+    assert measured["rows"] == 2
+    assert measured["accuracy"] == (0.5 if invalid_id else 1)
+    assert measured["invalid_outputs"] == (1 if invalid_id else 0)
     assert measured["nll"] is measured["ece"] is None
     assert measured["usage"]["prompt_tokens"] == 200
     assert Decimal(measured["cost_per_1000_usd"]) == Decimal("0.3375")
