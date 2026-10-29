@@ -27,6 +27,8 @@ from backend import store
 from backend.config import Settings
 from backend.data import MAX_CSV_BYTES, CSVPreview, merchant_key, preview_csv
 from backend.evidence import Evidence
+from backend.meta_webhook import MetaWebhook
+from backend.meta_webhook import router as meta_router
 from backend.schemas import (
     Answer,
     AnswerResult,
@@ -67,12 +69,14 @@ def create_app(
             lambda: WorkspaceService(store.Store(config.database_path), config.data_dir)
         )
         app.state.workspaces = service
+        app.state.meta_webhook = MetaWebhook(config, service)
         try:
             yield
         finally:
             await run_in_threadpool(service.close)
 
     app = FastAPI(title="Secnd", version="0.1.0", lifespan=lifespan)
+    app.include_router(meta_router(config))
 
     @app.exception_handler(StarletteHTTPException)
     async def http_error(request: Request, error: StarletteHTTPException):
