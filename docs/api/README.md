@@ -4,14 +4,15 @@ The versioned API is under `/api/v1/workspaces/{ws}`; use `default` locally.
 The [OpenAPI contract](openapi.json) defines every request and response.
 `/api/health` and `/api/preview` retain their existing behavior.
 
-**Import, predict, feed, queue, answers and chat still return contract fixtures**
-with `X-Secnd-Mode: fixture`. Uploads are validated but not saved, predictions
-are illustrative and answers do not train a model.
+**Import, feed, queue and chat still return contract fixtures**, with
+`X-Secnd-Mode: fixture`. Predict and answers use persisted workspaces prepared
+with `WorkspaceService` and return `X-Secnd-Mode: live`; other workspaces use
+fixtures. CSV uploads are validated but not saved by this slice.
 
 **Metrics are published evaluations**, with `X-Secnd-Mode: evaluation`: a real
 held-out card and curves for MTOP (default), BANKING77 or IPSA. They are not
 workspace learning results. Model-version reads and pointer changes use the
-workspace registry and return `X-Secnd-Mode: live`; a new workspace has no versions.
+workspace registry; a new workspace has no versions.
 
 ## Try the contract
 
@@ -118,3 +119,30 @@ curve has been measured; the API does not substitute the trade-off curve.
 Registry cards must validate as `EvalCard`, including measured `coverage`.
 Cards written with only a threshold are unavailable until the training path
 supplies a complete card. No coverage number is inferred from that threshold.
+
+## Workspace storage and answer worker
+
+SQLite schema version 2 migrates the bootstrap database at startup without
+replacing existing data. Workspaces own their items, label history, prediction
+history, idempotent answers and model-version metadata. Label sources are
+`seed`, `answer`, `spot_check` and `muse_cold_start`; their weights are 1, 1, 1
+and 0.3. Answer keys are unique within a workspace. Reusing a key with a
+different item or label returns 409; replaying it returns the original result.
+
+`backend.workspace.WorkspaceService.create(ws, labels, calib_frame, ...)`
+persists a fixed calibration set separately from training labels. The service
+rebuilds the Loop by replaying labels in arrival order, with their sources,
+then retraining. Calibration item IDs are refused as answers. Every routed
+Decision is saved with its version, confidence, threshold and spot-check flag.
+
+For a prepared workspace, `POST /answers` commits the answer and label together
+and returns `retrain: queued` before background fitting completes. A per-workspace
+lock serialises model work; another workspace can train independently. Labels
+survive a failed fit or process restart and replay on rebuild. One observed
+class is retained without fitting until a second class arrives. The registry
+remains the authority for the current model; the database mirrors its cards.
+
+This service runs in one API process. Multiple processes require a durable
+worker queue and coordinated model/cache writes. The learning-loop module is
+a runtime dependency: prepared predictions return 503 when it is unavailable,
+or 409 when no model has passed the gate. CSV import remains a fixture.
