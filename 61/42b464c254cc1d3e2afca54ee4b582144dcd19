@@ -1,0 +1,21 @@
+docs/results/s2/bakeoff-mtop-gpu.md
+  s_99a14fdaab2d15::t_9495d094874928 1-12
+docs/results/s2/bakeoff-mtop-gpu.csv
+  s_99a14fdaab2d15::t_a2219352753ed2 1-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6142b464c254cc1d3e2afca54ee4b582144dcd19",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
