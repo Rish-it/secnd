@@ -59,4 +59,4 @@ def test_pretune_drops_every_mtop_text_before_tuning(tmp_path, monkeypatch):
     report = finetune.pretune("minilm", steps=1)
     assert seen["texts"] == ["weather today", "play jazz"]
     assert report["dropped_mtop_overlap"] == 1 and report["rows"] == 2
-    assert seen["path"].endswith("encoders/pt-minilm")
+    assert seen["path"].endswith("encoders/pt-minilm-s1")  # non-default steps get their own name
