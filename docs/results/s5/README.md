@@ -226,3 +226,22 @@ or automation coverage is claimed by these raw zero-shot results.
 Structured output: [Meta documentation](https://dev.meta.ai/docs/structured-output),
 checked 2026-10-29. The classification comparison keeps its original prompt and
 request shape; schema-constrained output applies only to paraphrases.
+
+## Completed paraphrase cache
+
+[Reports](augmentation.json), generated 2026-10-29 using Muse Spark 1.3:
+
+| Dataset | Unique training texts | Paraphrases | Successful-batch cost | p50 batch latency |
+| --- | ---: | ---: | ---: | ---: |
+| BANKING77 | 2,300 | 4,600 | $1.390641 | 4,069 ms |
+| MTOP | 2,393 | 4,786 | $1.370108 | 3,793 ms |
+| IPSA | 615 | 1,230 | $0.465591 | 6,028 ms |
+
+Total: **5,308 texts / 10,616 paraphrases**. Full augmentation spend was
+**$3.59346625**, including malformed batches, bounded repairs and paid in-flight
+responses that did not become cache entries after a failure. The successful-batch
+figures in the table omit those attempts; the ledger retains them. Blank IPSA
+texts were skipped (164 selections across the ten training subsets). The cache
+is local data and is excluded from version control; rerun the documented CLI to
+recreate it with your own provider budget. No held-out labels or training labels
+were sent. Paraphrase quality has not been separately scored.
