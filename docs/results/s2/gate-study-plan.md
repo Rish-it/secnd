@@ -68,3 +68,34 @@ A replaces the default only if:
 - the same rule keeps the synthetic unsafe rate at or below 5% on every curve.
 
 Otherwise A stays, and the study reports which cause explains each zero.
+
+## Result (added after the run; nothing above was changed)
+
+Inputs:
+- `incontext-ic-ettin-{150m,32m}-s6000-near-clean.json` and `gate-study.json`.
+- Clean calib sizes:
+  - MTOP: 1,203 rows (2,235 eval rows minus 1,032 whose text a training set contains), so the
+    certify half is 602.
+  - BANKING77: 2,998 rows, so the certify half is 1,499.
+
+Findings:
+- **Nothing certifies at 99%.** Median certified coverage is 0% for every rule, model, set and
+  history budget (52 configurations).
+  - The only certifications in any halving are BANKING77 with full history:
+    - the logistic head certifies in 15% of halvings under A and 10% under C;
+    - the 8-neighbour vote certifies in 1%.
+  - MTOP accuracy matches the earlier runs: the 150M reader reaches 85.4% at 200 labels and
+    93.4% with full history. BANKING77 now has 3,000 fewer history rows, so its full-history
+    figures dip slightly (logistic head 92.5%, was 92.9%).
+- **No rule is unsafe.** The share of halvings whose accepted test answers fall below 99% is at
+  most 0.5%. On the synthetic curves the unsafe rate is at most 1.25%, under A.
+- **Causes of the zeros (150M):**
+  - 18 weak ranking;
+  - 4 sample size;
+  - 4 residual errors, all from the 8-neighbour vote.
+  - MTOP's 602-row certify half can only pass a cohort of at least 427 answers (71%) with zero
+    errors. The best test headroom is 78%, for the 32-example reader with full history.
+- **Decision (pre-registered):** B and C never beat A, so A stays.
+- **Earlier results:** the certified shares reported before this split were measured with the
+  temperature and threshold fitted on about 2,200 test rows. They are withdrawn as
+  certification evidence.
