@@ -1,0 +1,33 @@
+backend/api.py
+  s_931864dc636ea3::t_681f81e33ac233 46,58-62,125,155-159,163,166-179,189-191,221,225-244,247-248,251,253-257,260-261,264,280,287,320
+backend/tests/test_api.py
+  s_1f3964e6251ccb::t_32151a89723813 112,118
+backend/tests/test_live_api.py
+  s_931864dc636ea3::t_4643a6973d6230 1-186
+docs/api/openapi.json
+  s_1f3964e6251ccb::t_276f293141b5d2 1306,1400,1406,1494,1500,1520,1607,1706,1790,1883,1976,2074,2080,2100,2187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b2f9a576b97b4dae1f84b1e9b0835ae76260f0fc",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
