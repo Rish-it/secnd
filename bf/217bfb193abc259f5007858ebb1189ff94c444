@@ -1,0 +1,21 @@
+docs/results/s5/muse-predictions.jsonl
+  s_931864dc636ea3::t_7e514e514b0f81 1-500
+docs/results/s5/muse-sample.json
+  s_931864dc636ea3::t_d664048956dd9f 1-580
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bf217bfb193abc259f5007858ebb1189ff94c444",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
