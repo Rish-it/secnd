@@ -203,3 +203,21 @@ Per-dataset reports record selections, counts, successful-batch cost and p50
 batch latency. Successful-batch cost excludes failed/retried calls; the ledgers
 retain every paid attempt. Each consumer must join the cache to its own training
 rows, keeping the frozen calibration and test sets unchanged.
+
+## Fresh provider comparison
+
+On **2026-10-29**, the same 500 IPSA rows and classification prompt produced:
+
+| Provider / model | Accuracy | Invalid outputs | HTTP p50 | Conservative $ / 1,000 |
+| --- | ---: | ---: | ---: | ---: |
+| Meta / muse-spark-1.3 | 39.4% | 0 / 500 | 1,892 ms | $2.465243 |
+| Baseten / muse-spark-open-1026 | 37.4% | 0 / 500 | 1,610 ms | $2.0050175 |
+
+[Combined result](provider-comparison.json), [Meta trials](providers/meta/),
+[Baseten trials](providers/baseten/). Combined comparison spend: **$2.23513025**.
+Meta remains the default because its observed accuracy is higher; Baseten is
+cheaper and faster on this run. This two-point accuracy gap is descriptive,
+not a statistical significance claim. The operational default was selected
+using this test sample, so it is not an independent estimate of winner quality.
+NLL/ECE stay null because confidence is self-reported. No calibrated precision
+or automation coverage is claimed by these raw zero-shot results.
