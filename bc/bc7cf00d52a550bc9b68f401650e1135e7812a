@@ -1,0 +1,24 @@
+backend/reader_audit.py
+  s_d75a8bfdc0509a::t_d758fe3a7e0490 1-66,68-166,168-206
+  s_d75a8bfdc0509a::t_4e2ff4cff49e22 67,167,207-215
+backend/modal_reader_audit.py
+  s_d75a8bfdc0509a::t_018a72344ae66c 1-71
+docs/model.md
+  s_d75a8bfdc0509a::t_459e42139f6225 3-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bcbc7cf00d52a550bc9b68f401650e1135e7812a",
+  "prompts": {},
+  "sessions": {
+    "s_d75a8bfdc0509a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1890a-afae-7d30-972c-76425591d4d6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
