@@ -32,3 +32,44 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start the container
+        run: docker compose up --build -d
+      - name: Check health, frontend and CSV quickstart
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8000/api/health > /tmp/health.json; then break; fi
+            sleep 1
+          done
+          python -c 'import json; h=json.load(open("/tmp/health.json")); assert h == {"status":"ok","database":"ready"}'
+          curl --fail --silent http://127.0.0.1:8000/ | grep -q '<div id="root">'
+          curl --fail --silent -F file=@examples/decisions.csv http://127.0.0.1:8000/api/preview > /tmp/preview.json
+          python -c 'import json; p=json.load(open("/tmp/preview.json")); assert p["row_count"] == 8 and len(p["rows"]) == 5 and "category" in p["columns"]'
+      - name: Container logs
+        if: failure()
+        run: docker compose logs
+      - name: Stop the container
+        if: always()
+        run: docker compose down
+
+  evals:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.26"
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Reproduce the fixed CPU evaluation (under two minutes)
+        run: timeout 120 uv run python -m backend.ci_eval
