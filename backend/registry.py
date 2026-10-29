@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 
+from backend import metrics
 from backend.calibrate import TARGET
 
 PREFIX = "ren-1."
@@ -22,7 +23,9 @@ def collapsed(p: np.ndarray) -> bool:
     return len(np.unique(p.argmax(axis=1))) < 2 or np.ptp(p.max(axis=1)) < 1e-6
 
 
-def gate(y_regression, p_candidate, p_current=None, tau=None, calib_lower=0.0) -> list[str]:
+def gate(
+    y_regression, p_candidate, p_current=None, tau=None, calib_lower=0.0, current_tau=None
+) -> list[str]:
     """Reasons to refuse the candidate; an empty list means it may be promoted."""
     reasons = []
     if tau is not None and calib_lower < TARGET:
@@ -35,6 +38,12 @@ def gate(y_regression, p_candidate, p_current=None, tau=None, calib_lower=0.0) -
         ).mean()
         if drop > MAX_REGRESSION:
             reasons.append(f"regression set accuracy drops {drop:.3f}")
+        if current_tau is not None:  # coverage ratchet: never trade certified coverage away
+            lost = metrics.coverage_at(p_current, current_tau) - (
+                0.0 if tau is None else metrics.coverage_at(p_candidate, tau)
+            )
+            if lost > MAX_REGRESSION:
+                reasons.append(f"certified coverage drops {lost:.3f}")
     return reasons
 
 

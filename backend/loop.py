@@ -114,7 +114,9 @@ class Loop:
             current = None
             if self.current:
                 current = self._proba(self.current["model"], calib_x, self.current["temperature"])
-            reasons = registry.gate(self.calib_y, p, current, tau, lower)
+            reasons = registry.gate(
+                self.calib_y, p, current, tau, lower, self.current and self.current["tau"]
+            )
             promoted = not reasons
             if promoted:
                 candidate = {"model": model, "temperature": temperature, "tau": tau, "lower": lower}
