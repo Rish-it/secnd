@@ -1,0 +1,21 @@
+docs/results/s3r/protocol.md
+  s_3e40618a94275e::t_0aad98c8505940 1-72
+docs/results/s3r/paraphrases.json
+  s_3e40618a94275e::t_a9a0d65680cb9a 1-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3d217193cca5853e110fee5d1111787cee965cf0",
+  "prompts": {},
+  "sessions": {
+    "s_3e40618a94275e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18916-7a5b-7ff2-bd5b-6019c2ec55ca",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
