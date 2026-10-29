@@ -53,6 +53,8 @@ export type EvalCurves = {
   }[];
 };
 export type Metrics = {
+  guarded: boolean;
+  labels: number;
   dataset?: Dataset | null;
   curves?: EvalCurves;
   card: EvalCard;
@@ -136,8 +138,8 @@ export const api = {
     request<Page<Decision>>(
       `${base}/queue${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
     ),
-  metrics: (dataset: Dataset = "mtop") =>
-    request<Metrics>(`${base}/metrics?dataset=${dataset}`),
+  metrics: (dataset?: Dataset) =>
+    request<Metrics>(`${base}/metrics${dataset ? `?dataset=${dataset}` : ""}`),
   models: () => request<Page<ModelVersion>>(`${base}/models`),
   answer(item_id: string, label: string, idempotencyKey: string) {
     return request<{
