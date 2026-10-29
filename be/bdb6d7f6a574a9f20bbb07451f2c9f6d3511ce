@@ -1,0 +1,61 @@
+docs/results/s3r/split-audit.json
+  s_1327be57a67224::t_a8cdec4eca705b 1-39
+docs/results/s3r/README.md
+  s_d75a8bfdc0509a::t_2d02fa224bbe7b 83,128-133
+  s_1327be57a67224::t_2fd2eaeb912366 1-82,84-127
+backend/modal_reader_audit.py
+  s_1327be57a67224::t_a8cdec4eca705b 52-54
+  s_1327be57a67224::t_65d747f68692a8 70
+docs/results/s3r/paraphrase-results.json
+  s_3e40618a94275e::t_63b29e69e3a58a 1-2523
+docs/model.md
+  s_d75a8bfdc0509a::t_2d02fa224bbe7b 38-51
+docs/results/s3r/protocol.md
+  s_d75a8bfdc0509a::t_2d02fa224bbe7b 70,90-94
+docs/results/s3r/cpu-32m.json
+  s_3e40618a94275e::t_3697c804b1c0ab 1-649
+docs/results/s3r/cpu.json
+  s_d75a8bfdc0509a::t_4e1d664d5d2df1 1-649
+docs/results/s3r/attacks.json
+  s_2ebaf109a8770b::t_d54ad21ca487e5 1-84348
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bebdb6d7f6a574a9f20bbb07451f2c9f6d3511ce",
+  "prompts": {},
+  "sessions": {
+    "s_1327be57a67224": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a1890a-afae-7d30-972c-76425591d4d6",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_2ebaf109a8770b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a18916-7a5b-7ff2-bd5b-6019c2ec55ca",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_3e40618a94275e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18916-7a5b-7ff2-bd5b-6019c2ec55ca",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_d75a8bfdc0509a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1890a-afae-7d30-972c-76425591d4d6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
