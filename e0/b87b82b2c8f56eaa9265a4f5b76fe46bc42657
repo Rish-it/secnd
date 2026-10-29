@@ -1,0 +1,21 @@
+frontend/src/App.css
+  s_1f3964e6251ccb::t_73b2df470231bf 1047-1072
+frontend/src/Metrics.tsx
+  s_1f3964e6251ccb::t_13ec7420289faa 1,3-8,11-13,22,24-28,30-36,39,44,46,72-73,79,97-98,107-132,154-155,169-175,180,185,274,277-281,314,318,322,339-344
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e0b87b82b2c8f56eaa9265a4f5b76fe46bc42657",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
