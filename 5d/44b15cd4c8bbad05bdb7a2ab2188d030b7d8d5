@@ -1,0 +1,21 @@
+pyproject.toml
+  s_1f3964e6251ccb::t_8742f19515b282 11
+uv.lock
+  s_1f3964e6251ccb::t_d13d3bb5445e38 428-442,714,736
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5d44b15cd4c8bbad05bdb7a2ab2188d030b7d8d5",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
