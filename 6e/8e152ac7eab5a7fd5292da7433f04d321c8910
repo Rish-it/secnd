@@ -1,0 +1,21 @@
+backend/store.py
+  s_1f3964e6251ccb::t_84197e07599b9c 3-4,111,116-118,275-353
+backend/tests/test_store.py
+  s_1f3964e6251ccb::t_5b4479364752fb 107-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6e8e152ac7eab5a7fd5292da7433f04d321c8910",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
