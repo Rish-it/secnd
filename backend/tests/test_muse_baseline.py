@@ -135,3 +135,27 @@ def test_published_comparison_retains_all_trials_and_reconciles_cost():
     assert [row["training_rows"] for row in compared["baselines"]] == [200, 5000]
     for field in ("data_hash", "split_hash", "sample_hash", "protocol_hash"):
         assert compared[field] == measured[field] == plan[field]
+
+
+def test_provider_comparison_keeps_identical_inputs_and_reconciles_both_runs():
+    root = Path(__file__).resolve().parents[2] / "docs/results/s5"
+    compared = json.loads((root / "provider-comparison.json").read_text())
+    total = Decimal(0)
+    for result in compared["providers"]:
+        directory = root / "providers" / result["provider"]
+        plan = json.loads((directory / "muse-sample.json").read_text())
+        trials = read_predictions(directory / "muse-predictions.jsonl", plan)
+        assert len(trials) == result["rows"] == 500
+        assert result["nll"] is result["ece"] is None
+        assert result["invalid_outputs"] == sum(t.invalid_output for t in trials.values())
+        assert usage_cost(Usage.model_validate(result["usage"]), result["provider"]) == Decimal(
+            result["cost_usd"]
+        )
+        for field in ("data_hash", "split_hash", "sample_hash", "input_hash", "protocol_hash"):
+            assert plan[field] == result[field] == compared[field]
+        total += Decimal(result["cost_usd"])
+    assert total == Decimal(compared["combined_spend_usd"]) < 10
+    assert (
+        compared["default_provider"]
+        == max(compared["providers"], key=lambda r: r["accuracy"])["provider"]
+    )

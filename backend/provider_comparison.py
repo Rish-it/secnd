@@ -16,6 +16,36 @@ from backend.providers import ledger_path, provider_settings
 TASK = "muse-baseline-provider"
 
 
+def write_comparison():
+    paths = [
+        RESULTS / "providers" / provider / "muse-baseline.json" for provider in ("meta", "baseten")
+    ]
+    if not all(path.exists() for path in paths):
+        return
+    measured = [json.loads(path.read_text()) for path in paths]
+    fields = ("data_hash", "split_hash", "sample_hash", "input_hash", "protocol_hash")
+    if any(measured[0][field] != measured[1][field] for field in fields):
+        raise ValueError("Provider comparison provenance differs.")
+    winner = min(measured, key=lambda row: (-row["accuracy"], Decimal(row["cost_usd"])))
+    write_json(
+        RESULTS / "provider-comparison.json",
+        {
+            **{field: measured[0][field] for field in fields},
+            "rows": 500,
+            "providers": measured,
+            "default_provider": winner["provider"],
+            "selection_rule": "Higher observed accuracy; lower measured cost breaks a tie.",
+            "selection_limit": (
+                "Default chosen on this test sample; no significance or independent "
+                "winner estimate claimed."
+            ),
+            "combined_spend_usd": str(
+                sum((Decimal(row["cost_usd"]) for row in measured), Decimal(0))
+            ),
+        },
+    )
+
+
 def run(provider, *, limit=500):
     configured = provider_settings(Settings(), provider)
     configured = configured.model_copy(update={"muse_budget_usd": Decimal(4)})
@@ -64,6 +94,7 @@ def run(provider, *, limit=500):
         **summarize(test, trials, ledger, TASK),
     )
     write_json(directory / "muse-baseline.json", result)
+    write_comparison()
     print(
         json.dumps(
             {"provider": provider, "accuracy": result["accuracy"], "cost_usd": result["cost_usd"]}
