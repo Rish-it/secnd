@@ -90,6 +90,13 @@ validated dictionary. `count` takes a `filter` with optional `label`, `auto`,
 the current workspace. No SQL or arbitrary function names are accepted.
 Chat stops after four completion rounds; tool replies are capped at 32 KiB.
 
+Explanations receive the classifier's original top-three scores and up to three
+past labeled decisions. Scores keep their original mass; they are not
+renormalized over the displayed classes. The prompt requires one or two short
+sentences, the highest score as a percentage, uncertainty, and no invented
+evidence. A snapshot checks the complete prompt with three classes and three
+examples. Retrieval of real neighbours is still awaiting a fitted model.
+
 Before using the client, measure tokens on a representative small sample. Then
 provide those measurements and the planned row count to `BudgetRun`.
 
@@ -103,7 +110,9 @@ uv run python -m backend.muse_baseline
 The first command checks a small sample; the second resumes the same 500 IPSA
 test rows, sampled with seed 0. The model sees only the description, amount,
 date and 62 allowed labels. No examples or held-out answers enter its prompt.
-Eight requests run concurrently; latency includes HTTP time and retries.
+At most eight requests are in flight, with new calls spaced one second apart;
+latency includes HTTP time and retries, excluding this admission wait. The first
+84 compact trials preceded pacing; it was added after HTTP 429 responses.
 Each completed trial is checkpointed. Invalid outputs count as incorrect and
 are never retried for a better answer. Transport and budget failures stop the
 run; completed checkpoints are reused on restart. Sample, input, protocol,
