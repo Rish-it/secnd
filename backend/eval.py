@@ -127,7 +127,7 @@ def card(dataset: str, model_name: str, budget: int, seed: int = 0, curves_out=N
     recall = (
         pd.Series(p.argmax(axis=1) == y).groupby(test["label"].to_numpy()).agg(["mean", "size"])
     )
-    worst = recall[recall["size"] >= 20].sort_values("mean").head(5)
+    worst = recall[recall["size"] >= 20].sort_values("mean", kind="stable").head(5)
 
     timings = []
     for _, row in test.sample(min(200, len(test)), random_state=seed).iterrows():

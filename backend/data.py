@@ -231,6 +231,18 @@ def _tail_by_group(frame: pd.DataFrame, fraction: float, seed: int) -> pd.Index:
     return frame.index[groups.isin(chosen)]
 
 
+def seed_quota(labels: pd.Series) -> pd.Series:
+    """Seed rows per label, proportional to `labels`; leftover rows go to the largest remainders.
+
+    Ties break by label name with a stable sort, so every platform gives the same quota.
+    """
+    share = labels.value_counts(normalize=True).sort_index() * SEED_ROWS
+    quota = share.astype(int)
+    remainder = (share - quota).sort_values(ascending=False, kind="stable")
+    quota[remainder.index[: SEED_ROWS - quota.sum()]] += 1
+    return quota
+
+
 def split_dataset(frame: pd.DataFrame, seed: int = 0) -> pd.Series:
     """Assign every row to seed, stream, calib or test; same frame and seed give the same split.
 
@@ -253,9 +265,7 @@ def split_dataset(frame: pd.DataFrame, seed: int = 0) -> pd.Series:
 
     pool = order[split[order.index] == "stream"]
     early = pool.iloc[: max(10 * SEED_ROWS, len(pool) // 10)]
-    share = early["label"].value_counts(normalize=True) * SEED_ROWS
-    quota = share.astype(int)
-    quota[(share - quota).sort_values(ascending=False).index[: SEED_ROWS - quota.sum()]] += 1
+    quota = seed_quota(early["label"])
     picked = [
         rows.sample(quota[label], random_state=seed).index
         for label, rows in early.groupby("label")

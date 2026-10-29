@@ -136,3 +136,13 @@ def test_split_manifest_hash_changes_with_assignment():
         data.split_manifest("x", frame, split)["hash"]
         != data.split_manifest("x", frame, moved)["hash"]
     )
+
+
+def test_seed_quota_ties_do_not_depend_on_row_order():
+    # 7 equal labels share 200 rows: 28 each and 4 left over, so the tie-break decides who gets 29.
+    labels = pd.Series([f"class {i % 7}" for i in range(700)])
+    quota = data.seed_quota(labels)
+    assert quota.sum() == 200
+    assert quota.to_dict() == data.seed_quota(labels.iloc[::-1]).to_dict()
+    assert quota.to_dict() == data.seed_quota(labels.sample(frac=1, random_state=3)).to_dict()
+    assert list(quota[quota == 29].index) == ["class 0", "class 1", "class 2", "class 3"]
