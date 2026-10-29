@@ -1,0 +1,21 @@
+docs/results/s5/spend.csv
+  s_931864dc636ea3::t_e9628a693d7209 9-10
+docs/results/s5/spend-meta.csv
+  s_931864dc636ea3::t_081b585dff0d81 1-6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1ce72dc0684785bf92ef8b961300e5d80eb1af96",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
