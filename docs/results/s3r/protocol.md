@@ -53,3 +53,12 @@ train, leaving 11,667 history rows; certification has 2,000 rows. All reader
 training excluded these MTOP train texts. The earlier 602-row result is superseded.
 Keep rule A unchanged, fit temperature and threshold only on the new calibration
 split. Full-history 0/8/32 conditions remain the registered primary audit.
+
+## Implementation clarification (before attack results)
+
+Attack inference uses the same CUDA BF16 autocast and calibration batch size 32
+as the supplied evaluation; CPU measurements use FP32. An initial GPU process
+was interrupted before any attack outcome was observed to enforce this match.
+No thresholds are adjusted to attack outcomes. The wrapper paraphrase is limited;
+a separately registered set of human-written test-message rewrites will supplement
+it. Max-length hits are reported as an upper bound on actual truncations.
