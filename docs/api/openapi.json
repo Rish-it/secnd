@@ -176,6 +176,43 @@
         "title": "ChatResult",
         "type": "object"
       },
+      "CoveragePrecisionPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "coverage": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Coverage",
+            "type": "number"
+          },
+          "precision": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precision"
+          },
+          "threshold": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "threshold",
+          "coverage",
+          "precision"
+        ],
+        "title": "CoveragePrecisionPoint",
+        "type": "object"
+      },
       "Decision": {
         "properties": {
           "auto": {
@@ -605,6 +642,27 @@
         "title": "EvalCard",
         "type": "object"
       },
+      "EvalCurves": {
+        "additionalProperties": false,
+        "properties": {
+          "coverage_precision": {
+            "items": {
+              "$ref": "#/components/schemas/CoveragePrecisionPoint"
+            },
+            "title": "Coverage Precision",
+            "type": "array"
+          },
+          "reliability": {
+            "items": {
+              "$ref": "#/components/schemas/ReliabilityBin"
+            },
+            "title": "Reliability",
+            "type": "array"
+          }
+        },
+        "title": "EvalCurves",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -775,6 +833,25 @@
           "card": {
             "$ref": "#/components/schemas/EvalCard"
           },
+          "curves": {
+            "$ref": "#/components/schemas/EvalCurves"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "enum": [
+                  "mtop",
+                  "banking77",
+                  "ipsa"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset"
+          },
           "history": {
             "items": {
               "$ref": "#/components/schemas/HistoryPoint"
@@ -937,6 +1014,35 @@
           }
         },
         "title": "Reasons",
+        "type": "object"
+      },
+      "ReliabilityBin": {
+        "additionalProperties": false,
+        "properties": {
+          "accuracy": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Accuracy",
+            "type": "number"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "count": {
+            "minimum": 0.0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "confidence",
+          "accuracy",
+          "count"
+        ],
+        "title": "ReliabilityBin",
         "type": "object"
       },
       "SliceMetrics": {

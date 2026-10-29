@@ -156,7 +156,29 @@ class HistoryPoint(BaseModel):
     precision: Probability | None = None
 
 
+class ReliabilityBin(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    confidence: Probability
+    accuracy: Probability
+    count: Annotated[int, Field(ge=0)]
+
+
+class CoveragePrecisionPoint(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    threshold: Probability
+    coverage: Probability
+    precision: Probability | None
+
+
+class EvalCurves(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reliability: list[ReliabilityBin] = Field(default_factory=list)
+    coverage_precision: list[CoveragePrecisionPoint] = Field(default_factory=list)
+
+
 class MetricsResult(BaseModel):
+    dataset: Literal["mtop", "banking77", "ipsa"] | None = None
+    curves: EvalCurves = Field(default_factory=EvalCurves)
     card: EvalCard
     history: list[HistoryPoint]
 
