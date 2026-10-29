@@ -1,5 +1,7 @@
 """Workspace storage. Each write owns one connection and commits atomically."""
 
+import base64
+import binascii
 import json
 import sqlite3
 from contextlib import closing, contextmanager
@@ -106,11 +108,14 @@ class Store:
                     connection.execute("BEGIN IMMEDIATE")
                 yield connection
 
-    def create_workspace(self, workspace: str, config: dict) -> None:
+    def create_workspace(self, workspace: str, config: dict, *, items=(), labels=()) -> None:
         with self.connect(write=True) as db:
             db.execute(
                 "INSERT INTO workspaces VALUES (?, ?, ?)", (workspace, encode(config), timestamp())
             )
+            self._items(db, workspace, items)
+            for item_id, label in labels:
+                self._label(db, workspace, item_id, label, "seed")
 
     def workspace(self, workspace: str) -> dict:
         with self.connect() as db:
@@ -267,3 +272,82 @@ class Store:
             | {"card": json.loads(row["card_json"]), "is_current": bool(row["is_current"])}
             for row in rows
         ]
+
+    def latest_prediction(self, workspace, item_id):
+        with self.connect() as db:
+            row = db.execute(
+                "SELECT decision_json FROM predictions WHERE workspace_id=? AND item_id=? "
+                "ORDER BY created_at DESC, id DESC LIMIT 1",
+                (workspace, item_id),
+            ).fetchone()
+        return json.loads(row[0]) if row else None
+
+    def decision_page(self, workspace, kind, cursor=None, limit=20):
+        if kind not in ("feed", "queue") or not 1 <= limit <= 100:
+            raise ValueError("Invalid decision page.")
+        self.workspace(workspace)
+        with self.connect() as db:
+            params = [workspace]
+            after = ""
+            if cursor:
+                try:
+                    scope, route, identifier = json.loads(
+                        base64.b64decode(cursor, altchars=b"-_", validate=True)
+                    )
+                    if scope != workspace or route != kind or not isinstance(identifier, str):
+                        raise ValueError
+                    previous = db.execute(
+                        "SELECT prob, created_at, id FROM predictions "
+                        "WHERE workspace_id=? AND id=?",
+                        (workspace, identifier),
+                    ).fetchone()
+                    if previous is None:
+                        raise ValueError
+                except (ValueError, TypeError, binascii.Error, UnicodeError):
+                    raise ValueError("Unknown decision cursor.") from None
+                if kind == "feed":
+                    after = " AND (p.created_at, p.id) < (?, ?)"
+                    params.extend((previous["created_at"], previous["id"]))
+                else:
+                    after = " AND (p.prob, p.created_at, p.id) > (?, ?, ?)"
+                    params.extend(tuple(previous))
+            selection = (
+                "p.auto=1"
+                if kind == "feed"
+                else (
+                    "p.auto=0 AND NOT EXISTS (SELECT 1 FROM answers a "
+                    "WHERE a.workspace_id=p.workspace_id AND a.item_id=p.item_id)"
+                )
+            )
+            ordering = (
+                "p.created_at DESC, p.id DESC" if kind == "feed" else ("p.prob, p.created_at, p.id")
+            )
+            params.append(limit + 1)
+            rows = db.execute(
+                "SELECT p.*, i.text, i.amount, i.date FROM predictions p JOIN items i "
+                "ON i.workspace_id=p.workspace_id AND i.id=p.item_id "
+                "WHERE p.workspace_id=? AND " + selection + " AND NOT EXISTS ("
+                "SELECT 1 FROM predictions n WHERE n.workspace_id=p.workspace_id "
+                "AND n.item_id=p.item_id AND (n.created_at, n.id) > (p.created_at, p.id))"
+                + after
+                + " ORDER BY "
+                + ordering
+                + " LIMIT ?",
+                params,
+            ).fetchall()
+        items = []
+        for row in rows[:limit]:
+            decision = json.loads(row["decision_json"])
+            decision["item"] = {
+                "item_id": row["item_id"],
+                "text": row["text"],
+                "amount": row["amount"],
+                "date": row["date"],
+            }
+            items.append(decision)
+        next_cursor = None
+        if len(rows) > limit:
+            next_cursor = base64.urlsafe_b64encode(
+                encode([workspace, kind, rows[limit - 1]["id"]]).encode()
+            ).decode()
+        return {"items": items, "next_cursor": next_cursor}

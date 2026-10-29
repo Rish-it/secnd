@@ -104,3 +104,60 @@ def test_failed_writes_leave_no_partial_training_rows(store):
     assert store.item("a", "1")["text"] == ""
     with pytest.raises(KeyError):
         store.item("missing", "1")
+
+
+def test_import_is_atomic_and_decision_pages_are_stable_and_scoped(tmp_path):
+    store = Store(tmp_path / "db.sqlite3")
+    with pytest.raises(sqlite3.IntegrityError):
+        store.create_workspace(
+            "broken",
+            {},
+            items=[dict(id="x", text="x", merchant_key="")],
+            labels=[("missing", "a")],
+        )
+    with pytest.raises(KeyError):
+        store.workspace("broken")
+    store.create_workspace("a", {})
+    store.create_workspace("b", {})
+    items = [dict(id=str(i), text=f"item {i}", merchant_key="") for i in range(8)]
+    decisions = [
+        dict(
+            item_id=str(i),
+            model_version="ren-1.0",
+            label="a",
+            prob=0.5 + i / 20,
+            probabilities={"a": 0.5 + i / 20},
+            auto=i >= 5,
+            threshold=0.7,
+            reasons={},
+            spot_check=i == 1,
+        )
+        for i in range(8)
+    ]
+    store.record_predictions("a", items, decisions)
+    first = store.decision_page("a", "queue", limit=2)
+    assert [d["item_id"] for d in first["items"]] == ["0", "1"]
+    assert first["items"][1]["spot_check"]
+    assert first["items"][0]["item"]["text"] == "item 0"
+    # A concurrent answer removes a prior question without shifting the next cursor.
+    store.answer("a", "0", "a", "answer", {})
+    second = store.decision_page("a", "queue", first["next_cursor"], 2)
+    assert [d["item_id"] for d in second["items"]] == ["2", "3"]
+    third = store.decision_page("a", "queue", second["next_cursor"], 2)
+    assert [d["item_id"] for d in third["items"]] == ["4"]
+    assert third["next_cursor"] is None
+    feed = store.decision_page("a", "feed", limit=1)
+    assert feed["items"][0]["item_id"] == "7"
+    assert store.decision_page("a", "feed", feed["next_cursor"], 1)["items"][0]["item_id"] == "6"
+    # Every prediction is logged, but a page contains only the latest decision per item.
+    store.record_predictions("a", [items[5]], [{**decisions[5], "auto": False, "prob": 0.6}])
+    assert len(store.predictions("a")) == 9
+    assert [d["item_id"] for d in store.decision_page("a", "feed")["items"]] == ["7", "6"]
+    assert store.decision_page("b", "queue")["items"] == []
+    for workspace, kind, cursor in (
+        ("b", "queue", first["next_cursor"]),
+        ("a", "feed", first["next_cursor"]),
+        ("a", "queue", "not-a-cursor"),
+    ):
+        with pytest.raises(ValueError, match="cursor"):
+            store.decision_page(workspace, kind, cursor)
