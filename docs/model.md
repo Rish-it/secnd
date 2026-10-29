@@ -76,6 +76,23 @@ from the calibration gate.
 Larger encoders and encoders fine-tuned on the training labels (on a GPU, contrastive loss) are
 being measured with the same grid and rule (`uv run python -m backend.bench --gpu`).
 
+**Calibration and the 99% gate.** One temperature is fitted on the calibration split by NLL. The
+automatic-answer threshold is the lowest confidence where the Clopper–Pearson 95% lower bound on
+precision is at least 99%; that needs at least 299 correct answers above it. If no threshold
+qualifies, nothing is answered automatically. A new model version is promoted only if that bound
+holds, its predictions have not collapsed to one class, and its accuracy on a fixed regression set
+drops by at most 1 point; any earlier version can be restored.
+
+**Does the claim survive re-splitting?** ([run](results/s3/)) The held-out pool (calibration and
+test) is shuffled into two halves 2,000 times; temperature and threshold are refitted on one half
+and precision is measured on the other. On BANKING77 with 2,000 labels:
+
+| Splits | Pass rate | Splits that answer nothing | Coverage when answering (median) | Worst 1% precision |
+| ---: | ---: | ---: | ---: | ---: |
+| 2,000 | 91.4% | 60.4% | 45.0% | 98.4% |
+
+The target is a 95% pass rate, so the gate is not yet tight enough at this size.
+
 ## Numbers
 
 On [500 fixed held-out IPSA claims](results/s5/comparison.json), zero-shot Muse
@@ -100,4 +117,5 @@ Hosted CPU cost and the calibrated model comparison await their measured inputs.
 
 ## Limits
 
-Filled in as each part ships.
+- The 99% gate passes 91.4% of re-splits on BANKING77 at 2,000 labels, below its 95% target.
+- English only.
