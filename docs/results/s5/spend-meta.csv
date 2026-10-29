@@ -1,0 +1,6 @@
+time,task,prompt_tokens,completion_tokens,reasoning_tokens,cached_tokens,cost_usd,status
+2026-10-29T07:28:27.546180+00:00,muse-baseline-provider,2385,1683,1554,0,0.01013400,completed
+2026-10-29T07:37:02.730081+00:00,muse-baseline-provider,237164,217890,205370,0,1.22248750,completed
+2026-10-29T07:37:22.293192+00:00,training-paraphrases,11254,21284,8886,0,0.10452450,failed
+2026-10-29T07:38:57.576719+00:00,training-paraphrases,787,1516,674,0,0.00742675,completed
+2026-10-29T07:40:40.274600+00:00,training-paraphrases,9361,17383,7131,1506,0.08557900,failed

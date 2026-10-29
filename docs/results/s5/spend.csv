@@ -6,3 +6,5 @@ time,task,prompt_tokens,completion_tokens,reasoning_tokens,cached_tokens,cost_us
 2026-10-29T04:54:24.902560+00:00,muse-baseline-compact,3050,1252,1127,0,0.00913350,completed
 2026-10-29T04:54:58.302647+00:00,muse-baseline-compact,94758,52492,23787,9728,0.34153850,failed_estimated
 2026-10-29T05:04:59.234213+00:00,muse-baseline-compact,254606,118504,108103,53504,0.82189950,completed
+2026-10-29T07:28:27.750491+00:00,muse-baseline-provider,3050,1571,1442,768,0.01048925,completed
+2026-10-29T07:37:02.824280+00:00,muse-baseline-provider,302999,144299,131897,76928,0.99201950,completed
