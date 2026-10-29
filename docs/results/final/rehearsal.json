@@ -1,0 +1,116 @@
+{
+  "source_revision": "377288fdb93a5ebaa888c364cf026f05a7932305",
+  "scope": "Two automated Docker technical walkthroughs; narration timing and recording are separate.",
+  "image_bytes": 804590446,
+  "runs": [
+    {
+      "live_api": {
+        "source_revision": "38bc6e9e5d7072f10a56a1a60cf30c2f62282497",
+        "featurizer": "pt-minilm",
+        "history_versions": 2,
+        "guarded": false,
+        "device": "cpu",
+        "illustrative_rows": 200,
+        "initial_mode": "fixture",
+        "import_mode": "live",
+        "predict_mode": "live",
+        "models_status": 200,
+        "answer_queued": true,
+        "idempotency_replay_equal": true,
+        "answered_question_removed": true,
+        "rollback_prediction_version": "ren-1.0",
+        "model_versions": 2,
+        "scope": "Illustrative HTTP integration; no benchmark coverage claim."
+      },
+      "meta_webhook": {
+        "source_revision": "38bc6e9e5d7072f10a56a1a60cf30c2f62282497",
+        "scope": "Illustrative local integration, not benchmark quality.",
+        "featurizer": "pt-minilm",
+        "handshake": true,
+        "messages": [
+          {
+            "platform": "whatsapp",
+            "status": "queued",
+            "duplicate": true
+          },
+          {
+            "platform": "messenger",
+            "status": "queued",
+            "duplicate": true
+          }
+        ],
+        "answered_queue_empty": true,
+        "background_retrain": true,
+        "outbound_sends": 0
+      }
+    },
+    {
+      "live_api": {
+        "source_revision": "38bc6e9e5d7072f10a56a1a60cf30c2f62282497",
+        "featurizer": "pt-minilm",
+        "history_versions": 2,
+        "guarded": false,
+        "device": "cpu",
+        "illustrative_rows": 200,
+        "initial_mode": "fixture",
+        "import_mode": "live",
+        "predict_mode": "live",
+        "models_status": 200,
+        "answer_queued": true,
+        "idempotency_replay_equal": true,
+        "answered_question_removed": true,
+        "rollback_prediction_version": "ren-1.0",
+        "model_versions": 2,
+        "scope": "Illustrative HTTP integration; no benchmark coverage claim."
+      },
+      "meta_webhook": {
+        "source_revision": "38bc6e9e5d7072f10a56a1a60cf30c2f62282497",
+        "scope": "Illustrative local integration, not benchmark quality.",
+        "featurizer": "pt-minilm",
+        "handshake": true,
+        "messages": [
+          {
+            "platform": "whatsapp",
+            "status": "queued",
+            "duplicate": true
+          },
+          {
+            "platform": "messenger",
+            "status": "queued",
+            "duplicate": true
+          }
+        ],
+        "answered_queue_empty": true,
+        "background_retrain": true,
+        "outbound_sends": 0
+      }
+    }
+  ],
+  "readme_curl_passes": 2,
+  "offline_pinned_encoder_cpu_encode": true,
+  "outbound_sends": 0,
+  "code_hashes": {
+    "backend/api.py": "6cb0bf88d0f48b6a6884f87b85ee2560f802fdd87c69369812e0bc93b829bf73",
+    "backend/config.py": "7d8f5abf3172ac1ed89d2c16349b7335e1dc1f14ce9629021f359d798373669e",
+    "backend/workspace.py": "d8257b5707989043f87629b5128eb6de3de3e3a00af209afeabdb98709310019",
+    "backend/encoders.py": "cef34e9157e0a028f0d06fc733170fdb0b25e694de55154fce5ea1c7161a7fad",
+    "backend/meta_webhook.py": "782ab7bcf33cf8d325aa169e9cc331100bc424e23149b2a59a692d32eee87bc3",
+    "backend/evidence.py": "c8f4da62f44b063d6db8000b118496a538f38aabff7518872b57f13ba1185309",
+    "backend/loop.py": "d3e2413a29aeb9ec47f581253e09ccf88db1a92fcd85c4b26739edde1547391d",
+    "backend/features.py": "82c71a041cd7be646e0bb9c822f4e7372fbdbf9f9a80d402f17115eeceb43c94"
+  },
+  "checks": {
+    "tests": 196,
+    "full_runs": 2,
+    "clean_committed_revision": true
+  },
+  "browser": {
+    "released_reference_coverage": 0.4242,
+    "released_encoder_label": true,
+    "mobile_width": 390,
+    "desktop_checked": true,
+    "horizontal_overflow": false,
+    "console_errors": 0,
+    "console_warnings": 0
+  }
+}
