@@ -1,0 +1,21 @@
+docs/results/final/README.md
+  s_fdd70b19755bd7::t_28a4ae57658e02 1-17
+docs/results/final/rehearsal.json
+  s_fdd70b19755bd7::t_6c4471ea75f5fc 1-116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "991c5b4255b766a06548c9be526553056656523f",
+  "prompts": {},
+  "sessions": {
+    "s_fdd70b19755bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
