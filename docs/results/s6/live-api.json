@@ -1,0 +1,43 @@
+{
+  "command": "uv run python -m backend.tests.http_live --base-url http://127.0.0.1:8021",
+  "server_code_revision": "1695b2f",
+  "fixture_source": "backend/tests/test_live_api.py:csv_rows",
+  "runs": [
+    {
+      "source_revision": "75a22eda4308131db64dd1b688e4108e53d0aa6f",
+      "featurizer": "minilm",
+      "device": "cpu",
+      "illustrative_rows": 200,
+      "initial_mode": "fixture",
+      "import_mode": "live",
+      "predict_mode": "live",
+      "models_status": 200,
+      "answer_queued": true,
+      "idempotency_replay_equal": true,
+      "answered_question_removed": true,
+      "rollback_prediction_version": "ren-1.0",
+      "model_versions": 2,
+      "scope": "Illustrative HTTP integration; no benchmark coverage claim."
+    },
+    {
+      "source_revision": "75a22eda4308131db64dd1b688e4108e53d0aa6f",
+      "featurizer": "minilm",
+      "device": "cpu",
+      "illustrative_rows": 200,
+      "initial_mode": "fixture",
+      "import_mode": "live",
+      "predict_mode": "live",
+      "models_status": 200,
+      "answer_queued": true,
+      "idempotency_replay_equal": true,
+      "answered_question_removed": true,
+      "rollback_prediction_version": "ren-1.0",
+      "model_versions": 2,
+      "scope": "Illustrative HTTP integration; no benchmark coverage claim."
+    }
+  ],
+  "limits": [
+    "Illustrative local CPU integration, not benchmark quality or latency evidence.",
+    "Recovery can refit from durable labels; historical merchant-memory snapshots are not exported."
+  ]
+}
