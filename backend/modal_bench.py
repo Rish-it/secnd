@@ -129,3 +129,23 @@ def main(dataset: str = "mtop"):
     out = ROOT / f"docs/results/s2/bakeoff-{dataset}-gpu.csv"
     out.write_text(bench.remote(dataset))
     print(f"saved {out}")
+
+
+@app.function(gpu="A10G", volumes={"/vol": volume}, timeout=3 * 3600)
+def typed_run(init: str, epochs: int, seed: int) -> str:
+    """Train and score Ren on typed-decisions; `init` is an Ettin size or a saved reader."""
+    import torch
+
+    assert torch.cuda.is_available(), "no CUDA device: refusing to train on CPU"
+    run = Path("/vol/run")
+    run.mkdir(parents=True, exist_ok=True)
+    args = ["--init", init, "--epochs", str(epochs), "--seed", str(seed)]
+    subprocess.run(["python", "-m", "backend.typed", *args], cwd=run, check=True)
+    return (run / f"docs/results/s2/typed-{init}-e{epochs}-s{seed}.json").read_text()
+
+
+@app.local_entrypoint()
+def typed(init: str = "ettin-150m", epochs: int = 8, seed: int = 0):
+    path = ROOT / f"docs/results/s2/typed-{init}-e{epochs}-s{seed}.json"
+    path.write_text(typed_run.remote(init, epochs, seed))
+    print(f"saved {path}")
