@@ -39,6 +39,7 @@ def test_cache_resumes_atomically_without_sending_labels_or_repeating_texts(tmp_
 
     def handler(request):
         payload = json.loads(request.content)
+        assert payload["response_format"]["type"] == "json_schema"
         supplied = json.loads(payload["messages"][1]["content"])
         assert all(set(row) == {"key", "text"} for row in supplied)
         assert "NEVER SEND" not in request.content.decode()
