@@ -464,7 +464,7 @@ def budgeted(model, tok, evals: dict[str, Task], save: Path) -> dict:
     def kept(task, key, p):
         np.savez_compressed(
             save / f"{key}.npz",
-            **{f"p_{k}": v.astype(np.float16) for k, v in p.items()},
+            **{f"p_{k}": v.astype(np.float32) for k, v in p.items()},  # float16 ties confident rows
             y_calib=labels_of(task.calib),
             y_test=labels_of(task.test),
         )

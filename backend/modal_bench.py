@@ -141,6 +141,7 @@ def typed_run(init: str, epochs: int, seed: int) -> str:
     run.mkdir(parents=True, exist_ok=True)
     args = ["--init", init, "--epochs", str(epochs), "--seed", str(seed)]
     subprocess.run(["python", "-m", "backend.typed", *args], cwd=run, check=True)
+    volume.commit()
     return (run / f"docs/results/s2/typed-{init}-e{epochs}-s{seed}.json").read_text()
 
 

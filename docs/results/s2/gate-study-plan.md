@@ -99,3 +99,31 @@ Findings:
 - **Earlier results:** the certified shares reported before this split were measured with the
   temperature and threshold fitted on about 2,200 test rows. They are withdrawn as
   certification evidence.
+
+## Result on the corrected split (added after the rerun; nothing above was changed)
+
+Why rerun:
+- MTOP's official eval split shares 1,032 texts with TOPv2, so calib is now 4,000 rows taken
+  from MTOP train (seed 0) and kept out of history. BANKING77 calib is 3,000 rows, as before.
+- Certify halves: MTOP 2,000, BANKING77 1,500. Predictions are saved in float32; an earlier
+  float16 save rounded hundreds of confident rows to exactly 1.0 and merged them into one tie.
+
+Findings (`gate-study.json`):
+- **The 150M reader certifies MTOP in every halving, under A**, at every history budget:
+
+  | History | Accuracy | Median coverage, A |
+  |---|---|---|
+  | none | 81.0% | 23.4% (87% of halvings) |
+  | 200 | 85.9% | 28.6% |
+  | 1,000 | 89.8% | 30.4% |
+  | all | 92.9% | 35.8% |
+
+  The 32-example reader reaches 39.3% with full history.
+- **B never certifies; C certifies only with full history** (32.1–32.9%, below A).
+- **No rule is unsafe.** At most 0.5% of halvings fall below 99% test precision; on synthetic
+  curves the unsafe rate is at most 1.25%, under A.
+- **Zeros left:**
+  - BANKING77 (every model) and the 32M reader on MTOP: weak ranking or sample size;
+  - the logistic head: sample size (its headroom reaches 61–69%, but the cohort never passes);
+  - the 8-neighbour vote: residual errors.
+- **Decision (pre-registered): A stays.**

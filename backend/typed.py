@@ -8,6 +8,7 @@ and fits one temperature per type; test is scored once, at the end.
 
     python -m backend.typed --init ettin-400m --epochs 8
     python -m backend.typed --init ic-ettin-150m-s6000-near    # start from the in-context reader
+    python -m backend.typed --ensemble a.npz b.npz              # average saved runs' probabilities
 """
 
 import argparse
@@ -238,9 +239,10 @@ def train(init, data_dir, epochs, seed, batch_size=16, lr=3e-5):
         if best is None or acc > best[0]:
             best = (acc, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()})
     model.load_state_dict(best[1])
-    val_probs = predict(model, tok, val)
+    val_probs, test_probs = predict(model, tok, val), predict(model, tok, test)
     temps = temperatures(val, val_probs)
-    return {
+    probs = {"val": pad(val_probs), "test": pad(test_probs)}
+    return probs, {
         "init": init,
         "seed": seed,
         "epochs": epochs,
@@ -250,7 +252,26 @@ def train(init, data_dir, epochs, seed, batch_size=16, lr=3e-5):
         "history": history,
         "temperatures": {k: round(v, 3) for k, v in temps.items()},
         "val": report(val, val_probs, temps),
-        "test": report(test, predict(model, tok, test), temps),
+        "test": report(test, test_probs, temps),
+    }
+
+
+def ensemble(data_dir: Path, paths: list[Path]) -> dict:
+    """Mean of saved runs' probabilities; temperatures refit on validation, test scored once."""
+    _, val, test = load(data_dir)
+    saved = [np.load(p) for p in paths]
+    probs = {
+        part: [
+            p[: len(d.keys)] for d, p in zip(ds, np.mean([s[part] for s in saved], 0), strict=True)
+        ]
+        for part, ds in (("val", val), ("test", test))
+    }
+    temps = temperatures(val, probs["val"])
+    return {
+        "members": [p.stem for p in paths],
+        "temperatures": {k: round(v, 3) for k, v in temps.items()},
+        "val": report(val, probs["val"], temps),
+        "test": report(test, probs["test"], temps),
     }
 
 
@@ -261,9 +282,21 @@ def main():
     parser.add_argument("--init", default="ettin-150m")
     parser.add_argument("--epochs", type=int, default=8)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--ensemble", nargs="+", type=Path, help="saved runs to average")
     args = parser.parse_args()
-    result = train(args.init, Settings().data_dir, args.epochs, args.seed)
-    path = Path("docs/results/s2") / f"typed-{args.init}-e{args.epochs}-s{args.seed}.json"
+    data_dir = Settings().data_dir
+    if args.ensemble:
+        result = ensemble(data_dir, args.ensemble)
+        path = Path("docs/results/s2") / f"typed-ensemble-{len(args.ensemble)}.json"
+        path.write_text(json.dumps(result, indent=2) + "\n")
+        print(json.dumps(result["test"]))
+        return
+    probs, result = train(args.init, data_dir, args.epochs, args.seed)
+    name = f"typed-{args.init}-e{args.epochs}-s{args.seed}"
+    saved = data_dir / "predictions" / "typed"
+    saved.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(saved / f"{name}.npz", **probs)
+    path = Path("docs/results/s2") / f"{name}.json"
     path.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result["test"]))
 

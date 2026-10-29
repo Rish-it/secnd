@@ -216,6 +216,7 @@ def escalation_report(task, p_calib, p_test, cert, test, answers) -> dict:
         "agree": round(float(agree.mean()), 4),
         "precision_when_agree": round(float((pt == yt)[agree].mean()), 4),
         "muse_accuracy_when_disagree": round(float((muse == yt)[~agree].mean()), 4),
+        "ren_accuracy_when_disagree": round(float((pt == yt)[~agree].mean()), 4),
     }
     return out
 
