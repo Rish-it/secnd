@@ -2,19 +2,19 @@
   "datasets": [
     {
       "dataset": "banking77",
-      "cached_texts": 2300,
-      "paraphrases": 4600,
-      "successful_batch_cost_usd": "1.39064075",
-      "p50_batch_latency_ms": 4068.8257704969146,
-      "input_text_hash": "609222321cc46b1753d480a55b18f71763c385994573b4a6781ec89d93208761"
+      "cached_texts": 2303,
+      "paraphrases": 4606,
+      "successful_batch_cost_usd": "1.75929325",
+      "p50_batch_latency_ms": 4182.403708997299,
+      "input_text_hash": "b27f53f17daeb7895163e24ca61a103ea9bb1ecc004237065fa987922600f986"
     },
     {
       "dataset": "mtop",
-      "cached_texts": 2393,
-      "paraphrases": 4786,
-      "successful_batch_cost_usd": "1.37010825",
-      "p50_batch_latency_ms": 3792.528708494501,
-      "input_text_hash": "58b95791facb34aee952a9990c9b6367829811d808015e601a6b285c40b6ab15"
+      "cached_texts": 2391,
+      "paraphrases": 4782,
+      "successful_batch_cost_usd": "1.49261950",
+      "p50_batch_latency_ms": 3829.862582992064,
+      "input_text_hash": "0ef44feb6198cca8ec680154d92568e72cf7bd91ad573afb4396e6eccb6736ee"
     },
     {
       "dataset": "ipsa",
@@ -25,9 +25,9 @@
       "input_text_hash": "9b408bdaacab84e3410b481701f54bfde5cf04b1e382398c1165a372e20c959e"
     }
   ],
-  "total_unique_texts": 5308,
-  "total_paraphrases": 10616,
-  "augmentation_spend_usd": "3.59346625",
+  "total_unique_texts": 5309,
+  "total_paraphrases": 10618,
+  "augmentation_spend_usd": "4.09834400",
   "provider": "meta",
   "model": "muse-spark-1.3",
   "budgets": [
@@ -42,5 +42,9 @@
     4
   ],
   "labels_sent": false,
-  "note": "Ledger spend includes failed batches, same-provider repairs and paid in-flight responses not saved after a batch failure. Per-dataset successful-batch costs omit these attempts."
+  "note": "Eligible counts use the current training selections after the stable split fix; the local cache also preserves older entries. Every consumer must select its own training hashes. Ledger spend includes failed batches, same-provider repairs and paid in-flight responses not saved after a batch failure. Successful-batch costs omit these attempts and may include a full batch reused only in part.",
+  "stored_unique_texts": 6080,
+  "stored_paraphrases": 12160,
+  "topup_spend_usd": "0.50487775",
+  "split_revision": "cb43d0f"
 }
