@@ -44,6 +44,9 @@ manifests.
 classifier gets 37.5% of test claims right (88.6% on known payees, 21.7% on new ones). With 5,000 it
 gets 44.7%. None of the baselines can yet answer a useful share of claims at 99% precision.
 
+The [card format](results/s1/README.md) follows the API response schema. Each card records both
+the pinned source-data hash and the split hash; unmeasured values stay null.
+
 ## How
 
 Filled in as each part ships.
