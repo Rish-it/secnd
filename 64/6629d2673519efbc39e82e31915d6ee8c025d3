@@ -1,0 +1,23 @@
+backend/robustness.py
+  s_99a14fdaab2d15::t_f3fc9410792172 49-90
+docs/results/s3/robustness-banking77-minilm+lr-b2000.csv
+  s_99a14fdaab2d15::t_7572d5ee967d72 1-2001
+docs/results/s3/robustness-banking77-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_fbd2ec0567f8f5 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "646629d2673519efbc39e82e31915d6ee8c025d3",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
