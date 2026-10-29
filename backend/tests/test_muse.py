@@ -304,7 +304,7 @@ def test_explanation_prompt_carries_only_supplied_evidence(tmp_path):
         )
         assert json.loads(messages[1]["content"]) == {
             "item": {"item_id": "a", "text": "Train", "amount": 25.0, "date": None},
-            "top3": {"Travel": 0.8, "Software": 0.2},
+            "top3": {"Travel": 0.62, "Office": 0.23, "Software": 0.1},
             "neighbours": [
                 {
                     "item_id": "past-1",
@@ -312,17 +312,45 @@ def test_explanation_prompt_carries_only_supplied_evidence(tmp_path):
                     "amount": None,
                     "date": None,
                     "label": "Travel",
-                }
+                },
+                {
+                    "item_id": "past-2",
+                    "text": "Stationery",
+                    "amount": 12.0,
+                    "date": "2026-10-20",
+                    "label": "Office",
+                },
+                {
+                    "item_id": "past-3",
+                    "text": "Video subscription",
+                    "amount": 18.0,
+                    "date": None,
+                    "label": "Software",
+                },
             ],
         }
-        return completion("Travel is 80% likely based on the supplied rail fare example.")
+        return completion(
+            "Travel is 62% likely; the rail fare example helps, but this is uncertain."
+        )
 
     with client_for(tmp_path, handler) as (client, _):
         assert client.explain(
             MuseItem(item_id="a", text="Train", amount=25),
-            {"Travel": 0.8, "Software": 0.2},
-            [LabelledItem(item_id="past-1", text="Rail fare", label="Travel")],
-        ).startswith("Travel is 80%")
+            {"Travel": 0.62, "Office": 0.23, "Software": 0.1},
+            [
+                LabelledItem(item_id="past-1", text="Rail fare", label="Travel"),
+                LabelledItem(
+                    item_id="past-2",
+                    text="Stationery",
+                    amount=12,
+                    date="2026-10-20",
+                    label="Office",
+                ),
+                LabelledItem(
+                    item_id="past-3", text="Video subscription", amount=18, label="Software"
+                ),
+            ],
+        ).startswith("Travel is 62%")
 
 
 def tool_call(name, arguments):
