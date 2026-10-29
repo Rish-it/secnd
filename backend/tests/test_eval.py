@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from backend import data, eval
+from backend.schemas import EvalCard
 
 
 def test_training_rows_take_seed_then_earliest_stream():
@@ -66,6 +67,7 @@ def local_dataset(tmp_path, monkeypatch):
 def test_card_has_flat_api_fields_and_hashes_all_sources(local_dataset):
     sources = local_dataset()
     result = eval.card("ipsa", "majority", budget=200)
+    assert EvalCard.model_validate(result).model_dump(exclude_unset=True) == result
     assert result["model_version"] == "ipsa-majority-b200-s0"
     assert (
         result["data_hash"]
