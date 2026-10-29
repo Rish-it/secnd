@@ -2,8 +2,10 @@
 
 import json
 import logging
+import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor, wait
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -11,8 +13,9 @@ from pydantic import TypeAdapter
 
 from backend.config import Settings
 from backend.encoders import fetch
+from backend.importing import holdout, labelled_rows
 from backend.registry import Registry
-from backend.schemas import Decision, WorkspaceId
+from backend.schemas import Decision, EvalCard, WorkspaceId
 from backend.store import Store
 
 logger = logging.getLogger(__name__)
@@ -25,6 +28,10 @@ def loop_factory(*args, **kwargs):
     return Loop(*args, **kwargs)
 
 
+class WorkspaceExists(ValueError):
+    """Imports must not replace a workspace's fixed holdout or saved answers."""
+
+
 class WorkspaceService:
     def __init__(self, store: Store, data_dir: Path, factory=loop_factory):
         self.store, self.data_dir, self.factory = store, data_dir, factory
@@ -34,12 +41,20 @@ class WorkspaceService:
         # carmy: one process; use a durable worker queue before running multiple API processes.
         self._executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="workspace-answer")
 
-    def create(self, workspace, labels, calib: pd.DataFrame, *, featurizer=None, seed=0):
+    def create(
+        self, workspace, labels, calib: pd.DataFrame, *, featurizer=None, seed=0, training=None
+    ):
         TypeAdapter(WorkspaceId).validate_python(workspace)
         if len(set(labels)) < 2 or len(labels) != len(set(labels)):
             raise ValueError("A workspace needs at least two distinct labels.")
         if calib.empty or not set(calib.label).issubset(labels):
             raise ValueError("Calibration rows must use the workspace labels.")
+        if training is not None:
+            if set(training.id.astype(str)) & set(calib.id.astype(str)) or not set(
+                training.label
+            ).issubset(labels):
+                raise ValueError("Training labels must be disjoint from calibration.")
+        calib = calib.assign(amount=calib.get("amount"), date=calib.get("date"))
         featurizer = featurizer or Settings().featurizer
         if featurizer == "pt-minilm":
             try:
@@ -59,7 +74,66 @@ class WorkspaceService:
                 "featurizer": featurizer,
                 "seed": seed,
             },
+            items=[]
+            if training is None
+            else json.loads(training.to_json(orient="records", date_format="iso")),
+            labels=[] if training is None else list(zip(training.id, training.label, strict=True)),
         )
+
+    def import_decisions(self, workspace, content, target_column):
+        frame = labelled_rows(content, target_column)
+        train, calib = holdout(frame)
+        with self._lock(workspace):
+            try:
+                self.create(workspace, sorted(frame.label.unique().tolist()), calib, training=train)
+            except sqlite3.IntegrityError:
+                raise WorkspaceExists(
+                    "This workspace already exists. Choose a new workspace."
+                ) from None
+            self._runtime(workspace)
+            return {
+                "workspace_id": workspace,
+                "row_count": len(frame),
+                "target_column": target_column,
+                "card": self.card(workspace),
+            }
+
+    def has_model(self, workspace):
+        return Registry(self.data_dir, workspace).current() is not None
+
+    def card(self, workspace):
+        registry = Registry(self.data_dir, workspace)
+        current = registry.current()
+        return (
+            EvalCard.model_validate(registry.card(current))
+            if current
+            else EvalCard(model_version="untrained", coverage=0)
+        )
+
+    def page(self, workspace, kind, cursor=None, limit=20):
+        return self.store.decision_page(workspace, kind, cursor, limit)
+
+    def metrics(self, workspace):
+        with self._lock(workspace):
+            registry = Registry(self.data_dir, workspace)
+            history = []
+            for version in registry.versions():
+                card = EvalCard.model_validate(registry.card(version))
+                saved = (registry.root / version / "card.json").stat().st_mtime
+                history.append(
+                    {
+                        "timestamp": datetime.fromtimestamp(saved, UTC),
+                        "model_version": version,
+                        "coverage": card.coverage,
+                        "precision": card.precision,
+                    }
+                )
+            return {
+                "card": self.card(workspace),
+                "history": history,
+                "guarded": bool(getattr(self._loops.get(workspace), "guarded", False)),
+                "labels": len(self.store.labels(workspace)),
+            }
 
     def _lock(self, workspace):
         TypeAdapter(WorkspaceId).validate_python(workspace)
@@ -90,6 +164,16 @@ class WorkspaceService:
             ],
         )
 
+    def _restore_current(self, workspace, loop):
+        registry = Registry(self.data_dir, workspace)
+        version = registry.current()
+        if version and (loop.current is None or loop.current["version"] != version):
+            candidate = registry.load(version)
+            loop.current = {**candidate, "version": version}
+            loop.c = candidate["model"].C
+            loop.pending, loop.checks = {}, [0, 0]
+            self._sync_models(workspace)
+
     def _runtime(self, workspace, *, before=None):
         if workspace not in self._loops:
             config = self.store.workspace(workspace)
@@ -98,7 +182,7 @@ class WorkspaceService:
                 pd.DataFrame(config["calib"]),
                 featurizer=config["featurizer"],
                 seed=config["seed"],
-                cache_dir=self.data_dir / "cache",
+                cache_dir=self.data_dir / "workspaces" / workspace / "cache",
                 models=Registry(self.data_dir, workspace),
             )
             history = [
@@ -108,6 +192,7 @@ class WorkspaceService:
                 frame = pd.DataFrame([{**row, "id": row["item_id"]}])
                 self._validate_training(workspace, frame, [row["label"]])
                 loop.learn(frame, [row["label"]], row["source"])
+            self._restore_current(workspace, loop)
             if len({r["label"] for r in history}) >= 2:
                 loop.retrain()
                 self._sync_models(workspace)
@@ -115,7 +200,9 @@ class WorkspaceService:
                 self._errors.pop(workspace, None)
             self._loops[workspace] = loop
             self._positions[workspace] = max((r["position"] for r in history), default=0)
-        return self._loops[workspace]
+        loop = self._loops[workspace]
+        self._restore_current(workspace, loop)
+        return loop
 
     def route(self, workspace, frame: pd.DataFrame) -> list[dict]:
         with self._lock(workspace):
@@ -128,10 +215,13 @@ class WorkspaceService:
             )
             return decisions
 
-    def answer(self, workspace, item_id, label, idempotency_key, *, source="answer") -> dict:
+    def answer(self, workspace, item_id, label, idempotency_key, *, source=None) -> dict:
         item = self.store.item(workspace, item_id)
+        if source is None:
+            previous = self.store.latest_prediction(workspace, item_id)
+            source = "spot_check" if previous and previous.get("spot_check") else "answer"
         self._validate_training(workspace, pd.DataFrame([item]), [label])
-        current = next((row for row in self.store.models(workspace) if row["is_current"]), None)
+        current = self.card(workspace)
         result, created = self.store.answer(
             workspace,
             item_id,
@@ -139,8 +229,8 @@ class WorkspaceService:
             idempotency_key,
             {
                 "item_id": item_id,
-                "coverage": current["card"].get("coverage", 0) if current else 0,
-                "model_version": current["version"] if current else "untrained",
+                "coverage": current.coverage,
+                "model_version": current.model_version,
                 "retrain": "queued",
             },
             source,

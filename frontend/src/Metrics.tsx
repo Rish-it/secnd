@@ -8,7 +8,7 @@ const measuredPercent = (value: number | null | undefined) =>
   value == null ? "—" : `${(value * 100).toFixed(2)}%`;
 
 export default function Metrics({ refresh }: { refresh: number }) {
-  const [dataset, setDataset] = useState<Dataset>("mtop");
+  const [dataset, setDataset] = useState<Dataset | "workspace">("workspace");
   const requestId = useRef(0);
   const [versionsError, setVersionsError] = useState("");
   const [metrics, setMetrics] = useState<WorkspaceMetrics | null>(null);
@@ -22,7 +22,7 @@ export default function Metrics({ refresh }: { refresh: number }) {
     const request = ++requestId.current;
     try {
       const [result, models] = await Promise.all([
-        api.metrics(dataset),
+        api.metrics(dataset === "workspace" ? undefined : dataset),
         api.models().catch(() => null),
       ]);
       if (request !== requestId.current) return;
@@ -46,6 +46,8 @@ export default function Metrics({ refresh }: { refresh: number }) {
   }, [dataset]);
   useEffect(() => {
     void load();
+    const timer = window.setInterval(() => void load(), 2000);
+    return () => window.clearInterval(timer);
   }, [load, refresh]);
   async function rollback(version: string) {
     setBusy(true);
@@ -69,7 +71,7 @@ export default function Metrics({ refresh }: { refresh: number }) {
       setBusy(false);
     }
   }
-  const selected = !metrics?.dataset || metrics.dataset === dataset;
+  const selected = dataset === "workspace" || metrics?.dataset === dataset;
   if (loading && (!metrics || !selected))
     return (
       <p role="status" className="metrics-status">
@@ -107,10 +109,12 @@ export default function Metrics({ refresh }: { refresh: number }) {
       <section className="dataset-picker" aria-label="Evaluation dataset">
         <div>
           <p className="eyebrow">PUBLISHED EVALUATIONS</p>
-          <p>Fixed held-out test sets · 2,000 training labels · seed 0</p>
+          <p>{metrics.dataset
+            ? "Fixed held-out test sets · 2,000 training labels · seed 0"
+            : `Fixed workspace calibration · ${metrics.labels} training labels`}</p>
         </div>
         <div className="dataset-buttons">
-          {(["mtop", "banking77", "ipsa"] as const).map((name) => (
+          {(["workspace", "mtop", "banking77", "ipsa"] as const).map((name) => (
             <button
               key={name}
               aria-pressed={dataset === name}
@@ -137,6 +141,12 @@ export default function Metrics({ refresh }: { refresh: number }) {
           yet.
         </p>
       )}
+      {metrics.guarded && (
+        <p role="status" className="gate-warning">
+          Guarded: automatic answers paused. Spot-checks show precision below
+          the target; every new item goes to a person until a new version passes.
+        </p>
+      )}
       {error && (
         <p className="error-message" role="alert">
           {error}
@@ -151,7 +161,9 @@ export default function Metrics({ refresh }: { refresh: number }) {
         <div>
           <p className="eyebrow">REN / THE PRECISION GATE</p>
           <h2>
-            {card.coverage === 0
+            {metrics.guarded
+              ? "Automatic answers paused (guarded)."
+              : card.coverage === 0
               ? "Not certified yet. Answers nothing yet."
               : `${measuredPercent(card.coverage)} answered automatically${missedTarget ? "; precision target missed" : ""}.`}
           </h2>
@@ -178,12 +190,12 @@ export default function Metrics({ refresh }: { refresh: number }) {
         {[
           {
             label: "Coverage",
-            value: measuredPercent(card.coverage),
+            value: measuredPercent(metrics.guarded ? 0 : card.coverage),
             note: "Share answered automatically",
           },
           {
             label: "Automatic precision",
-            value: measuredPercent(card.precision),
+            value: measuredPercent(metrics.guarded ? null : card.precision),
             note:
               card.precision == null
                 ? "No measured automatic traffic"

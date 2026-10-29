@@ -852,12 +852,23 @@
             ],
             "title": "Dataset"
           },
+          "guarded": {
+            "default": false,
+            "title": "Guarded",
+            "type": "boolean"
+          },
           "history": {
             "items": {
               "$ref": "#/components/schemas/HistoryPoint"
             },
             "title": "History",
             "type": "array"
+          },
+          "labels": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Labels",
+            "type": "integer"
           }
         },
         "required": [
@@ -1303,7 +1314,7 @@
         },
         "summary": "Answers",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
@@ -1397,13 +1408,13 @@
         },
         "summary": "Chat",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
     "/api/v1/workspaces/{ws}/decisions:import": {
       "post": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Persist labels with a fixed calibration holdout and fit a first model.",
         "operationId": "import_decisions_api_v1_workspaces__ws__decisions_import_post",
         "parameters": [
           {
@@ -1491,13 +1502,13 @@
         },
         "summary": "Import Decisions",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
     "/api/v1/workspaces/{ws}/feed": {
       "get": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Newest persisted automatic decisions, with cursor pagination.",
         "operationId": "feed_api_v1_workspaces__ws__feed_get",
         "parameters": [
           {
@@ -1517,6 +1528,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 512,
                   "type": "string"
                 },
                 {
@@ -1603,13 +1615,13 @@
         },
         "summary": "Feed",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
     "/api/v1/workspaces/{ws}/metrics": {
       "get": {
-        "description": "Published evaluation card and curves, separate from workspace learning.",
+        "description": "Workspace calibration history and live guard; optional dataset selects a published test evaluation.",
         "operationId": "metrics_api_v1_workspaces__ws__metrics_get",
         "parameters": [
           {
@@ -1627,14 +1639,20 @@
             "name": "dataset",
             "required": false,
             "schema": {
-              "default": "mtop",
-              "enum": [
-                "mtop",
-                "banking77",
-                "ipsa"
+              "anyOf": [
+                {
+                  "enum": [
+                    "mtop",
+                    "banking77",
+                    "ipsa"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
               ],
-              "title": "Dataset",
-              "type": "string"
+              "title": "Dataset"
             }
           }
         ],
@@ -1702,7 +1720,7 @@
         },
         "summary": "Metrics",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
@@ -1786,7 +1804,7 @@
         },
         "summary": "Models",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
@@ -1879,7 +1897,7 @@
         },
         "summary": "Rollback",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
@@ -1972,7 +1990,7 @@
         },
         "summary": "Rollback",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
@@ -2070,13 +2088,13 @@
         },
         "summary": "Predict",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     },
     "/api/v1/workspaces/{ws}/queue": {
       "get": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Unanswered persisted questions, least confident first; spot-checks included.",
         "operationId": "queue_api_v1_workspaces__ws__queue_get",
         "parameters": [
           {
@@ -2096,6 +2114,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 512,
                   "type": "string"
                 },
                 {
@@ -2182,7 +2201,7 @@
         },
         "summary": "Queue",
         "tags": [
-          "Workspace contract fixtures"
+          "Workspace"
         ]
       }
     }

@@ -8,8 +8,9 @@ from backend.schemas import EvalCard, EvalCurves, ModelVersion
 
 
 class Evidence:
-    def __init__(self, data_dir: Path, evaluation_dir: Path):
+    def __init__(self, data_dir: Path, evaluation_dir: Path, *, workspace_lock=None):
         self.data_dir, self.evaluation_dir = data_dir, evaluation_dir
+        self._workspace_lock = workspace_lock
         self._guard = threading.Lock()
         self._locks = {}
 
@@ -22,6 +23,8 @@ class Evidence:
         return card, curves
 
     def _lock(self, workspace):
+        if self._workspace_lock is not None:
+            return self._workspace_lock(workspace)
         with self._guard:
             return self._locks.setdefault(workspace, threading.RLock())
 

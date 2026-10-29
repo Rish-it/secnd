@@ -34,7 +34,6 @@ from backend.schemas import (
     ChatResult,
     Decision,
     Error,
-    EvalCard,
     ImportResult,
     Item,
     MetricsResult,
@@ -44,7 +43,7 @@ from backend.schemas import (
     Reasons,
     WorkspaceId,
 )
-from backend.workspace import WorkspaceService
+from backend.workspace import WorkspaceExists, WorkspaceService
 
 
 class Health(BaseModel):
@@ -56,7 +55,11 @@ def create_app(
     settings: Settings | None = None, *, workspace_service: WorkspaceService | None = None
 ) -> FastAPI:
     config = settings or Settings()
-    evidence = Evidence(config.data_dir, config.evaluation_dir)
+    evidence = Evidence(
+        config.data_dir,
+        config.evaluation_dir,
+        workspace_lock=lambda ws: app.state.workspaces._lock(ws),
+    )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -119,7 +122,7 @@ def create_app(
 
     contract = APIRouter(
         prefix="/api/v1/workspaces/{ws}",
-        tags=["Workspace contract fixtures"],
+        tags=["Workspace"],
         responses={status: {"model": Error} for status in (422, 413, 404, 409, 503)},
         dependencies=[Depends(fixture_mode)],
     )
@@ -127,9 +130,6 @@ def create_app(
         "Contract fixture only: no model runs and nothing is saved. "
         "Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured."
     )
-
-    def card() -> EvalCard:
-        return EvalCard(model_version="fixture-v0", coverage=0)
 
     def decision(item: Item, *, auto: bool = False) -> Decision:
         probability = 1.0 if auto else 0.55
@@ -152,21 +152,31 @@ def create_app(
             items = []
         return Page(items=items[:limit], next_cursor=None)
 
-    @contract.post("/decisions:import", response_model=ImportResult, description=contract_note)
+    @contract.post(
+        "/decisions:import",
+        response_model=ImportResult,
+        description="Persist labels with a fixed calibration holdout and fit a first model.",
+    )
     async def import_decisions(
         ws: WorkspaceId,
         file: UploadFile,
+        response: Response,
         target_column: Annotated[str, Form(min_length=1, max_length=100)],
     ):
-        inspected = await preview(file)
-        if target_column not in inspected.columns:
-            raise HTTPException(status_code=422, detail="The target column is missing.")
-        return ImportResult(
-            workspace_id=ws,
-            row_count=inspected.row_count,
-            target_column=target_column,
-            card=card(),
-        )
+        try:
+            content = await file.read(MAX_CSV_BYTES + 1)
+            if len(content) > MAX_CSV_BYTES:
+                raise HTTPException(413, "Choose a CSV smaller than 5 MiB.")
+            service = app.state.workspaces
+            result = await run_in_threadpool(service.import_decisions, ws, content, target_column)
+        except WorkspaceExists as error:
+            raise HTTPException(409, str(error)) from error
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        finally:
+            await file.close()
+        workspace_mode(ws, response, service)
+        return result
 
     def stored_workspace(ws):
         service = app.state.workspaces
@@ -175,6 +185,9 @@ def create_app(
         except KeyError:
             return None
         return service
+
+    def workspace_mode(ws, response, service):
+        response.headers["X-Secnd-Mode"] = "live" if service.has_model(ws) else "fixture"
 
     @contract.post(
         "/predict",
@@ -205,27 +218,50 @@ def create_app(
                 raise HTTPException(409, "Workspace has no trained model yet.") from error
             except ValueError as error:
                 raise HTTPException(422, str(error)) from error
-            response.headers["X-Secnd-Mode"] = "live"
+            workspace_mode(ws, response, service)
             return result
         return [decision(item) for item in body.items]
 
-    @contract.get("/feed", response_model=Page[Decision], description=contract_note)
-    def feed(
-        ws: WorkspaceId,
-        cursor: str | None = None,
-        limit: Annotated[int, Query(ge=1, le=100)] = 20,
-    ):
-        items = [decision(Item(item_id="fixture-auto-1", text="Example rail fare"), auto=True)]
+    def workspace_page(ws, kind, response, cursor, limit):
+        if service := stored_workspace(ws):
+            try:
+                result = service.page(ws, kind, cursor, limit)
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from error
+            workspace_mode(ws, response, service)
+            return result
+        items = (
+            [decision(Item(item_id="fixture-auto-1", text="Example rail fare"), auto=True)]
+            if kind == "feed"
+            else [decision(Item(item_id="fixture-queue-1", text="Example subscription"))]
+        )
         return page(items, cursor, limit)
 
-    @contract.get("/queue", response_model=Page[Decision], description=contract_note)
-    def queue(
+    @contract.get(
+        "/feed",
+        response_model=Page[Decision],
+        description="Newest persisted automatic decisions, with cursor pagination.",
+    )
+    def feed(
         ws: WorkspaceId,
-        cursor: str | None = None,
+        response: Response,
+        cursor: Annotated[str | None, Query(max_length=512)] = None,
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
     ):
-        item = decision(Item(item_id="fixture-queue-1", text="Example subscription"))
-        return page([item], cursor, limit)
+        return workspace_page(ws, "feed", response, cursor, limit)
+
+    @contract.get(
+        "/queue",
+        response_model=Page[Decision],
+        description="Unanswered persisted questions, least confident first; spot-checks included.",
+    )
+    def queue(
+        ws: WorkspaceId,
+        response: Response,
+        cursor: Annotated[str | None, Query(max_length=512)] = None,
+        limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    ):
+        return workspace_page(ws, "queue", response, cursor, limit)
 
     @contract.post(
         "/answers",
@@ -241,20 +277,14 @@ def create_app(
     ):
         if service := stored_workspace(ws):
             try:
-                previous = [
-                    d for d in service.store.predictions(ws) if d["item_id"] == body.item_id
-                ]
-                source = "spot_check" if previous and previous[-1]["spot_check"] else "answer"
-                result = service.answer(
-                    ws, body.item_id, body.label, idempotency_key, source=source
-                )
+                result = service.answer(ws, body.item_id, body.label, idempotency_key)
             except store.IdempotencyConflict as error:
                 raise HTTPException(409, str(error)) from error
             except KeyError as error:
                 raise HTTPException(404, "Item was not found in this workspace.") from error
             except ValueError as error:
                 raise HTTPException(422, str(error)) from error
-            response.headers["X-Secnd-Mode"] = "live"
+            workspace_mode(ws, response, service)
             return result
         return AnswerResult(
             item_id=body.item_id, coverage=0, model_version="fixture-v0", retrain="fixture"
@@ -263,11 +293,18 @@ def create_app(
     @contract.get(
         "/metrics",
         response_model=MetricsResult,
-        description="Published evaluation card and curves, separate from workspace learning.",
+        description="Workspace calibration history and live guard; optional dataset selects a "
+        "published test evaluation.",
     )
     def metrics(
-        ws: WorkspaceId, response: Response, dataset: Literal["mtop", "banking77", "ipsa"] = "mtop"
+        ws: WorkspaceId,
+        response: Response,
+        dataset: Literal["mtop", "banking77", "ipsa"] | None = None,
     ):
+        if dataset is None and (service := stored_workspace(ws)):
+            workspace_mode(ws, response, service)
+            return MetricsResult(**service.metrics(ws))
+        dataset = dataset or "mtop"
         try:
             measured, curves = evidence.evaluation(dataset)
         except FileNotFoundError as error:
@@ -287,7 +324,7 @@ def create_app(
             items = evidence.models(ws)
         except (ValueError, FileNotFoundError) as error:
             raise HTTPException(503, "Model cards are invalid or incomplete.") from error
-        response.headers["X-Secnd-Mode"] = "live"
+        response.headers["X-Secnd-Mode"] = "live" if any(v.current for v in items) else "fixture"
         return Page[ModelVersion](items=items)
 
     @contract.post(

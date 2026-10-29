@@ -4,17 +4,21 @@ The versioned API is under `/api/v1/workspaces/{ws}`; use `default` locally.
 The [OpenAPI contract](openapi.json) defines every request and response.
 `/api/health` and `/api/preview` retain their existing behavior.
 
-**Import, feed, queue and chat still return contract fixtures**, with
-`X-Secnd-Mode: fixture`. Predict and answers use persisted workspaces prepared
-with `WorkspaceService` and return `X-Secnd-Mode: live`; other workspaces use
-fixtures. CSV uploads are validated but not saved by this slice.
+**Import, predict, feed, queue and answers use WorkspaceService.** Import saves
+historical labels and a fixed calibration holdout; predictions and human answers
+are persisted. `X-Secnd-Mode` stays `fixture` until the workspace has a promoted
+model, then becomes `live`. Before import, the example predict/feed/queue/answer
+responses remain fixtures. A prepared workspace without a model has empty pages
+and returns 409 on predict. Imports and accepted answers can be durable before a
+model exists; the header describes model availability. Chat remains a fixture.
 
-**Metrics are published evaluations**, with `X-Secnd-Mode: evaluation`: a real
-held-out card and curves for MTOP (default), BANKING77 or IPSA. They are not
-workspace learning results. Model-version reads and pointer changes use the
-workspace registry; a new workspace has no versions.
+**Metrics default to the stored workspace:** the current calibration card, saved-version
+history, training-label count and live `guarded` flag. Explicit `dataset=mtop`,
+`banking77` or `ipsa` selects a published held-out test evaluation with
+`X-Secnd-Mode: evaluation`. Before import the default is the MTOP evaluation.
+Model-version reads and pointer changes use the workspace registry.
 
-## Try the contract
+## Import and predict
 
 Install dependencies using the root README, then start an API process:
 
@@ -23,17 +27,19 @@ uv run uvicorn backend.api:app --host 127.0.0.1 --port 8016
 ```
 
 In a second terminal, set `API=http://127.0.0.1:8016/api/v1/workspaces/default`.
-These three commands validate a CSV, request an illustrative decision and read
-the example evaluation card:
+Use your own historical CSV with `text` or `description`, a separate target
+column, and optional `item_id` (or `id`), `amount` and ISO `date`. IDs must be
+unique and labels nonempty. At least two labels must remain in training after
+the holdout. These three commands import it, predict, then read queued questions:
 
 ```sh
-printf 'text,amount,category\nTrain fare,25,Travel\n' | curl --fail-with-body -sS "$API/decisions:import" \
-  -F 'file=@-;filename=demo.csv;type=text/csv' -F target_column=category
+curl --fail-with-body -sS "$API/decisions:import" \
+  -F 'file=@/path/to/labelled-decisions.csv;type=text/csv' -F target_column=category
 
 curl --fail-with-body -sS "$API/predict" -H 'Content-Type: application/json' \
   -d '{"items":[{"item_id":"invoice-1","text":"Train fare","amount":25}]}'
 
-curl --fail-with-body -sS "$API/metrics"
+curl --fail-with-body -sS "$API/queue"
 ```
 
 | Method and path | Request | Response |
@@ -43,7 +49,7 @@ curl --fail-with-body -sS "$API/metrics"
 | `GET /feed` | Optional `cursor`, `limit` (1–100) | `Page<Decision>`, automatic items |
 | `GET /queue` | Optional `cursor`, `limit` (1–100) | `Page<Decision>`, uncertain items |
 | `POST /answers` | `{item_id, label}`, required `Idempotency-Key` header | `AnswerResult` |
-| `GET /metrics` | Optional `dataset=mtop\|banking77\|ipsa` | Published card and reliability/coverage–precision curves; empty learning history |
+| `GET /metrics` | Optional `dataset=mtop\|banking77\|ipsa` | Workspace calibration card, version history, label count and guard; dataset selects published test curves |
 | `GET /models` | None | `Page<ModelVersion>` |
 | `POST /models/{v}:promote` | None | Select an existing registry version atomically |
 | `POST /models/{v}:rollback` | None | `ModelVersion`; 404 for an unknown version |
@@ -57,7 +63,8 @@ can carry the remaining mass. `reasons` has `neighbours` and `merchant_memory`.
 A null threshold means automatic decisions have not been certified.
 
 Pages have `items` and a nullable `next_cursor`; null means there is no next page.
-The fixture feed and queue each contain one item; the registry list starts empty. The fixture answer reports
+Unprepared fixture feed and queue each contain one example; the registry starts empty.
+The fixture answer reports
 `retrain: fixture`; the live contract also permits `retrain: queued` with the
 current version and coverage. The fixture checks for an idempotency header but
 does not persist or replay answers.
@@ -89,7 +96,7 @@ Authentication belongs in a workspace router dependency.
 Postgres replaces the SQLite store behind the same storage calls.
 A worker queue replaces the per-workspace retraining dispatcher.
 SDKs can be generated from the committed OpenAPI schema.
-Live model and chat handlers replace the fixtures while preserving these types.
+Chat remains a fixture; the other workspace routes persist real data.
 
 ## Published metrics and versions
 
@@ -113,8 +120,13 @@ Published evaluations come from `docs/results/s3/card-*.json` and matching
 directory. `MetricsResult.dataset` identifies the benchmark and `curves` holds
 reliability bins (`confidence`, `accuracy`, `count`) and trade-off points
 (`threshold`, `coverage`, `precision`). A missing threshold on IPSA means no
-automatic answers are certified. An empty `history` means no workspace learning
-curve has been measured; the API does not substitute the trade-off curve.
+automatic answers are certified. Published evaluations have an empty `history`; workspace history contains one point
+per saved promoted model, with its original card-file timestamp and calibration
+coverage/precision. Refused candidates do not create a saved version or history
+point. The API never substitutes a benchmark trade-off curve for workspace history.
+The live `guarded` flag pauses automatic answers even if the saved card certified
+coverage. The browser polls for background updates. Spot-check state is held in
+memory and resets after a process restart.
 
 Registry cards must validate as `EvalCard`, including measured `coverage`.
 Cards written with only a threshold are unavailable until the training path
@@ -142,7 +154,26 @@ survive a failed fit or process restart and replay on rebuild. One observed
 class is retained without fitting until a second class arrives. The registry
 remains the authority for the current model; the database mirrors its cards.
 
+Imports reserve a fixed 20% for calibration (whole groups can change the row share): the newest rows for fully dated inputs,
+otherwise whole merchant groups with seed 0. Calibration is stored separately
+and never becomes training labels; workspace cards measure this fixed calibration
+set, not a benchmark test set. Source benchmark splits remain unchanged. Importing
+into an existing workspace returns 409 and preserves its labels and holdout.
+A refused first candidate leaves zero coverage and no model.
+
+Feed is newest first; queue is least confident first and includes spot-checks.
+Pages expose the latest prediction per item, with its original item/evidence;
+all prediction events remain in storage. Answered items leave the queue. Cursors
+are scoped to workspace and route and remain stable when earlier questions are
+answered. Invalid/cross-workspace cursors return 422.
+
+Registry reads and pointer changes share the workspace retraining lock. The next
+prediction loads a selected model head/temperature/threshold; the current workspace
+label memory remains in use. Restart replays durable labels, restores the prior
+model for the gate, and may fit a new candidate. This is not an immutable snapshot
+of the historical merchant memory.
+
 This service runs in one API process. Multiple processes require a durable
-worker queue and coordinated model/cache writes. The learning-loop module is
-a runtime dependency: prepared predictions return 503 when it is unavailable,
-or 409 when no model has passed the gate. CSV import remains a fixture.
+worker queue and coordinated model/cache writes. Prepared predictions return
+409 when no model has passed the gate. Initial import fitting uses a worker
+thread; subsequent answer fitting stays off the request path.

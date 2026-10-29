@@ -11,7 +11,6 @@ from backend.schemas import (
     ChatResult,
     Decision,
     Error,
-    ImportResult,
     MetricsResult,
     Page,
 )
@@ -110,16 +109,13 @@ def test_api_misses_do_not_serve_frontend_html(tmp_path: Path):
 API = "/api/v1/workspaces/default"
 
 
-def test_contract_import_and_predictions_are_explicit_fixtures(client: TestClient):
+def test_invalid_single_label_import_and_unprepared_prediction_fixtures(client: TestClient):
     response = client.post(
         f"{API}/decisions:import",
         files={"file": ("data.csv", b"text,category\nTrain,Travel\n", "text/csv")},
         data={"target_column": "category"},
     )
-    assert response.headers["X-Secnd-Mode"] == "fixture"
-    imported = ImportResult.model_validate(response.json())
-    assert imported.row_count == 1
-    assert imported.card.accuracy is None
+    assert response.status_code == 422
     response = client.post(
         f"{API}/predict",
         json={"items": [{"item_id": "a", "text": "Train", "date": "2026-10-29"}]},
