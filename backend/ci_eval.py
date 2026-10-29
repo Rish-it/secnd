@@ -1,4 +1,4 @@
-"""Reproduce every deterministic field of one cheap, committed evaluation card."""
+"""Reproduce every deterministic field of cheap, committed evaluation cards."""
 
 import json
 from difflib import unified_diff
@@ -6,7 +6,8 @@ from pathlib import Path
 
 from backend.eval import card
 
-EXPECTED = Path("docs/results/s8/eval-ipsa-merchant_memory-b200.json")
+DATASETS = ("ipsa", "banking77")
+RESULTS = Path("docs/results/s8")
 UNSTABLE = {"predict_ms", "peak_rss_bytes", "git_sha", "worst_classes"}
 
 
@@ -26,14 +27,18 @@ def compare(expected, actual):
 
 def main():
     try:
-        measured = card("ipsa", "merchant_memory", 200, 0)
-        compare(
-            json.loads(EXPECTED.read_text()),
-            {k: v for k, v in measured.items() if k not in UNSTABLE},
-        )
+        for dataset in DATASETS:
+            measured = card(dataset, "merchant_memory", 200, 0)
+            compare(
+                json.loads((RESULTS / f"eval-{dataset}-merchant_memory-b200.json").read_text()),
+                {k: v for k, v in measured.items() if k not in UNSTABLE},
+            )
+            print(
+                f"Fixed {dataset.upper()} evaluation matches deterministic fields "
+                "(budget 200, seed 0)."
+            )
     except ValueError as error:
         raise SystemExit(str(error)) from None
-    print("Fixed IPSA evaluation matches every deterministic field (budget 200, seed 0).")
 
 
 if __name__ == "__main__":

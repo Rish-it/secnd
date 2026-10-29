@@ -71,5 +71,5 @@ jobs:
           version: "0.9.26"
           enable-cache: true
       - run: uv sync --locked
-      - name: Reproduce the fixed CPU evaluation (under two minutes)
+      - name: Reproduce IPSA and BANKING77 CPU evaluations (under two minutes)
         run: timeout 120 uv run python -m backend.ci_eval
