@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import "./App.css";
+import { api, percent } from "./api";
+import type { EvalCard, Preview } from "./api";
 
 type View = "Teach" | "Companion" | "Metrics";
 type Connection = "connecting" | "online" | "offline";
-type Preview = {
-  filename: string;
-  columns: string[];
-  row_count: number;
-  rows: Record<string, string>[];
-};
+
 
 const example = `description,amount,category
 Train to client meeting,28.50,Travel
@@ -74,6 +71,10 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [sourceFile, setSourceFile] = useState<File | null>(null);
+  const [trained, setTrained] = useState<EvalCard | null>(null);
+  const [training, setTraining] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -102,28 +103,16 @@ export default function App() {
     setError("");
     setPreview(null);
     setTarget("");
+    setTrained(null);
+    setSourceFile(null);
     if (file.size > 5 * 1024 * 1024) {
       setError("Choose a CSV smaller than 5 MiB.");
       return;
     }
     setBusy(true);
     try {
-      const form = new FormData();
-      form.append("file", file);
-      const response = await fetch("/api/preview", {
-        method: "POST",
-        body: form,
-        signal: AbortSignal.timeout(30000),
-      });
-      if (!response.ok) {
-        const problem = await response.json().catch(() => null);
-        throw new Error(
-          typeof problem?.detail === "string"
-            ? problem.detail
-            : "Could not read this CSV. Please try again.",
-        );
-      }
-      const result: Preview = await response.json();
+      const { data: result } = await api.preview(file);
+      setSourceFile(file);
       setPreview(result);
       setTarget(
         result.columns.find((column) =>
@@ -143,6 +132,18 @@ export default function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function teach() {
+    if (!sourceFile || !target) return;
+    setTraining(true); setError("");
+    try {
+      const result = await api.teach(sourceFile, target);
+      setTrained(result.data.card);
+      setPreviewMode(result.fixture);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not teach this decision.");
+    } finally { setTraining(false); }
   }
 
   function chooseFile(event: ChangeEvent<HTMLInputElement>) {
@@ -297,7 +298,7 @@ export default function App() {
                     {busy ? "Reading CSV…" : "Choose a CSV"}
                     <Icon kind="arrow" />
                   </button>
-                  <small>UTF-8 CSV · up to 5 MiB · preview only</small>
+                  <small>UTF-8 CSV · up to 5 MiB</small>
                 </div>
                 <div className="example-row">
                   <span>Just looking around?</span>
@@ -384,10 +385,23 @@ export default function App() {
                         </tbody>
                       </table>
                     </div>
-                    <p className="preview-note">
-                      Your preview is ready. Training is the next step and isn’t
-                      available yet. This file hasn’t been saved.
-                    </p>
+                    <div className="teach-actions">
+                      <p className="preview-note">Check the decision column, then teach Ren with these examples.</p>
+                      <button className="primary-button" disabled={training || !target} onClick={() => void teach()}>
+                        {training ? "Preparing your examples…" : "Teach this decision"}<Icon kind="arrow" />
+                      </button>
+                    </div>
+                    {trained && <section className="training-result" aria-live="polite">
+                      <p className="eyebrow">{previewMode ? "PREVIEW CHECKED" : "YOUR MODEL"}</p>
+                      <h3>{trained.coverage === 0 ? "Answers nothing yet." : `Ren can handle ${percent(trained.coverage)} on its own.`}</h3>
+                      <p>{previewMode ? "Your CSV and target column look ready. Training is not connected yet; these examples have not been saved." : trained.threshold == null ? "Keep teaching. There is not enough held-out evidence to certify automatic answers at 99% precision." : "Anything below the certified threshold comes back to you."}</p>
+                      <dl className="result-stats">
+                        <div><dt>Coverage</dt><dd>{percent(trained.coverage)}</dd></div>
+                        <div><dt>Accuracy</dt><dd>{percent(trained.accuracy)}</dd></div>
+                        <div><dt>Model</dt><dd>{previewMode ? "Not trained" : trained.model_version}</dd></div>
+                        <div><dt>Training time</dt><dd>{trained.retrain_ms == null ? "—" : `${trained.retrain_ms.toFixed(0)} ms`}</dd></div>
+                      </dl>
+                    </section>}
                   </section>
                 )}
               </section>

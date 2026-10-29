@@ -758,3 +758,12 @@ th {
     padding: 35px 20px;
   }
 }
+
+.teach-actions { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 22px; }
+.training-result { margin-top: 24px; padding: 24px; background: #edf1e9; border-radius: 12px; }
+.training-result h3 { font-size: 25px; margin: 12px 0; font-weight: 500; }
+.training-result > p { line-height: 1.6; max-width: 65ch; }
+.result-stats { display: flex; flex-wrap: wrap; gap: 26px; margin: 24px 0 0; }
+.result-stats dt { color: #647268; font-size: 12px; }
+.result-stats dd { margin: 8px 0 0; font-size: 18px; }
+@media (max-width: 650px) { .teach-actions { align-items: stretch; flex-direction: column; } }
