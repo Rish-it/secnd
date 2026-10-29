@@ -22,6 +22,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev
 COPY backend backend
+RUN SECND_DATA_DIR=/opt/secnd python -m backend.encoders
 COPY docs/results/s3/card-*.json docs/results/s3/
 COPY docs/results/s3/curves-*.json docs/results/s3/
 COPY --from=frontend /build/frontend/dist frontend/dist
