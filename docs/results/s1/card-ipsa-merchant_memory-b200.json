@@ -1,53 +1,123 @@
 {
-  "provenance": {
-    "dataset": "ipsa",
-    "model": "merchant_memory",
-    "budget": 200,
-    "train_rows": 200,
-    "seed": 0,
-    "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
-    "git_sha": "8d9e33b"
+  "model_version": "ipsa-merchant_memory-b200-s0",
+  "accuracy": 0.2555,
+  "macro_f1": 0.0513,
+  "nll": 9.2357,
+  "brier": 0.8188,
+  "ece": 0.1486,
+  "aurc": 0.4594,
+  "classwise_ece": {
+    "Advertising and contact cards": 0.0046,
+    "Air travel": 0.01,
+    "Approved costs outside the Scheme": 0.0001,
+    "Bought-in services": 0.0021,
+    "Business rates": 0.0014,
+    "Cleaning services": 0.0115,
+    "Congestion charge & toll": 0.0072,
+    "Council tax": 0.0097,
+    "Equipment - hire": 0.0047,
+    "Equipment - purchase": 0.039,
+    "Hospitality": 0.0063,
+    "Hotel - European": 0.0014,
+    "Hotel - London": 0.0033,
+    "Hotel - UK Not London": 0.0091,
+    "Hotel - late night": 0.0005,
+    "IPSA RICS Valuation": 0.0,
+    "Insurance - buildings": 0.002,
+    "Insurance - contents": 0.0023,
+    "Landline phone & internet - installation & equipment purchase": 0.0018,
+    "Landline phone & internet - rental & usage": 0.0249,
+    "Landline phone & internet - rental & usage MP Staff": 0.0,
+    "MP Budget Overspend": 0.0004,
+    "Maintenance, Redecorations & Repairs": 0.0062,
+    "Mileage - bicycle": 0.0003,
+    "Mileage - car": 0.0421,
+    "Mileage - motorcycle": 0.0002,
+    "Mobile telephone - contract & usage": 0.0265,
+    "Mobile telephone - equipment purchase": 0.0036,
+    "Moving Fees": 0.0013,
+    "Newspapers, journals, magazines": 0.0152,
+    "Other": 0.0009,
+    "Other public transport": 0.0147,
+    "Parking": 0.0259,
+    "Payroll": 0.0319,
+    "Pooled staffing services": 0.0176,
+    "Postage & couriers": 0.0036,
+    "Rail": 0.0627,
+    "Rail Booking Fee": 0.0001,
+    "Railcard": 0.0027,
+    "Recruitment Services &Costs": 0.0016,
+    "Redundancy": 0.0084,
+    "Removals": 0.0008,
+    "Rent": 0.0158,
+    "Service charge & ground Rent": 0.0001,
+    "Software & applications": 0.0219,
+    "Stationery & printing": 0.1454,
+    "Subletting": 0.0015,
+    "Subsistence": 0.0104,
+    "TV licence": 0.0022,
+    "Taxi": 0.0,
+    "Training - MP": 0.0006,
+    "Training - staff": 0.009,
+    "Translation services (Welsh Language)": 0.0003,
+    "Translation services - other languages": 0.0005,
+    "Travel Associated Cost": 0.0002,
+    "Utilities": 0.0287,
+    "Vehicle hire cost": 0.0018,
+    "Venue hire, meetings & surgeries": 0.0247,
+    "Volunteer - agreed arrangement costs": 0.0316,
+    "Waste disposal, confidential waste & rubbish collection": 0.0042,
+    "Website hosting and design": 0.0035,
+    "Working From Home Allowance": 0.0052
   },
-  "quality": {
-    "accuracy": 0.2555,
-    "macro_f1": 0.0513,
-    "nll": 9.2357,
-    "brier": 0.8188,
-    "ece": 0.1486,
-    "classwise_ece": 0.0115,
-    "aurc": 0.4594
+  "threshold": 0.99,
+  "coverage": 0.2361,
+  "precision": 0.885,
+  "cp_lower_bound": 0.952,
+  "robustness_pass_rate": null,
+  "seen_merchant": {
+    "count": 10045,
+    "accuracy": 0.885
   },
-  "claim": {
-    "tau": 0.99,
-    "coverage": 0.2361,
-    "precision_above": 0.885,
-    "calib_auto": {
-      "n": 11110,
-      "correct": 10614
-    },
-    "calib_cp_lower": 0.952
-  },
-  "slices": {
-    "seen_merchant": {
-      "rows": 10045,
-      "accuracy": 0.885
-    },
-    "unseen_merchant": {
-      "rows": 32507,
-      "accuracy": 0.061
-    }
+  "unseen_merchant": {
+    "count": 32507,
+    "accuracy": 0.061
   },
   "worst_classes": {
-    "Advertising and contact cards": 0.0,
-    "Parking": 0.0,
-    "Payroll": 0.0,
-    "Rail": 0.0,
-    "Railcard": 0.0
+    "Advertising and contact cards": {
+      "count": 844,
+      "accuracy": 0.0
+    },
+    "Parking": {
+      "count": 1101,
+      "accuracy": 0.0
+    },
+    "Payroll": {
+      "count": 1357,
+      "accuracy": 0.0
+    },
+    "Rail": {
+      "count": 2669,
+      "accuracy": 0.0
+    },
+    "Railcard": {
+      "count": 114,
+      "accuracy": 0.0
+    }
   },
-  "speed": {
-    "fit_seconds": 0.001,
-    "predict_ms_p50": 0.041,
-    "predict_ms_p99": 0.096,
-    "peak_rss_mb": 536.4
-  }
+  "featurize_ms": null,
+  "predict_ms": {
+    "p50": 0.037,
+    "p99": 0.077
+  },
+  "retrain_ms": null,
+  "peak_rss_bytes": 569442304,
+  "artifact_bytes": null,
+  "image_bytes": null,
+  "cost_per_1000_usd": null,
+  "data_hash": "c0f340b2d1c250c0469221605d38790abed2e3f9f7f8a4f5bb8215d7fbb373e6",
+  "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
+  "featurizer_id": null,
+  "seed": 0,
+  "git_sha": "e2579c9"
 }
