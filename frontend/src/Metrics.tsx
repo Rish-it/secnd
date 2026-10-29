@@ -115,6 +115,7 @@ export default function Metrics({ refresh }: { refresh: number }) {
               key={name}
               aria-pressed={dataset === name}
               onClick={() => {
+                if (name === dataset) return;
                 setLoading(true);
                 setDataset(name);
               }}
