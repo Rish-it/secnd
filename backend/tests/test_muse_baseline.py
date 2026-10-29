@@ -1,6 +1,7 @@
 import json
 import time
 from decimal import Decimal
+from pathlib import Path
 
 import httpx
 import numpy as np
@@ -9,7 +10,7 @@ import pytest
 
 from backend.config import Settings
 from backend.data import split_manifest
-from backend.muse import MuseError
+from backend.muse import MuseError, Usage, usage_cost
 from backend.muse_baseline import collect, compare, digest, read_predictions, sample, summarize
 
 
@@ -115,3 +116,22 @@ def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(
     (tmp_path / "muse-predictions.jsonl").write_text(json.dumps(record) + "\n")
     with pytest.raises(ValueError, match="fixed experiment"):
         read_predictions(tmp_path / "muse-predictions.jsonl", plan)
+
+
+def test_published_comparison_retains_all_trials_and_reconciles_cost():
+    root = Path(__file__).resolve().parents[2] / "docs/results/s5"
+    plan = json.loads((root / "muse-sample.json").read_text())
+    trials = read_predictions(root / "muse-predictions.jsonl", plan)
+    measured = json.loads((root / "muse-baseline.json").read_text())
+    compared = json.loads((root / "comparison.json").read_text())
+    assert len(trials) == len(set(plan["row_ids"])) == measured["rows"] == 500
+    assert len(plan["labels"]) == 62
+    assert measured["invalid_outputs"] == sum(trial.invalid_output for trial in trials.values())
+    assert measured["nll"] is measured["ece"] is None
+    assert usage_cost(Usage.model_validate(measured["usage"])) == Decimal(measured["cost_usd"])
+    assert Decimal(measured["cost_per_1000_usd"]) == Decimal(measured["cost_usd"]) * 2
+    assert Decimal(measured["experiment_spend_usd"]) < 10
+    assert compared["muse"] == measured
+    assert [row["training_rows"] for row in compared["baselines"]] == [200, 5000]
+    for field in ("data_hash", "split_hash", "sample_hash", "protocol_hash"):
+        assert compared[field] == measured[field] == plan[field]

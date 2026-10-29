@@ -3,6 +3,31 @@
 The decision classifier does not call a language model. Optional labeling,
 explanations and chat use the configured Chat Completions endpoint.
 
+## Measured comparison
+
+Same 500 held-out IPSA claims, seed 0 and 62 allowed cost types. Raw
+[comparison](comparison.json), [Muse result](muse-baseline.json),
+[sample](muse-sample.json) and [trials](muse-predictions.jsonl):
+
+| Model | Training labels | Accuracy | ECE-10 | p50 per item | Cost per 1,000 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Muse Spark, zero-shot | 0 | 37.0% | null | 1,577.04 ms | $2.3451 |
+| Character TF-IDF + logistic regression | 200 | 36.2% | 0.1440 | 0.235 ms | unmeasured |
+| Character TF-IDF + logistic regression | 5,000 | 45.2% | 0.2078 | 0.231 ms | unmeasured |
+
+All 500 final outputs passed validation. Muse's cost includes conservative
+retry estimates and all compact-protocol paid calls, including calls completed
+while a failed batch was shutting down. It excludes the earlier distribution
+experiments. The complete ledger, including those experiments and the
+connection check, totals **$2.39298**. These are full-list token estimates;
+cached-input discounts are excluded.
+
+Muse NLL/ECE are null because confidence is self-reported. The text classifiers
+are raw baselines; this table makes no calibrated precision or automation
+coverage claim. CPU hosting cost and the fitted model comparison await measured
+throughput. Latencies are local CPU prediction times versus remote HTTP times,
+not equivalent hardware or service-level guarantees.
+
 ## Connection
 
 Copy `.env.example` to `.env` and set `SECND_MUSE_API_KEY` locally. The default
