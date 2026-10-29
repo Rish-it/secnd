@@ -1,4 +1,5 @@
 import threading
+from types import SimpleNamespace
 
 import pandas as pd
 import pytest
@@ -13,14 +14,17 @@ class RecordingLoop:
         self.calib = calib
         self.models = kwargs["models"]
         self.block = None
+        self.current = None
 
     def learn(self, frame, labels, source):
         self.learned.extend(zip(frame.id, labels, [source] * len(frame), strict=True))
 
     def retrain(self):
         self.trained += 1
-        v = self.models.save({}, {"coverage": 0.2, "threshold": 0.99})
+        artifact = {"model": SimpleNamespace(C=1), "temperature": 1, "tau": None, "lower": 0}
+        v = self.models.save(artifact, {"coverage": 0.2, "threshold": 0.99})
         self.models.promote(v)
+        self.current = {**artifact, "version": v}
 
     def on_answer(self, frame, label, source):
         self.answers.append((str(frame.id.iloc[0]), label, source, threading.get_ident()))
