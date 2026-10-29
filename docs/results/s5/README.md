@@ -248,3 +248,58 @@ texts were skipped (164 selections across the ten training subsets). The cache
 is local data and is excluded from version control; rerun the documented CLI to
 recreate it with your own provider budget. No held-out labels or training labels
 were sent. Paraphrase quality has not been separately scored.
+
+## Reproduce the cold-start handoff
+
+`backend.handoff` selects 500 stream rows at seed 0. Meta teacher labels are
+cached locally by model, item ID and text hash; fixed calibration and test rows
+are never sent for labeling or used to train. Human-label comparisons use 50
+and 200 seed labels, before and after the same teacher labels are added at weight
+0.3. A separate 20-round simulation starts with zero human labels.
+
+```sh
+uv run python -m backend.handoff --label  # paid; explicit $10 task cap
+uv run python -m backend.handoff          # cache-only; no new provider calls
+uv run --with matplotlib python docs/results/s5/plot-handoff.py
+```
+
+The task cap includes earlier attempts under the same ledger task, so resuming
+cannot reset its allowance. Keep the current spend ledger. The conservative
+preflight uses 6,000 input tokens and the 2,048-output-token ceiling per item;
+actual and estimated failed-attempt charges come from the existing client ledger.
+Eight requests can run concurrently. Local teacher caches and encoder files stay
+outside Git. Raw request text is absent from the result report.
+
+Curve shares count cumulative completed decisions by teacher, automatic model
+and human. Unanswered items are recorded separately as `pending` and excluded
+from that denominator. Fixed-test coverage and automatic precision are separate
+metrics. True stream labels stand in for human answers; this is an offline
+simulation. No claim about live customer behavior follows from it.
+
+## Measured cold-start run
+
+[Report](handoff.json), fixed MTOP split, seed 0, released `pt-minilm`, 500
+`muse-spark-1.3` labels. Teacher spend was **$1.28854950** against the **$10** task
+cap, including all recorded attempts. Cache-only repetition reproduced quality,
+routes, counts, shares and split hashes exactly; fitting timings vary.
+
+| Human seed labels | Test accuracy without teacher | With 500 teacher labels |
+| --- | ---: | ---: |
+| 50 | 65.27% | 77.74% |
+| 200 | 79.30% | 81.45% |
+
+All four seed-budget comparisons certify zero automatic coverage. Better raw
+accuracy alone does not establish a safe automatic decision threshold.
+
+The separate zero-human-label start reaches **52.65% fixed-test coverage at
+99.77% automatic precision** after **2,272 simulated human answers**; accuracy is
+**90.01%**. The run completes 500 teacher decisions, 5,047 automatic decisions and
+2,272 human decisions, while **8,081 questions remain pending**. The automatic
+share among completed decisions is **64.55%**; that is a different denominator
+from test coverage and excludes the pending questions. This is one fixed seed,
+not a robustness estimate or a guarantee on new traffic.
+
+![Recorded teacher-to-Ren handoff](handoff.svg)
+
+[PNG](handoff.png) · [SVG](handoff.svg). The teacher's confidence is self-reported;
+it is never used to calibrate the classifier or to relax its precision gate.
