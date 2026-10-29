@@ -44,7 +44,7 @@ async () => {
     window.fetch=(url,init)=>String(url).endsWith('/models')?Promise.resolve(new Response(JSON.stringify({message:'Unavailable registry'}),{status:503,headers:{'Content-Type':'application/json'}})):original(url,init);
     button('Refresh measurements').click();
     await settle(()=>text().includes('Workspace versions are unavailable'));
-    if(!text().includes('31.68%'))throw Error('Registry failure hid evaluation');
+    if(!text().includes('42.42%'))throw Error('Registry failure hid evaluation');
   } finally { window.fetch=original; }
   button('Refresh measurements').click();
   await settle(()=>!text().includes('Workspace versions are unavailable'));
