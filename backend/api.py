@@ -2,6 +2,7 @@ import sqlite3
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 
+import pandas as pd
 from fastapi import (
     APIRouter,
     Depends,
@@ -24,7 +25,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend import store
 from backend.config import Settings
-from backend.data import MAX_CSV_BYTES, CSVPreview, preview_csv
+from backend.data import MAX_CSV_BYTES, CSVPreview, merchant_key, preview_csv
 from backend.evidence import Evidence
 from backend.schemas import (
     Answer,
@@ -43,6 +44,7 @@ from backend.schemas import (
     Reasons,
     WorkspaceId,
 )
+from backend.workspace import WorkspaceService
 
 
 class Health(BaseModel):
@@ -50,14 +52,22 @@ class Health(BaseModel):
     database: str = "ready"
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(
+    settings: Settings | None = None, *, workspace_service: WorkspaceService | None = None
+) -> FastAPI:
     config = settings or Settings()
     evidence = Evidence(config.data_dir, config.evaluation_dir)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        await run_in_threadpool(store.initialize, config.database_path)
-        yield
+        service = workspace_service or await run_in_threadpool(
+            lambda: WorkspaceService(store.Store(config.database_path), config.data_dir)
+        )
+        app.state.workspaces = service
+        try:
+            yield
+        finally:
+            await run_in_threadpool(service.close)
 
     app = FastAPI(title="Secnd", version="0.1.0", lifespan=lifespan)
 
@@ -110,7 +120,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     contract = APIRouter(
         prefix="/api/v1/workspaces/{ws}",
         tags=["Workspace contract fixtures"],
-        responses={status: {"model": Error} for status in (422, 413, 404, 503)},
+        responses={status: {"model": Error} for status in (422, 413, 404, 409, 503)},
         dependencies=[Depends(fixture_mode)],
     )
     contract_note = (
@@ -158,8 +168,45 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             card=card(),
         )
 
-    @contract.post("/predict", response_model=list[Decision], description=contract_note)
-    def predict(ws: WorkspaceId, body: PredictRequest):
+    def stored_workspace(ws):
+        service = app.state.workspaces
+        try:
+            service.store.workspace(ws)
+        except KeyError:
+            return None
+        return service
+
+    @contract.post(
+        "/predict",
+        response_model=list[Decision],
+        description="Routes and logs decisions for stored workspaces; otherwise returns fixtures.",
+    )
+    def predict(ws: WorkspaceId, body: PredictRequest, response: Response):
+        if service := stored_workspace(ws):
+            frame = pd.DataFrame(
+                [
+                    {
+                        "id": item.item_id,
+                        "text": item.text,
+                        "amount": item.amount,
+                        "date": item.date.isoformat() if item.date else None,
+                        "merchant_key": merchant_key(item.text),
+                    }
+                    for item in body.items
+                ]
+            )
+            try:
+                result = service.route(ws, frame)
+            except ModuleNotFoundError as error:
+                if error.name != "backend.loop":
+                    raise
+                raise HTTPException(503, "Learning loop is not installed yet.") from error
+            except RuntimeError as error:
+                raise HTTPException(409, "Workspace has no trained model yet.") from error
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from error
+            response.headers["X-Secnd-Mode"] = "live"
+            return result
         return [decision(item) for item in body.items]
 
     @contract.get("/feed", response_model=Page[Decision], description=contract_note)
@@ -180,12 +227,35 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         item = decision(Item(item_id="fixture-queue-1", text="Example subscription"))
         return page([item], cursor, limit)
 
-    @contract.post("/answers", response_model=AnswerResult, description=contract_note)
+    @contract.post(
+        "/answers",
+        response_model=AnswerResult,
+        description="Persists idempotent answers for stored workspaces and queues retraining; "
+        "otherwise returns fixtures.",
+    )
     def answers(
         ws: WorkspaceId,
         body: Answer,
+        response: Response,
         idempotency_key: Annotated[str, Header(min_length=1, max_length=256)],
     ):
+        if service := stored_workspace(ws):
+            try:
+                previous = [
+                    d for d in service.store.predictions(ws) if d["item_id"] == body.item_id
+                ]
+                source = "spot_check" if previous and previous[-1]["spot_check"] else "answer"
+                result = service.answer(
+                    ws, body.item_id, body.label, idempotency_key, source=source
+                )
+            except store.IdempotencyConflict as error:
+                raise HTTPException(409, str(error)) from error
+            except KeyError as error:
+                raise HTTPException(404, "Item was not found in this workspace.") from error
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from error
+            response.headers["X-Secnd-Mode"] = "live"
+            return result
         return AnswerResult(
             item_id=body.item_id, coverage=0, model_version="fixture-v0", retrain="fixture"
         )

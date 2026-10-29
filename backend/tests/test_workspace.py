@@ -152,3 +152,48 @@ def test_one_class_answer_waits_for_second_class_without_losing_rows(service):
     service.drain()
     assert loop.learned == [("0", "a", "answer"), ("1", "b", "answer")]
     assert loop.trained == 1
+
+
+def test_http_predict_and_answer_use_persisted_workspace(service, tmp_path):
+    from fastapi.testclient import TestClient
+
+    from backend.api import create_app
+    from backend.config import Settings
+
+    settings = Settings(data_dir=tmp_path, frontend_dist=tmp_path / "none", _env_file=None)
+    api = "/api/v1/workspaces/a"
+    with TestClient(create_app(settings, workspace_service=service)) as client:
+        predicted = client.post(
+            api + "/predict", json={"items": [{"item_id": "routed", "text": "Rail"}]}
+        )
+        assert predicted.status_code == 200
+        assert predicted.headers["X-Secnd-Mode"] == "live"
+        assert len(service.store.predictions("a")) == 1
+        answer = {"item_id": "routed", "label": "b"}
+        headers = {"Idempotency-Key": "http-answer"}
+        first = client.post(api + "/answers", json=answer, headers=headers)
+        assert first.status_code == 200
+        assert first.headers["X-Secnd-Mode"] == "live"
+        assert first.json()["retrain"] == "queued"
+        service.drain()
+        assert client.post(api + "/answers", json=answer, headers=headers).json() == first.json()
+        assert len(service.store.labels("a")) == 3
+        conflict = client.post(api + "/answers", json={**answer, "label": "a"}, headers=headers)
+        assert conflict.status_code == 409
+        assert conflict.json()["code"] == "http_409"
+        assert (
+            client.post(
+                api + "/answers",
+                json={**answer, "item_id": "absent"},
+                headers={"Idempotency-Key": "other"},
+            ).status_code
+            == 404
+        )
+        assert (
+            client.post(
+                api + "/answers",
+                json={**answer, "label": "unknown"},
+                headers={"Idempotency-Key": "other"},
+            ).status_code
+            == 422
+        )

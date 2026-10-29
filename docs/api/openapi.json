@@ -1204,7 +1204,7 @@
     },
     "/api/v1/workspaces/{ws}/answers": {
       "post": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Persists idempotent answers for stored workspaces and queues retraining; otherwise returns fixtures.",
         "operationId": "answers_api_v1_workspaces__ws__answers_post",
         "parameters": [
           {
@@ -1259,6 +1259,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "413": {
             "content": {
@@ -1344,6 +1354,16 @@
             },
             "description": "Not Found"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -1427,6 +1447,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "413": {
             "content": {
@@ -1530,6 +1560,16 @@
             },
             "description": "Not Found"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -1619,6 +1659,16 @@
             },
             "description": "Not Found"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -1692,6 +1742,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "413": {
             "content": {
@@ -1859,6 +1919,16 @@
             },
             "description": "Not Found"
           },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
           "413": {
             "content": {
               "application/json": {
@@ -1898,7 +1968,7 @@
     },
     "/api/v1/workspaces/{ws}/predict": {
       "post": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Routes and logs decisions for stored workspaces; otherwise returns fixtures.",
         "operationId": "predict_api_v1_workspaces__ws__predict_post",
         "parameters": [
           {
@@ -1946,6 +2016,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "413": {
             "content": {
@@ -2048,6 +2128,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "413": {
             "content": {
