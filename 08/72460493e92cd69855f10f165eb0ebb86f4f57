@@ -1,0 +1,21 @@
+docs/results/s2/bakeoff-banking77.csv
+  s_99a14fdaab2d15::t_f15c75d256cbf5 1-253
+docs/results/s2/bakeoff-banking77.md
+  s_99a14fdaab2d15::t_ff0aaadb37126b 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0872460493e92cd69855f10f165eb0ebb86f4f57",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
