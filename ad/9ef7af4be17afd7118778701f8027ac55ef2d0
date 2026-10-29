@@ -1,0 +1,19 @@
+docs/results/s5/README.md
+  s_fdd70b19755bd7::t_1b724139ecb3ee 278-305
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ad9ef7af4be17afd7118778701f8027ac55ef2d0",
+  "prompts": {},
+  "sessions": {
+    "s_fdd70b19755bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
