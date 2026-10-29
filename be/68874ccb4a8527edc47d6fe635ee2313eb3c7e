@@ -1,0 +1,21 @@
+docs/results/s5/augmentation-banking77.json
+  s_1f3964e6251ccb::t_3f3404e1f44c22 2-4,9,11,13-14,22,28,46,52,58,64,70,76,91-92
+docs/results/s5/augmentation-mtop.json
+  s_1f3964e6251ccb::t_b0b3d5cd7dc3ad 2-4,9,11,13-14,34,40,46,52,91-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "be68874ccb4a8527edc47d6fe635ee2313eb3c7e",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
