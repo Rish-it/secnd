@@ -1,0 +1,25 @@
+backend/tests/test_encoders.py
+  s_f4216e91105995::t_3a836a66ff34f1 13-17,68-70,73
+  s_f4216e91105995::t_a86304fb32a296 1-12,18-67,71-72,74-81
+backend/encoders.py
+  s_f4216e91105995::t_3a836a66ff34f1 47-50
+  s_f4216e91105995::t_0d4c24a1516801 1-46,51-65
+backend/encoder-ren-1.0.0.json
+  s_f4216e91105995::t_8a8f1aea58f261 1-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0920b5c6b9d1e2cfe752efb5de68db53d9947660",
+  "prompts": {},
+  "sessions": {
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
