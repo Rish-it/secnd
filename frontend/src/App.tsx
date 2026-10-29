@@ -9,7 +9,6 @@ import Metrics from "./Metrics";
 type View = "Teach" | "Companion" | "Metrics";
 type Connection = "connecting" | "online" | "offline";
 
-
 const example = `description,amount,category
 Train to client meeting,28.50,Travel
 Monthly design software,24.00,Software
@@ -140,14 +139,21 @@ export default function App() {
 
   async function teach() {
     if (!sourceFile || !target) return;
-    setTraining(true); setError("");
+    setTraining(true);
+    setError("");
     try {
       const result = await api.teach(sourceFile, target);
       setTrained(result.data.card);
       setPreviewMode(result.fixture);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not teach this decision.");
-    } finally { setTraining(false); }
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not teach this decision.",
+      );
+    } finally {
+      setTraining(false);
+    }
   }
 
   function chooseFile(event: ChangeEvent<HTMLInputElement>) {
@@ -184,7 +190,9 @@ export default function App() {
               key={item}
               className={`nav-item ${view === item ? "active" : ""}`}
               aria-current={view === item ? "page" : undefined}
-              onClick={() => item === "Companion" ? setPanelOpen(true) : setView(item)}
+              onClick={() =>
+                item === "Companion" ? setPanelOpen(true) : setView(item)
+              }
             >
               <Icon kind={item} />
               <span>{item}</span>
@@ -282,7 +290,7 @@ export default function App() {
                   accept=".csv,text/csv"
                   aria-label="Upload labelled decisions CSV"
                   onChange={chooseFile}
-                  disabled={busy}
+                  disabled={busy || training}
                 />
                 <div className="upload-area">
                   <div className="upload-icon">
@@ -296,7 +304,7 @@ export default function App() {
                   <p>A description, an amount, and the category you picked.</p>
                   <button
                     className="primary-button"
-                    disabled={busy}
+                    disabled={busy || training}
                     onClick={() => inputRef.current?.click()}
                   >
                     {busy ? "Reading CSV…" : "Choose a CSV"}
@@ -307,7 +315,7 @@ export default function App() {
                 <div className="example-row">
                   <span>Just looking around?</span>
                   <button
-                    disabled={busy}
+                    disabled={busy || training}
                     onClick={() =>
                       void inspect(
                         new File([example], "example-decisions.csv", {
@@ -343,6 +351,7 @@ export default function App() {
                         The decision to learn
                         <select
                           value={target}
+                          disabled={training}
                           onChange={(event) => setTarget(event.target.value)}
                         >
                           {preview.columns.map((column) => (
@@ -390,22 +399,66 @@ export default function App() {
                       </table>
                     </div>
                     <div className="teach-actions">
-                      <p className="preview-note">Check the decision column, then teach Ren with these examples.</p>
-                      <button className="primary-button" disabled={training || !target} onClick={() => void teach()}>
-                        {training ? "Preparing your examples…" : "Teach this decision"}<Icon kind="arrow" />
+                      <p className="preview-note">
+                        Check the decision column, then teach Ren with these
+                        examples.
+                      </p>
+                      <button
+                        className="primary-button"
+                        disabled={training || !target}
+                        onClick={() => void teach()}
+                      >
+                        {training
+                          ? "Preparing your examples…"
+                          : "Teach this decision"}
+                        <Icon kind="arrow" />
                       </button>
                     </div>
-                    {trained && <section className="training-result" aria-live="polite">
-                      <p className="eyebrow">{previewMode ? "PREVIEW CHECKED" : "YOUR MODEL"}</p>
-                      <h3>{trained.coverage === 0 ? "Answers nothing yet." : `Ren can handle ${percent(trained.coverage)} on its own.`}</h3>
-                      <p>{previewMode ? "Your CSV and target column look ready. Training is not connected yet; these examples have not been saved." : trained.threshold == null ? "Keep teaching. There is not enough held-out evidence to certify automatic answers at 99% precision." : "Anything below the certified threshold comes back to you."}</p>
-                      <dl className="result-stats">
-                        <div><dt>Coverage</dt><dd>{percent(trained.coverage)}</dd></div>
-                        <div><dt>Accuracy</dt><dd>{percent(trained.accuracy)}</dd></div>
-                        <div><dt>Model</dt><dd>{previewMode ? "Not trained" : trained.model_version}</dd></div>
-                        <div><dt>Training time</dt><dd>{trained.retrain_ms == null ? "—" : `${trained.retrain_ms.toFixed(0)} ms`}</dd></div>
-                      </dl>
-                    </section>}
+                    {trained && (
+                      <section className="training-result" aria-live="polite">
+                        <p className="eyebrow">
+                          {previewMode ? "PREVIEW CHECKED" : "YOUR MODEL"}
+                        </p>
+                        <h3>
+                          {trained.coverage === 0
+                            ? "Answers nothing yet."
+                            : `Ren can handle ${percent(trained.coverage)} on its own.`}
+                        </h3>
+                        <p>
+                          {previewMode
+                            ? "Your CSV and target column look ready. Training is not connected yet; these examples have not been saved."
+                            : trained.threshold == null
+                              ? "Keep teaching. There is not enough held-out evidence to certify automatic answers at 99% precision."
+                              : "Anything below the certified threshold comes back to you."}
+                        </p>
+                        <dl className="result-stats">
+                          <div>
+                            <dt>Coverage</dt>
+                            <dd>{percent(trained.coverage)}</dd>
+                          </div>
+                          <div>
+                            <dt>Accuracy</dt>
+                            <dd>{percent(trained.accuracy)}</dd>
+                          </div>
+                          <div>
+                            <dt>Model</dt>
+                            <dd>
+                              {previewMode
+                                ? "Not trained"
+                                : trained.model_version}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Training time</dt>
+                            <dd>
+                              {trained.retrain_ms == null
+                                ? "—"
+                                : `${trained.retrain_ms.toFixed(0)} ms`}
+                            </dd>
+                          </div>
+                        </dl>
+                      </section>
+                    )}
                   </section>
                 )}
               </section>
@@ -495,7 +548,12 @@ export default function App() {
           </footer>
         </main>
       </div>
-      <Companion open={panelOpen} onOpen={() => setPanelOpen(true)} onClose={() => setPanelOpen(false)} onAnswer={() => setMetricsRefresh(value => value + 1)} />
+      <Companion
+        open={panelOpen}
+        onOpen={() => setPanelOpen(true)}
+        onClose={() => setPanelOpen(false)}
+        onAnswer={() => setMetricsRefresh((value) => value + 1)}
+      />
     </div>
   );
 }
