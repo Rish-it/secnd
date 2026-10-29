@@ -1044,3 +1044,29 @@ th {
     gap: 20px;
   }
 }
+
+.dataset-picker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.dataset-picker p { font-size: 12px; color: #68765d; }
+.dataset-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.dataset-buttons button {
+  padding: 9px 14px;
+  border: 1px solid #cbd4c3;
+  border-radius: 6px;
+  background: transparent;
+  color: #43583a;
+  cursor: pointer;
+}
+.dataset-buttons button[aria-pressed="true"] { background: #e3ebdc; border-color: #587c48; }
+.chart-table { overflow-x: auto; }
+.chart-table table { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 12px; }
+.chart-table th, .chart-table td { padding: 8px; text-align: left; border-bottom: 1px solid #e6e9df; }
+.evidence-card details { margin-top: 12px; font-size: 12px; }
+.evidence-card summary { cursor: pointer; color: #43583a; }
+.evidence-card figure { max-width: 720px; }

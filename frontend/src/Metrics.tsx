@@ -1,8 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, percent } from "./api";
-import type { Metrics as WorkspaceMetrics, ModelVersion } from "./api";
+import type { Dataset, Metrics as WorkspaceMetrics, ModelVersion } from "./api";
+
+import { ReliabilityChart, TradeoffChart } from "./EvidenceCharts";
+
+const measuredPercent = (value: number | null | undefined) =>
+  value == null ? "—" : `${(value * 100).toFixed(2)}%`;
 
 export default function Metrics({ refresh }: { refresh: number }) {
+  const [dataset, setDataset] = useState<Dataset>("mtop");
+  const requestId = useRef(0);
+  const [versionsError, setVersionsError] = useState("");
   const [metrics, setMetrics] = useState<WorkspaceMetrics | null>(null);
   const [versions, setVersions] = useState<ModelVersion[]>([]);
   const [fixture, setFixture] = useState(false);
@@ -11,20 +19,31 @@ export default function Metrics({ refresh }: { refresh: number }) {
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
+    const request = ++requestId.current;
     try {
-      const [result, models] = await Promise.all([api.metrics(), api.models()]);
+      const [result, models] = await Promise.all([
+        api.metrics(dataset),
+        api.models().catch(() => null),
+      ]);
+      if (request !== requestId.current) return;
       setMetrics(result.data);
-      setVersions(models.data.items);
-      setFixture(result.fixture || models.fixture);
+      setVersions(models?.data.items ?? []);
+      setVersionsError(
+        models
+          ? ""
+          : "Workspace versions are unavailable. Published evaluations are still shown.",
+      );
+      setFixture(result.fixture);
       setError("");
     } catch (cause) {
+      if (request !== requestId.current) return;
       setError(
         cause instanceof Error ? cause.message : "Could not load your metrics.",
       );
     } finally {
-      setLoading(false);
+      if (request === requestId.current) setLoading(false);
     }
-  }, []);
+  }, [dataset]);
   useEffect(() => {
     void load();
   }, [load, refresh]);
@@ -50,13 +69,14 @@ export default function Metrics({ refresh }: { refresh: number }) {
       setBusy(false);
     }
   }
-  if (loading && !metrics)
+  const selected = !metrics?.dataset || metrics.dataset === dataset;
+  if (loading && (!metrics || !selected))
     return (
       <p role="status" className="metrics-status">
         Gathering the evidence…
       </p>
     );
-  if (!metrics)
+  if (!metrics || !selected)
     return (
       <div className="empty-card" role="alert">
         <h2>Metrics are taking a moment.</h2>
@@ -74,6 +94,8 @@ export default function Metrics({ refresh }: { refresh: number }) {
     );
   const card = metrics.card;
   const history = metrics.history;
+  const curves = metrics.curves ?? { reliability: [], coverage_precision: [] };
+  const missedTarget = card.precision != null && card.precision < 0.99;
   const points = history
     .map(
       (row, index) =>
@@ -82,6 +104,33 @@ export default function Metrics({ refresh }: { refresh: number }) {
     .join(" ");
   return (
     <div className="metrics-workspace">
+      <section className="dataset-picker" aria-label="Evaluation dataset">
+        <div>
+          <p className="eyebrow">PUBLISHED EVALUATIONS</p>
+          <p>Fixed held-out test sets · 2,000 training labels · seed 0</p>
+        </div>
+        <div className="dataset-buttons">
+          {(["mtop", "banking77", "ipsa"] as const).map((name) => (
+            <button
+              key={name}
+              aria-pressed={dataset === name}
+              onClick={() => {
+                if (name === dataset) return;
+                setLoading(true);
+                setDataset(name);
+              }}
+            >
+              {name.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </section>
+      {metrics.dataset && (
+        <p className="evidence-note">
+          Recorded {metrics.dataset.toUpperCase()} evaluation. These numbers
+          describe a benchmark, not your uploaded workspace.
+        </p>
+      )}
       {fixture && (
         <p className="metrics-preview">
           Preview workspace · No trained model or measured workspace results
@@ -103,8 +152,8 @@ export default function Metrics({ refresh }: { refresh: number }) {
           <p className="eyebrow">REN / THE PRECISION GATE</p>
           <h2>
             {card.coverage === 0
-              ? "Answers nothing yet."
-              : `${percent(card.coverage)} handled on its own.`}
+              ? "Not certified yet. Answers nothing yet."
+              : `${measuredPercent(card.coverage)} answered automatically${missedTarget ? "; precision target missed" : ""}.`}
           </h2>
           <p>
             {card.threshold == null
@@ -118,16 +167,23 @@ export default function Metrics({ refresh }: { refresh: number }) {
           <small>A target requires evidence.</small>
         </div>
       </section>
+      {missedTarget && (
+        <p role="status" className="gate-warning">
+          The fixed test precision is {measuredPercent(card.precision)}, below
+          the 99% target. This result does not meet that target, even though the
+          re-split pass rate clears 95%.
+        </p>
+      )}
       <div className="metric-grid">
         {[
           {
             label: "Coverage",
-            value: percent(card.coverage),
+            value: measuredPercent(card.coverage),
             note: "Share answered automatically",
           },
           {
             label: "Automatic precision",
-            value: percent(card.precision),
+            value: measuredPercent(card.precision),
             note:
               card.precision == null
                 ? "No measured automatic traffic"
@@ -216,18 +272,14 @@ export default function Metrics({ refresh }: { refresh: number }) {
         <section className="evidence-card">
           <p className="eyebrow">CONFIDENCE THAT EARNS ITS KEEP</p>
           <h3>Reliability.</h3>
-          <div className="chart-empty">
-            <span className="reliability-empty" aria-hidden="true">
-              ↗
-            </span>
-            <p>No reliability bins measured yet.</p>
-            <small>
-              When confidence says 80%, roughly 80 in 100 should be right. The
-              diagram will compare this with held-out outcomes.
-            </small>
-          </div>
+          <ReliabilityChart bins={curves.reliability} />
         </section>
       </div>
+      <section className="evidence-card">
+        <p className="eyebrow">HOW MUCH CAN IT HANDLE?</p>
+        <h3>Coverage and precision.</h3>
+        <TradeoffChart points={curves.coverage_precision} />
+      </section>
       <section className="evidence-card handoff-card">
         <div className="section-heading">
           <div>
@@ -260,15 +312,15 @@ export default function Metrics({ refresh }: { refresh: number }) {
             </div>
             <div>
               <dt>Test precision</dt>
-              <dd>{percent(card.precision)}</dd>
+              <dd>{measuredPercent(card.precision)}</dd>
             </div>
             <div>
               <dt>Calibration lower bound</dt>
-              <dd>{percent(card.cp_lower_bound)}</dd>
+              <dd>{measuredPercent(card.cp_lower_bound)}</dd>
             </div>
             <div>
               <dt>Re-split pass rate</dt>
-              <dd>{percent(card.robustness_pass_rate)}</dd>
+              <dd>{measuredPercent(card.robustness_pass_rate)}</dd>
             </div>
           </dl>
           <p className="evidence-note">
@@ -285,7 +337,12 @@ export default function Metrics({ refresh }: { refresh: number }) {
         </section>
         <section className="evidence-card">
           <p className="eyebrow">A RECORD OF EVERY RELEASE</p>
-          <h3>Model versions.</h3>
+          <h3>Workspace model versions.</h3>
+          {versionsError && (
+            <p role="status" className="gate-warning">
+              {versionsError}
+            </p>
+          )}
           <ul className="model-versions">
             {versions.map((version) => (
               <li key={version.model_version}>

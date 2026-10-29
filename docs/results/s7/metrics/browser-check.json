@@ -1,0 +1,135 @@
+{
+  "runs": [
+    {
+      "datasets": {
+        "MTOP": {
+          "coverage": 0.3168,
+          "precision": 0.9962,
+          "threshold": 0.992915,
+          "pass_rate": 0.9905,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "BANKING77": {
+          "coverage": 0.369,
+          "precision": 0.9903,
+          "threshold": 0.986952,
+          "pass_rate": 0.9895,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "IPSA": {
+          "coverage": 0,
+          "precision": null,
+          "threshold": null,
+          "pass_rate": 0.984,
+          "reliability_bins": 10,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        }
+      },
+      "source_revision": "bae2b3f",
+      "api_revision": "d3deb29",
+      "timestamp": "2026-10-29T10:29:12.251Z",
+      "active_selection_refresh": true,
+      "data_table": true,
+      "retry_recovered": true,
+      "registry_failure_isolated": true,
+      "learning_and_handoff_empty": true,
+      "width": {
+        "document": 1200,
+        "viewport": 1200
+      }
+    },
+    {
+      "datasets": {
+        "MTOP": {
+          "coverage": 0.3168,
+          "precision": 0.9962,
+          "threshold": 0.992915,
+          "pass_rate": 0.9905,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "BANKING77": {
+          "coverage": 0.369,
+          "precision": 0.9903,
+          "threshold": 0.986952,
+          "pass_rate": 0.9895,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "IPSA": {
+          "coverage": 0,
+          "precision": null,
+          "threshold": null,
+          "pass_rate": 0.984,
+          "reliability_bins": 10,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        }
+      },
+      "source_revision": "bae2b3f",
+      "api_revision": "d3deb29",
+      "timestamp": "2026-10-29T10:29:12.843Z",
+      "active_selection_refresh": true,
+      "data_table": true,
+      "retry_recovered": true,
+      "registry_failure_isolated": true,
+      "learning_and_handoff_empty": true,
+      "width": {
+        "document": 1200,
+        "viewport": 1200
+      }
+    },
+    {
+      "datasets": {
+        "MTOP": {
+          "coverage": 0.3168,
+          "precision": 0.9962,
+          "threshold": 0.992915,
+          "pass_rate": 0.9905,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "BANKING77": {
+          "coverage": 0.369,
+          "precision": 0.9903,
+          "threshold": 0.986952,
+          "pass_rate": 0.9895,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "IPSA": {
+          "coverage": 0,
+          "precision": null,
+          "threshold": null,
+          "pass_rate": 0.984,
+          "reliability_bins": 10,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        }
+      },
+      "source_revision": "bae2b3f",
+      "api_revision": "d3deb29",
+      "timestamp": "2026-10-29T10:29:25.411Z",
+      "active_selection_refresh": true,
+      "data_table": true,
+      "retry_recovered": true,
+      "registry_failure_isolated": true,
+      "learning_and_handoff_empty": true,
+      "width": {
+        "document": 390,
+        "viewport": 390
+      }
+    }
+  ],
+  "console_errors": 0,
+  "console_warnings": 0
+}
