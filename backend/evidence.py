@@ -15,7 +15,8 @@ class Evidence:
         self._locks = {}
 
     def evaluation(self, dataset: str) -> tuple[EvalCard, EvalCurves]:
-        stem = f"{dataset}-minilm+lr-b2000.json"
+        encoder = "pt-minilm" if dataset == "mtop" else "minilm"
+        stem = f"{dataset}-{encoder}+lr-b2000.json"
         card = EvalCard.model_validate_json((self.evaluation_dir / f"card-{stem}").read_text())
         curves = EvalCurves.model_validate_json(
             (self.evaluation_dir / f"curves-{stem}").read_text()

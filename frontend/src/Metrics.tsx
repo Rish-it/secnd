@@ -133,6 +133,7 @@ export default function Metrics({ refresh }: { refresh: number }) {
         <p className="evidence-note">
           Recorded {metrics.dataset.toUpperCase()} evaluation. These numbers
           describe a benchmark, not your uploaded workspace.
+          {card.featurizer_id && ` Encoder/head: ${card.featurizer_id}.`}
         </p>
       )}
       {fixture && (

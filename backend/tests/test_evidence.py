@@ -16,6 +16,9 @@ def test_saved_cards_and_curves_validate_and_missing_files_fail(tmp_path):
         card, curves = evidence.evaluation(dataset)
         assert card.model_version.startswith(dataset)
         assert len(curves.reliability) and len(curves.coverage_precision)
+        if dataset == "mtop":
+            assert card.featurizer_id == "pt-minilm+lr"
+            assert card.coverage == 0.4242 and card.precision == 0.9993
     card, _ = evidence.evaluation("ipsa")
     assert card.coverage == 0 and card.threshold is None and card.precision is None
     with pytest.raises(FileNotFoundError):
@@ -54,8 +57,8 @@ def test_concurrent_pointer_changes_are_serialised(tmp_path):
 
 def test_invalid_curve_numbers_are_refused(tmp_path):
     card = {"model_version": "test", "coverage": 0}
-    (tmp_path / "card-mtop-minilm+lr-b2000.json").write_text(json.dumps(card))
-    (tmp_path / "curves-mtop-minilm+lr-b2000.json").write_text(
+    (tmp_path / "card-mtop-pt-minilm+lr-b2000.json").write_text(json.dumps(card))
+    (tmp_path / "curves-mtop-pt-minilm+lr-b2000.json").write_text(
         json.dumps({"reliability": [{"confidence": 1.2, "accuracy": 0.5, "count": 1}]})
     )
     with pytest.raises(ValidationError):

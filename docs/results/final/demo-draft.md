@@ -1,29 +1,24 @@
-# Three-minute demo draft
+# Three-minute demo script
 
-Rehearsal script, not a completed recording. Use a frozen release revision and
-real API responses. Cold start, learning, rollback and cost segments are pending
-live integration; do not simulate them or describe placeholders as measurements.
+The technical Docker walkthrough passed twice. Narration timing, video recording
+and submission remain separate human steps. Use actual responses and identify
+recorded experiments as offline results.
 
-| Time | Screen and action | Spoken line / evidence |
+| Time | Screen and action | Evidence |
 | --- | --- | --- |
-| 0:00–0:20 | Open the companion beside a recurring decision queue. | “Secnd learns a decision you repeat. It answers when the evidence supports 99% precision and asks you about the rest.” |
-| 0:20–0:45 | Create a fresh MTOP workspace; show zero human labels. Run the Muse cold start after it is connected. | “Muse Spark 1.3, through Meta's API, supplies the first labels. They count at weight 0.3; human answers count at 1. These requests are visible and budgeted.” |
-| 0:45–1:10 | Open the measured comparison and its dataset labels. | “On the same 500 IPSA test rows, Muse 1.3 scored 39.4%; the fallback scored 37.4%. This is a descriptive comparison. MTOP is a separate assistant-intent task.” |
-| 1:10–1:55 | Answer real queued MTOP questions. Show background retraining and the measured Muse → Ren → human handoff. | “Each answer trains the classifier head. Calibration stays held out. The gate can refuse a version, so an answer need not increase coverage.” Show actual counters, not a scripted increase. |
-| 1:55–2:20 | Open MTOP Metrics, then briefly BANKING77 and IPSA. | “The recorded MTOP run answers 31.68% automatically at 99.62% test precision. The claim holds in 99.05% of 2,000 re-splits. BANKING77 answers 36.9% automatically at 99.03% test precision, and its claim holds in 98.95% of re-splits. IPSA certifies nothing at this label budget.” Show the diagonal, 99% line and bound. |
-| 2:20–2:35 | Restore an earlier real model, then return to the chosen version. | Show the registry pointer and a subsequent decision carrying the restored version. Do not claim rollback works from a pointer change alone. |
-| 2:35–2:50 | Open the final measured cost table and its assumptions; one short explanation or chat if live. | “Muse helps teach and explain. Ren handles repeat decisions on CPU.” Give the verified per-1,000 costs; leave this numerical line unwritten until the CPU speed/cost report is merged. |
-| 2:50–3:00 | Show the release revision, model card and links. | “This demonstration covers the decision model, API and companion built for the hackathon. The source and reproducible evaluation are linked.” |
+| 0:00–0:20 | Introduce Ren as an independently released decision model built for Meta apps. | CPU serving; [released weights](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0), tag v1.0.0 and pinned manifest. |
+| 0:20–0:45 | Show the recorded teacher start and its graph. | 500 Meta teacher labels, weight 0.3, $1.28854950 total task spend. The curve starts with zero human labels; it is an offline simulation. |
+| 0:45–1:15 | Import the illustrative CSV, send a signed Meta fixture, open Companion. | The small workspace honestly certifies zero coverage. Text becomes a question; no real outbound message is sent. |
+| 1:15–1:45 | Answer the question, inspect history and model versions. | Answer persistence precedes background fitting. The gate can refuse a candidate. Show guarded when evidence triggers it; do not manufacture a precision claim. |
+| 1:45–2:10 | Return to the recorded MTOP handoff. | At 2,272 simulated human answers: 52.65% test coverage and 99.77% automatic precision. Show the 8,081 pending questions; the completed-decision shares exclude them. This is one seed. |
+| 2:10–2:30 | Open the published MTOP reference and its source files. | Separate experiment at 2,000 labels: 42.42% coverage, 99.93% test precision, 99.45% re-split pass rate. It is the project's group split, not an official-score comparison. |
+| 2:30–2:45 | Roll back, then predict again. | The next prediction carries the restored version. Head/calibration roll back; current workspace label memory remains. |
+| 2:45–3:00 | Close on the platform integration and reproducibility links. | WhatsApp/Messenger inbound text, HMAC verification, persistent message IDs, human corrections and CPU inference. WhatsApp real sends require token plus flag; Messenger outbound and chat stay previews. |
 
-The reference MTOP card is [here](../s3/card-mtop-minilm+lr-b2000.json),
-[BANKING77 here](../s3/card-banking77-minilm+lr-b2000.json) with its
-[2,000 re-splits](../s3/robustness-banking77-minilm+lr-b2000.json), and
-[IPSA here](../s3/card-ipsa-minilm+lr-b2000.json). The paired Muse run is
-[here](../s5/provider-comparison.json). These references are not a claim that a
-freshly trained demo workspace has the same metrics.
+Sources: [handoff protocol and graph](../s5/README.md#measured-cold-start-run),
+[tuned reference card](../s3/card-mtop-pt-minilm+lr-b2000.json),
+[re-splits](../s3/robustness-mtop-pt-minilm+lr-b2000.json), and
+[Docker rehearsal record](rehearsal.json).
 
-Before recording: complete live integration; regenerate final measured results
-from the release; run this exact sequence twice against the container; time it
-at or under 180 seconds. Verify zero-label state, answer persistence, version
-refusal, real rollback predictions and cost provenance. Record real failures
-honestly or choose a measured, repeatable demo run in advance.
+The illustrative CSV/webhook walkthrough and recorded MTOP experiments are
+separate. Do not describe the fixture workspace as having the benchmark's quality.
