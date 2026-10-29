@@ -1,0 +1,22 @@
+backend/augment.py
+  s_931864dc636ea3::t_b3c88c1c1f178d 1-251
+  s_931864dc636ea3::t_49718cbfbbbaf6 252-263
+backend/tests/test_augment.py
+  s_931864dc636ea3::t_6de5bab4397146 1-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c7cbea981593275a73f961ec867a4df1647989a2",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
