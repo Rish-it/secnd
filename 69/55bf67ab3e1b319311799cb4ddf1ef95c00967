@@ -1,0 +1,21 @@
+docs/results/s1/card-ipsa-random-b200.json
+  s_931864dc636ea3::t_2b7781b0af6f71 2-71,73-80,82-84,86-93,95-105,108-111,113-122
+docs/results/s1/card-ipsa-random-b5000.json
+  s_931864dc636ea3::t_d36bd7dff8ee6e 2-71,73-80,82-84,86-93,95-105,108-111,113-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6955bf67ab3e1b319311799cb4ddf1ef95c00967",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
