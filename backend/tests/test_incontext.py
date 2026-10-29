@@ -37,3 +37,16 @@ def test_capped_history_keeps_rows_and_vectors_aligned():
     small = ic.capped(task, 10)
     assert len(small.train) == len(small.train_vecs) == 10
     assert ic.capped(task, None) is task
+
+
+def test_score_chooses_nothing_from_test_labels():
+    rng = np.random.default_rng(0)
+    task = _task()
+    task.calib = [(f"c{i}", int(y)) for i, y in enumerate(rng.integers(3, size=1000))]
+    task.test = [(f"t{i}", int(y)) for i, y in enumerate(rng.integers(3, size=200))]
+    p = {part: rng.dirichlet(np.ones(3) * 0.2, len(getattr(task, part))) for part in ic.PARTS}
+    before = ic.score(task, p)
+    task.test = [(t, (y + 1) % 3) for t, y in task.test]
+    after = ic.score(task, p)
+    fixed = ("temperature", "cert_rows", "cert_accepted", "cert_cp_lower")
+    assert all(before[k] == after[k] for k in fixed)
