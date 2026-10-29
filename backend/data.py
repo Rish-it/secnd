@@ -5,6 +5,7 @@ import json
 import re
 import sys
 import urllib.request
+import zipfile
 from pathlib import Path
 
 import pandas as pd
@@ -113,6 +114,14 @@ DATASETS: dict[str, list[tuple[str, str, str]]] = {
             "d12d6e3bc4c3103966ae786dc435913c0c563dfa328f5a3646d0e62cfeeb474d",
         ),
     ],
+    # Meta's multilingual assistant intents (MTOP), CC BY-SA 4.0; only the English files are read.
+    "mtop": [
+        (
+            "mtop.zip",
+            "https://dl.fbaipublicfiles.com/mtop/mtop.zip",
+            "0c086500aed2ed48d3df383c91664b152e4a46e2adef6a635fa16d508ebaec0b",
+        ),
+    ],
 }
 
 
@@ -192,6 +201,21 @@ def load_dataset(name: str, data_dir: Path) -> pd.DataFrame:
     if name == "banking77":
         raw = pd.concat([pd.read_csv(folder / f, dtype=str) for f in ("train.csv", "test.csv")])
         return _frame(raw["text"], raw["category"])
+    if name == "mtop":
+        with zipfile.ZipFile(folder / "mtop.zip") as archive:
+            raw = pd.concat(
+                pd.read_csv(
+                    archive.open(f"mtop/en/{part}.txt"),
+                    sep="\t",
+                    header=None,
+                    usecols=[1, 3],
+                    names=["intent", "text"],
+                    dtype=str,
+                    quoting=csv.QUOTE_NONE,
+                )
+                for part in ("train", "eval", "test")
+            )
+        return _frame(raw["text"], raw["intent"])
     raise KeyError(name)
 
 
