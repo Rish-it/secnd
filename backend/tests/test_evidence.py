@@ -60,3 +60,21 @@ def test_invalid_curve_numbers_are_refused(tmp_path):
     )
     with pytest.raises(ValidationError):
         Evidence(tmp_path, tmp_path).evaluation("mtop")
+
+
+def test_pointer_changes_obey_an_injected_workspace_lock(tmp_path):
+    from concurrent.futures import TimeoutError
+    from threading import RLock
+
+    lock = RLock()
+    evidence = Evidence(tmp_path, tmp_path, workspace_lock=lambda workspace: lock)
+    registry = Registry(tmp_path, "default")
+    version = registry.save({}, {"coverage": 0})
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        with lock:
+            future = pool.submit(evidence.promote, "default", version)
+            with pytest.raises(TimeoutError):
+                future.result(timeout=0.05)
+            assert registry.current() is None
+        assert future.result(timeout=2).current
+    assert registry.current() == version
