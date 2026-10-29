@@ -1,0 +1,29 @@
+backend/tests/test_meta_webhook.py
+  s_f4216e91105995::t_dedbc3cfcdc258 30-35,42-48,57-61,87-91,115-128,139-141
+  s_f4216e91105995::t_a93dc444a42942 1-29,36-41,49-56,62-86,92-114,129-138,142-188
+  s_f4216e91105995::t_8549a7324ba419 189-191
+backend/meta_webhook.py
+  s_f4216e91105995::t_dedbc3cfcdc258 42-43,114-116,130-138,150-155,164-169
+  s_f4216e91105995::t_95935292f7ee0a 1-41,44-113,117-129,139-149,156-163,170-238
+backend/api.py
+  s_f4216e91105995::t_95935292f7ee0a 30
+  s_f4216e91105995::t_243fa7975d3ff9 31,72,79
+docs/api/openapi.json
+  s_f4216e91105995::t_031e27ebe70814 1622-1832
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4ed2585cc0718a1ff743055b8e6d0b4f7181bba4",
+  "prompts": {},
+  "sessions": {
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
