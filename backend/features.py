@@ -15,8 +15,15 @@ EMBEDDERS = {
         "sentence-transformers/all-MiniLM-L6-v2",
         "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
     ),
+    "mpnet": (
+        "sentence-transformers/all-mpnet-base-v2",
+        "e8c3b32edf5434bc2275fc9bab85f82640a19130",
+    ),
+    "bge": ("BAAI/bge-base-en-v1.5", "a5beb1e3e68b9ab74eb54cfd186867f64f240e1a"),
 }
 FEATURIZERS = ("char_tfidf", "potion", "minilm", "stack")
+# Bigger encoders and their fine-tuned versions (`ft-<encoder>`); the GPU grid runs these.
+GPU_FEATURIZERS = ("mpnet", "bge", "ft-minilm", "ft-mpnet", "ft-bge")
 
 _hashing = HashingVectorizer(
     analyzer="char_wb", ngram_range=(3, 5), n_features=2**18, alternate_sign=False
@@ -73,9 +80,15 @@ def numeric(frame: pd.DataFrame) -> np.ndarray:
     return np.column_stack([*columns, weekday]).astype(np.float32)
 
 
-def featurize(frame: pd.DataFrame, featurizer: str, cache_dir: Path | None = None):
-    """Rows of `frame` as a CSR matrix: the featurizer's text block, then the numeric block."""
-    if featurizer == "char_tfidf":
+def featurize(frame: pd.DataFrame, featurizer: str, cache_dir: Path | None = None, encoder=None):
+    """Rows of `frame` as a CSR matrix: the featurizer's text block, then the numeric block.
+
+    `encoder` is a model tuned for one training set; its vectors are never cached.
+    """
+    if encoder is not None:
+        texts = frame["text"].fillna("").tolist()
+        text = sparse.csr_matrix(encoder.encode(texts, batch_size=256, normalize_embeddings=True))
+    elif featurizer == "char_tfidf":
         text = char_tfidf(frame["text"])
     elif featurizer == "stack":
         text = sparse.hstack([char_tfidf(frame["text"]), embed("potion", frame["text"], cache_dir)])

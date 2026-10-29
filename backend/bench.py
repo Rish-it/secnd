@@ -3,6 +3,9 @@
 Every featurizer x classifier x label budget x seed is trained on `training_rows` and scored on
 the fixed test split. Writes docs/results/s2/bakeoff[-quick].csv and a mean +/- std table.
 
+GPU: `--gpu` runs the bigger and fine-tuned encoders (features.GPU_FEATURIZERS) with LR at
+budgets 100 and 500 and writes bakeoff-<dataset>-gpu.csv.
+
 Speed: `uv run python -m backend.bench --speed` measures each finalist in its own process and
 writes docs/results/s2/speed.csv.
 """
@@ -24,12 +27,13 @@ from backend import metrics
 from backend.config import Settings
 from backend.data import load_dataset, split_dataset
 from backend.eval import TAU, training_rows
-from backend.features import FEATURIZERS
+from backend.features import FEATURIZERS, GPU_FEATURIZERS
 from backend.model import CLASSIFIERS, Model
 
 BUDGETS = (50, 100, 200, 500, "all")
 SEEDS = range(5)
 QUICK = {"budgets": (100, 500), "seeds": range(2)}
+GPU = {"budgets": (100, 500), "seeds": SEEDS}
 METRICS = ["accuracy", "nll", "ece", "coverage"]
 OUT = Path("docs/results/s2")
 FINALISTS = ("char_tfidf+lr", "potion+lr", "stack+lr", "minilm+lr", "potion+knn")
@@ -37,7 +41,7 @@ FINALISTS = ("char_tfidf+lr", "potion+lr", "stack+lr", "minilm+lr", "potion+knn"
 WEIGHTS_BYTES = {"potion": 30_236_760, "minilm": 90_868_376}
 
 
-def run(dataset: str, budgets, seeds) -> pd.DataFrame:
+def run(dataset: str, budgets, seeds, featurizers=FEATURIZERS, classifiers=CLASSIFIERS):
     settings = Settings()
     frame = load_dataset(dataset, settings.data_dir)
     labels = sorted(frame["label"].unique())
@@ -51,8 +55,8 @@ def run(dataset: str, budgets, seeds) -> pd.DataFrame:
             if budget == "all" and seed != seeds[0]:
                 continue
             train = training_rows(frame, split, len(frame) if budget == "all" else budget, seed)
-            for featurizer in FEATURIZERS:
-                for classifier in CLASSIFIERS:
+            for featurizer in featurizers:
+                for classifier in classifiers:
                     started = time.perf_counter()
                     model = Model(labels, featurizer, classifier, seed, cache).fit(train)
                     fit = time.perf_counter() - started
@@ -153,6 +157,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", default="ipsa")
     parser.add_argument("--quick", action="store_true")
+    parser.add_argument("--gpu", action="store_true")
     parser.add_argument("--speed", action="store_true")
     parser.add_argument("--speed-one")
     args = parser.parse_args()
@@ -164,9 +169,14 @@ def main():
         OUT.mkdir(parents=True, exist_ok=True)
         speed().to_csv(OUT / "speed.csv", index=False)
         return
-    grid = QUICK if args.quick else {"budgets": BUDGETS, "seeds": SEEDS}
-    results = run(args.dataset, grid["budgets"], list(grid["seeds"]))
-    name = f"bakeoff-{args.dataset}" + ("-quick" if args.quick else "")
+    if args.gpu:
+        results = run(args.dataset, GPU["budgets"], list(GPU["seeds"]), GPU_FEATURIZERS, ("lr",))
+    else:
+        grid = QUICK if args.quick else {"budgets": BUDGETS, "seeds": SEEDS}
+        results = run(args.dataset, grid["budgets"], list(grid["seeds"]))
+    name = (
+        f"bakeoff-{args.dataset}" + ("-quick" if args.quick else "") + ("-gpu" if args.gpu else "")
+    )
     OUT.mkdir(parents=True, exist_ok=True)
     results.to_csv(OUT / f"{name}.csv", index=False)
     (OUT / f"{name}.md").write_text(table(results))

@@ -88,15 +88,22 @@ class Model(Baseline):
             c,
         )
         self.id = f"{featurizer}+{classifier}"
+        self.encoder = None
 
     def _x(self, frame, memory=None):
         block, memory = memory_block(frame, self.index, memory)
-        x = sparse.hstack([featurize(frame, self.featurizer, self.cache_dir), block], format="csr")
-        return x, memory
+        text = featurize(frame, self.featurizer, self.cache_dir, self.encoder)
+        return sparse.hstack([text, block], format="csr"), memory
 
     def fit(self, train):
-        x, self.memory = self._x(train)
         y = self.encode(train)
+        if self.featurizer.startswith("ft-"):
+            from backend.finetune import tune
+
+            self.encoder = tune(
+                self.featurizer[3:], train["text"].fillna("").tolist(), y, self.seed
+            )
+        x, self.memory = self._x(train)
         # Hashed columns no training row uses carry no weight; dropping them makes LR fast.
         self.columns = np.unique(x.indices)
         x = x[:, self.columns]
