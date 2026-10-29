@@ -1,0 +1,21 @@
+docs/results/s1/card-banking77-merchant_memory-b200.json
+  s_931864dc636ea3::t_dc4e4bde2ccbfb 2-86,88-95,97-99,101-120,123-126,128-137
+docs/results/s1/card-banking77-tfidf_lr-b200.json
+  s_931864dc636ea3::t_84d219ed04d111 2-86,88-95,97-99,101-120,123-126,128-137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "51aa6df2d2d5a318f93319697ca63d70e44f9d82",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
