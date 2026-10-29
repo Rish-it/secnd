@@ -3,8 +3,8 @@
   "model": "minilm+lr",
   "budget": 2000,
   "splits": 2000,
-  "pass_rate": 0.9795,
-  "mean_coverage": 0.007555922865013773,
-  "worst_1pct_precision": 0.9838459370341317,
+  "pass_rate": 0.9895,
+  "mean_coverage": 0.017531404958677683,
+  "worst_1pct_precision": 0.9862340464324784,
   "pool_rows": 3630
 }

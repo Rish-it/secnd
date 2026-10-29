@@ -9,7 +9,7 @@ from scipy.stats import beta
 TARGET = 0.99
 # The threshold is selected at a stricter bound than the 99% claim: a model just above 0.99 still
 # measures below it on many finite test sets. Chosen on MTOP (re-split pass 93.4% -> 99.0%),
-# then held unchanged on banking77 (98.0%) and ipsa (98.4%).
+# then held unchanged on banking77 (99.0%) and ipsa (98.4%).
 SELECT = 0.993
 ALPHA = 0.05
 LOG_T_BOUNDS = (np.log(0.05), np.log(20))
