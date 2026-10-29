@@ -154,3 +154,30 @@ counts against the experiment's $10 ceiling across restarts. Final inference
 costs use the compact protocol's ledger entries; total experiment spend also
 includes the exploratory calls. Cached input is charged at the full list
 price throughout, so these are conservative token costs rather than invoices.
+
+## Provider routing
+
+`backend.providers.MuseProviders` tries Meta Model API (`muse-spark-1.3`),
+Baseten (`meta-models/muse-spark-open-1026`), then Nebius Token Factory
+(`meta-models/muse-spark-open`). Only timeouts, HTTP 429 and HTTP 5xx allow
+failover after three bounded attempts. A valid answer, invalid model output,
+authentication error or exhausted budget never triggers another provider.
+Missing keys skip an unconfigured provider. These calls remain off the decision path.
+
+Prices checked **2026-10-29**: all three providers list $1.25 per million input,
+$0.15 per million cached input and $4.25 per million output tokens.
+Sources: [Meta pricing](https://dev.meta.ai/docs/pricing-rate-limits),
+[Baseten model page](https://www.baseten.co/library/muse-spark-open/),
+[Nebius catalog](https://tokenfactory.nebius.com/model-catalog.md).
+The guard conservatively charges cached input at the full input price; reasoning
+is included in output. Each provider has its own run budget and locked ledger:
+`spend-meta.csv` ($30 total), `spend.csv` (Baseten, $30 total), and
+`spend-nebius.csv` ($25 total). Keys stay in backend `.env` settings.
+
+For the fresh version comparison, run
+`uv run python -m backend.provider_comparison --provider meta` and the same
+command with `--provider baseten`. Each fixes the original 500 IPSA row IDs,
+input, split and classification prompt; paid predictions never fail over between
+models. Checkpoints and summaries are saved under `providers/<provider>/` and
+charged to that provider's shared ledger. Each experiment is capped at $4 across
+restarts, so the pair remains below $10. Invalid outputs count as incorrect.
