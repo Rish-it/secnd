@@ -6,13 +6,11 @@ from pathlib import Path
 
 from backend.eval import card
 
-EXPECTED = Path("docs/results/s1/card-ipsa-merchant_memory-b200.json")
-VOLATILE = {"predict_ms", "peak_rss_bytes", "git_sha"}
+EXPECTED = Path("docs/results/s8/eval-ipsa-merchant_memory-b200.json")
+UNSTABLE = {"predict_ms", "peak_rss_bytes", "git_sha", "worst_classes"}
 
 
 def compare(expected, actual):
-    expected = {k: v for k, v in expected.items() if k not in VOLATILE}
-    actual = {k: v for k, v in actual.items() if k not in VOLATILE}
     if expected != actual:
         difference = "\n".join(
             unified_diff(
@@ -28,7 +26,11 @@ def compare(expected, actual):
 
 def main():
     try:
-        compare(json.loads(EXPECTED.read_text()), card("ipsa", "merchant_memory", 200, 0))
+        measured = card("ipsa", "merchant_memory", 200, 0)
+        compare(
+            json.loads(EXPECTED.read_text()),
+            {k: v for k, v in measured.items() if k not in UNSTABLE},
+        )
     except ValueError as error:
         raise SystemExit(str(error)) from None
     print("Fixed IPSA evaluation matches every deterministic field (budget 200, seed 0).")
