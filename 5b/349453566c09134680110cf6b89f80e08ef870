@@ -1,0 +1,21 @@
+frontend/src/Companion.css
+  s_931864dc636ea3::t_e25b729b33f794 1-347
+frontend/src/Companion.tsx
+  s_931864dc636ea3::t_9d132a6d2fcecc 1-4,6-11,16-18,23-24,27,29-32,38-40,42-50,52-54,63-65,72-91,96-98,101-118,121-123,126-150,153-510
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5b349453566c09134680110cf6b89f80e08ef870",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
