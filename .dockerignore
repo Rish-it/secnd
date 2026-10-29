@@ -15,3 +15,9 @@
 **/.ruff_cache
 **/.env*
 frontend/src/assets/
+
+!docs/
+!docs/results/
+!docs/results/s3/
+!docs/results/s3/card-*.json
+!docs/results/s3/curves-*.json
