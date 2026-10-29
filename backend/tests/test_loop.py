@@ -87,6 +87,30 @@ def test_spot_checks_take_automatic_answers_to_a_person(fake):
     assert any(d["spot_check"] for d in decisions)
 
 
+def test_wrong_spot_checks_stop_automatic_answers_until_a_new_version(fake):
+    ren = _loop(spot_check_rate=1.0)
+    train = rows(600)
+    ren.learn(train, train["label"], "seed")
+    ren.retrain()
+    stream = rows(400, start=50_000)
+    ren.route(stream)
+    items = stream[stream["id"].astype(str).isin(ren.pending)].iloc[:105]
+    for item in items["id"].astype(str)[100:]:  # Ren predicted these wrong; the person corrects it
+        ren.pending[item] = next(x for x in ren.labels if x != ren.pending[item])
+    for item, label in zip(items["id"].astype(str)[:100], items["label"][:100], strict=True):
+        ren.pending[item] = label  # and these right
+    ren.learn(items.iloc[:101], items["label"][:101], "spot_check")  # 1 error in 101
+    assert not ren.guarded
+    ren.learn(items.iloc[101:], items["label"][101:], "spot_check")  # 5 errors in 105: below 99%
+    assert ren.guarded and ren.checks == [100, 105]
+    assert all(d["threshold"] is None and not d["auto"] for d in ren.route(stream))
+    more = rows(30, start=200_000)  # (fake rows saturate to one confidence past ~300 extra)
+    ren.learn(more, more["label"], "answer")
+    result = ren.retrain()
+    assert result["promoted"], result["reasons"]
+    assert not ren.guarded  # a new version starts clean
+
+
 def test_cold_start_labels_weigh_less_than_answers(fake):
     ren = _loop()
     first = rows(2)
