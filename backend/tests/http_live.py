@@ -25,6 +25,10 @@ with httpx.Client(timeout=120) as client:
     assert imported.status_code == 200, imported.text
     assert imported.headers["X-Secnd-Mode"] == "live", imported.text
     version = imported.json()["card"]["model_version"]
+    first_metrics = client.get(api + "/metrics")
+    assert first_metrics.headers["X-Secnd-Mode"] == "live"
+    assert len(first_metrics.json()["history"]) == 1
+    assert first_metrics.json()["guarded"] is False
     response = client.post(
         api + "/predict",
         json={"items": [{"item_id": "http-question", "text": "an unfamiliar everyday expense"}]},
@@ -49,6 +53,9 @@ with httpx.Client(timeout=120) as client:
             break
         assert time.monotonic() < deadline
         time.sleep(0.1)
+    metrics = client.get(api + "/metrics").json()
+    assert len(metrics["history"]) == len(versions.json()["items"])
+    assert metrics["labels"] == first_metrics.json()["labels"] + 1
     rollback = client.post(api + "/models/" + version + ":rollback")
     assert rollback.status_code == 200, rollback.text
     restored = client.post(
@@ -62,7 +69,9 @@ with httpx.Client(timeout=120) as client:
         "source_revision": subprocess.check_output(
             ["/usr/bin/git", "rev-parse", "HEAD"], text=True
         ).strip(),
-        "featurizer": "minilm",
+        "featurizer": imported.json()["card"]["featurizer_id"],
+        "history_versions": len(metrics["history"]),
+        "guarded": metrics["guarded"],
         "device": "cpu",
         "illustrative_rows": 200,
         "initial_mode": "fixture",
