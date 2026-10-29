@@ -1,0 +1,19 @@
+docs/results/s6/live-api.json
+  s_fdd70b19755bd7::t_73fb71f8f7d87f 2-3,7,25,60-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8dbd9e63c8a638b428f6de24c1b095faf68a927a",
+  "prompts": {},
+  "sessions": {
+    "s_fdd70b19755bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
