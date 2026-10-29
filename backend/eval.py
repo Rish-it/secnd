@@ -4,6 +4,7 @@ Leakage audit: `uv run python -m backend.eval --leakage [--dataset ipsa]`.
 """
 
 import argparse
+import hashlib
 import json
 import resource
 import subprocess
@@ -26,7 +27,7 @@ def _round(value: float) -> float | None:
     return None if np.isnan(value) else round(value, 4)
 
 
-QUALITY = ["accuracy", "macro_f1", "nll", "brier", "ece", "classwise_ece", "aurc"]
+QUALITY = ["accuracy", "macro_f1", "nll", "brier", "ece", "aurc"]
 
 
 def training_rows(frame: pd.DataFrame, split: pd.Series, budget: int, seed: int) -> pd.DataFrame:
@@ -41,8 +42,14 @@ def training_rows(frame: pd.DataFrame, split: pd.Series, budget: int, seed: int)
     )
 
 
-def quality(y, p) -> dict:
-    return {name: round(getattr(metrics, name)(y, p), 4) for name in QUALITY}
+def quality(y, p, labels: list[str]) -> dict:
+    return {
+        **{name: round(getattr(metrics, name)(y, p), 4) for name in QUALITY},
+        "classwise_ece": {
+            label: round(metrics._ece(p[:, index], y == index, bins=10), 4)
+            for index, label in enumerate(labels)
+        },
+    }
 
 
 def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
@@ -51,16 +58,14 @@ def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
     labels = sorted(frame["label"].unique())
     train = training_rows(frame, split, budget, seed)
 
-    started = time.perf_counter()
     model = BASELINES[model_name](labels).fit(train)
-    fit_seconds = time.perf_counter() - started
 
     results = {}
     for part in ("calib", "test"):
         rows = frame[split == part]
         results[part] = (rows, model.encode(rows), model.predict_proba(rows))
     test, y, p = results["test"]
-    calib, y_calib, p_calib = results["calib"]
+    _, y_calib, p_calib = results["calib"]
 
     kept = p_calib.max(axis=1) >= TAU
     correct = int((p_calib[kept].argmax(axis=1) == y_calib[kept]).sum())
@@ -77,41 +82,47 @@ def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
         timings.append(time.perf_counter() - started)
 
     sha = subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True)
+    manifest = split_manifest(dataset, frame, split)
+    slices = {
+        name: {
+            "count": int(mask.sum()),
+            "accuracy": round(metrics.accuracy(y[mask], p[mask]), 4) if mask.any() else None,
+        }
+        for name, mask in (("seen_merchant", seen), ("unseen_merchant", ~seen))
+    }
     return {
-        "provenance": {
-            "dataset": dataset,
-            "model": model_name,
-            "budget": budget,
-            "train_rows": len(train),
-            "seed": seed,
-            "split_hash": split_manifest(dataset, frame, split)["hash"],
-            "git_sha": sha.stdout.strip(),
+        "model_version": f"{dataset}-{model_name}-b{budget}-s{seed}",
+        **quality(y, p, labels),
+        "threshold": TAU,
+        "coverage": round(metrics.coverage_at(p, TAU), 4),
+        "precision": _round(metrics.precision_above(y, p, TAU)),
+        "cp_lower_bound": round(metrics.clopper_pearson_lower(correct, int(kept.sum())), 4)
+        if kept.any()
+        else None,
+        "robustness_pass_rate": None,
+        **slices,
+        "worst_classes": {
+            label: {"count": int(row["size"]), "accuracy": round(row["mean"], 4)}
+            for label, row in worst.iterrows()
         },
-        "quality": quality(y, p),
-        "claim": {
-            "tau": TAU,
-            "coverage": round(metrics.coverage_at(p, TAU), 4),
-            "precision_above": _round(metrics.precision_above(y, p, TAU)),
-            "calib_auto": {"n": int(kept.sum()), "correct": correct},
-            "calib_cp_lower": round(metrics.clopper_pearson_lower(correct, int(kept.sum())), 4),
+        "featurize_ms": None,
+        "predict_ms": {
+            "p50": round(float(np.percentile(timings, 50)) * 1000, 3),
+            "p99": round(float(np.percentile(timings, 99)) * 1000, 3),
         },
-        "slices": {
-            name: {
-                "rows": int(mask.sum()),
-                "accuracy": round(metrics.accuracy(y[mask], p[mask]), 4),
-            }
-            for name, mask in (("seen_merchant", seen), ("unseen_merchant", ~seen))
-            if mask.any()
-        },
-        "worst_classes": {label: round(row["mean"], 4) for label, row in worst.iterrows()},
-        "speed": {
-            "fit_seconds": round(fit_seconds, 3),
-            "predict_ms_p50": round(float(np.percentile(timings, 50)) * 1000, 3),
-            "predict_ms_p99": round(float(np.percentile(timings, 99)) * 1000, 3),
-            "peak_rss_mb": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2**20, 1)
-            if sys.platform == "darwin"
-            else round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2**10, 1),
-        },
+        "retrain_ms": None,
+        "peak_rss_bytes": int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+        * (1 if sys.platform == "darwin" else 1024),
+        "artifact_bytes": None,
+        "image_bytes": None,
+        "cost_per_1000_usd": None,
+        "data_hash": hashlib.sha256(
+            json.dumps(manifest["sources"], sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest(),
+        "split_hash": manifest["hash"],
+        "featurizer_id": None,
+        "seed": seed,
+        "git_sha": sha.stdout.strip(),
     }
 
 
@@ -196,7 +207,12 @@ def main() -> None:
     out = Path("docs/results/s1") / f"card-{args.dataset}-{args.model}-b{args.budget}.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(result, indent=2) + "\n")
-    print(json.dumps({k: result[k] for k in ("quality", "claim", "slices")}, indent=2))
+    print(
+        json.dumps(
+            {k: result[k] for k in ("accuracy", "ece", "coverage", "precision", "cp_lower_bound")},
+            indent=2,
+        )
+    )
     print(f"saved {out}")
 
 
