@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     muse_base_url: str = "https://inference.baseten.co/v1"
     muse_model: str = "meta-models/muse-spark-open-1026"
     muse_budget_usd: Decimal = Field(default=Decimal("10"), ge=0, le=100)
+    meta_api_key: SecretStr = SecretStr("")
+    meta_base_url: str = "https://api.meta.ai/v1"
+    meta_model: str = "muse-spark-1.3"
+    meta_budget_usd: Decimal = Field(default=Decimal("10"), ge=0, le=30)
+    nebius_api_key: SecretStr = Field(default=SecretStr(""), validation_alias="NEBIUS_API_KEY")
+    nebius_budget_usd: Decimal = Field(default=Decimal("10"), ge=0, le=25)
 
     @property
     def database_path(self) -> Path:
