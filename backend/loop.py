@@ -18,7 +18,7 @@ import pandas as pd
 from scipy import sparse
 from sklearn.linear_model import LogisticRegression
 
-from backend import calibrate, registry
+from backend import calibrate, metrics, registry
 from backend.features import featurize
 from backend.model import LR, memory_block, tune_c
 
@@ -119,9 +119,7 @@ class Loop:
             if promoted:
                 candidate = {"model": model, "temperature": temperature, "tau": tau, "lower": lower}
                 if self.models:
-                    version = self.models.save(
-                        candidate, {"threshold": tau, "cp_lower_bound": lower}
-                    )
+                    version = self.models.save(candidate, self._card(p, tau, lower, started))
                     self.models.promote(version)
                 else:
                     version = f"{registry.PREFIX}{self.versions}"
@@ -135,6 +133,22 @@ class Loop:
                 "labels": len(y),
                 "retrain_ms": round((time.perf_counter() - started) * 1000, 1),
             }
+
+    def _card(self, p, tau, lower, started) -> dict:
+        """EvalCard fields measured on the fixed calib set (a workspace has no test split)."""
+        y = self.calib_y
+        return {
+            "accuracy": metrics.accuracy(y, p),
+            "nll": metrics.nll(y, p),
+            "ece": metrics.ece(y, p),
+            "threshold": tau,
+            "coverage": 0.0 if tau is None else metrics.coverage_at(p, tau),
+            "precision": None if tau is None else metrics.precision_above(y, p, tau),
+            "cp_lower_bound": lower,
+            "retrain_ms": round((time.perf_counter() - started) * 1000, 1),
+            "featurizer_id": self.featurizer,
+            "seed": self.seed,
+        }
 
     def on_answer(self, item: pd.DataFrame, label: str, source: str = "answer") -> dict:
         self.learn(item, [label], source)

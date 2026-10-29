@@ -7,7 +7,7 @@ from scipy import sparse
 
 from backend import loop, registry
 from backend.data import _frame
-from backend.schemas import Decision
+from backend.schemas import Decision, EvalCard
 
 K, DIM = 6, 32
 CENTRES = np.random.default_rng(42).normal(0, 1, (K, DIM))
@@ -62,6 +62,8 @@ def test_a_bad_version_is_refused_and_rollback_restores_the_previous(fake, tmp_p
     good = rows(600)
     ren.learn(good, good["label"], "seed")
     assert ren.retrain()["model_version"] == "ren-1.0"
+    card = EvalCard.model_validate(models.card("ren-1.0"))  # the API serves this card
+    assert card.model_version == "ren-1.0" and card.coverage > 0 and card.precision >= 0.99
 
     bad = rows(6000, start=10_000, shuffle=True)  # swamps the good rows with shuffled labels
     ren.learn(bad, bad["label"], "answer")
