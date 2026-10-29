@@ -113,3 +113,24 @@ def test_quality_reports_each_class_ece():
         np.array([0, 1, 0, 1]), np.array([[0.9, 0.1]] * 4), ["Travel", "Software"]
     )
     assert result["classwise_ece"] == {"Travel": 0.4, "Software": 0.4}
+
+
+def test_curves_count_every_row_and_end_at_full_coverage():
+    rng = np.random.default_rng(0)
+    p = rng.dirichlet(np.ones(3), 500)
+    y = rng.integers(0, 3, 500)
+    result = eval.curves(y, p)
+    assert sum(b["count"] for b in result["reliability"]) == 500
+    last = result["coverage_precision"][-1]
+    assert last["coverage"] == 1
+    assert last["precision"] == round(float((p.argmax(axis=1) == y).mean()), 4)
+
+
+def test_calibrated_card_validates_and_abstains_without_enough_calib(local_dataset, tmp_path):
+    local_dataset()
+    curves_out = tmp_path / "curves.json"
+    result = eval.card("ipsa", "char_tfidf+lr", budget=200, curves_out=curves_out)
+    assert EvalCard.model_validate(result).model_dump(exclude_unset=True) == result
+    assert result["featurizer_id"] == "char_tfidf+lr"
+    assert (result["threshold"], result["coverage"], result["precision"]) == (None, 0.0, None)
+    assert set(json.loads(curves_out.read_text())) == {"reliability", "coverage_precision"}

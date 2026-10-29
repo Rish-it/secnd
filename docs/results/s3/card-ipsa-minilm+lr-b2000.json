@@ -1,0 +1,123 @@
+{
+  "model_version": "ipsa-minilm+lr-b2000-s0",
+  "accuracy": 0.4941,
+  "macro_f1": 0.23,
+  "nll": 4.7102,
+  "brier": 0.6569,
+  "ece": 0.1116,
+  "aurc": 0.234,
+  "classwise_ece": {
+    "Advertising and contact cards": 0.005,
+    "Air travel": 0.01,
+    "Approved costs outside the Scheme": 0.0001,
+    "Bought-in services": 0.084,
+    "Business rates": 0.0015,
+    "Cleaning services": 0.0042,
+    "Congestion charge & toll": 0.0072,
+    "Council tax": 0.0047,
+    "Equipment - hire": 0.0232,
+    "Equipment - purchase": 0.0443,
+    "Hospitality": 0.0029,
+    "Hotel - European": 0.0014,
+    "Hotel - London": 0.0049,
+    "Hotel - UK Not London": 0.0085,
+    "Hotel - late night": 0.0005,
+    "IPSA RICS Valuation": 0.0,
+    "Insurance - buildings": 0.0037,
+    "Insurance - contents": 0.0004,
+    "Landline phone & internet - installation & equipment purchase": 0.0118,
+    "Landline phone & internet - rental & usage": 0.022,
+    "Landline phone & internet - rental & usage MP Staff": 0.0,
+    "MP Budget Overspend": 0.0004,
+    "Maintenance, Redecorations & Repairs": 0.0029,
+    "Mileage - bicycle": 0.0003,
+    "Mileage - car": 0.0407,
+    "Mileage - motorcycle": 0.0002,
+    "Mobile telephone - contract & usage": 0.0129,
+    "Mobile telephone - equipment purchase": 0.0017,
+    "Moving Fees": 0.0013,
+    "Newspapers, journals, magazines": 0.0061,
+    "Other": 0.0009,
+    "Other public transport": 0.0147,
+    "Parking": 0.0211,
+    "Payroll": 0.0319,
+    "Pooled staffing services": 0.013,
+    "Postage & couriers": 0.0032,
+    "Rail": 0.0616,
+    "Rail Booking Fee": 0.0001,
+    "Railcard": 0.0027,
+    "Recruitment Services &Costs": 0.0004,
+    "Redundancy": 0.0084,
+    "Removals": 0.0014,
+    "Rent": 0.0269,
+    "Service charge & ground Rent": 0.0029,
+    "Software & applications": 0.0154,
+    "Stationery & printing": 0.0448,
+    "Subletting": 0.0015,
+    "Subsistence": 0.0104,
+    "TV licence": 0.0026,
+    "Taxi": 0.0,
+    "Training - MP": 0.001,
+    "Training - staff": 0.0036,
+    "Translation services (Welsh Language)": 0.0004,
+    "Translation services - other languages": 0.0001,
+    "Travel Associated Cost": 0.0002,
+    "Utilities": 0.0143,
+    "Vehicle hire cost": 0.0018,
+    "Venue hire, meetings & surgeries": 0.0168,
+    "Volunteer - agreed arrangement costs": 0.0304,
+    "Waste disposal, confidential waste & rubbish collection": 0.014,
+    "Website hosting and design": 0.0021,
+    "Working From Home Allowance": 0.0052
+  },
+  "threshold": null,
+  "coverage": 0.0,
+  "precision": null,
+  "cp_lower_bound": null,
+  "robustness_pass_rate": 0.984,
+  "seen_merchant": {
+    "count": 12127,
+    "accuracy": 0.87
+  },
+  "unseen_merchant": {
+    "count": 30425,
+    "accuracy": 0.3442
+  },
+  "worst_classes": {
+    "Other public transport": {
+      "count": 627,
+      "accuracy": 0.0
+    },
+    "Vehicle hire cost": {
+      "count": 78,
+      "accuracy": 0.0
+    },
+    "Translation services - other languages": {
+      "count": 21,
+      "accuracy": 0.0
+    },
+    "Training - MP": {
+      "count": 27,
+      "accuracy": 0.0
+    },
+    "Subsistence": {
+      "count": 441,
+      "accuracy": 0.0
+    }
+  },
+  "featurize_ms": null,
+  "predict_ms": {
+    "p50": 37.781,
+    "p99": 51.49
+  },
+  "retrain_ms": null,
+  "peak_rss_bytes": 2787606528,
+  "artifact_bytes": null,
+  "image_bytes": null,
+  "cost_per_1000_usd": null,
+  "data_hash": "c0f340b2d1c250c0469221605d38790abed2e3f9f7f8a4f5bb8215d7fbb373e6",
+  "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
+  "featurizer_id": "minilm+lr",
+  "seed": 0,
+  "git_sha": "8c64fb3"
+}
