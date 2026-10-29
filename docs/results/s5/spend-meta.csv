@@ -9,3 +9,5 @@ time,task,prompt_tokens,completion_tokens,reasoning_tokens,cached_tokens,cost_us
 2026-10-29T07:53:08.834709+00:00,training-paraphrases,39165,106978,67258,625,0.50361275,completed
 2026-10-29T07:56:30.200876+00:00,training-paraphrases,82607,153205,65200,3750,0.75438000,failed
 2026-10-29T08:03:36.844745+00:00,training-paraphrases,72003,73311,30362,0,0.40157550,completed
+2026-10-29T10:32:07.562908+00:00,training-paraphrases,66387,70443,27035,0,0.38236650,completed
+2026-10-29T10:32:45.910387+00:00,training-paraphrases,21577,22480,9468,0,0.12251125,completed
