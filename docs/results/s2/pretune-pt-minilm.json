@@ -1,0 +1,9 @@
+{
+  "encoder": "pt-minilm",
+  "base": "sentence-transformers/all-MiniLM-L6-v2",
+  "rows": 157405,
+  "dropped_mtop_overlap": 23137,
+  "intents": 69,
+  "steps": 3000,
+  "device": "cuda"
+}

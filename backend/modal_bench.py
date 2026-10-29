@@ -5,6 +5,7 @@ downloads are cached on a Modal volume, and the results CSV is copied back to do
 """
 
 import subprocess
+import sys
 from pathlib import Path
 
 import modal
@@ -40,33 +41,38 @@ def bench(dataset: str) -> str:
 
 
 @app.function(gpu="A10G", volumes={"/vol": volume}, timeout=2 * 3600)
-def pretune(encoder: str, budget: int = 2000) -> dict[str, str]:
-    """Tune `encoder` on TOPv2 (MTOP texts removed), then write MTOP's calibrated card with it."""
+def pretune(encoder: str) -> str:
+    """Tune `encoder` on TOPv2 (MTOP texts removed) and keep it on the volume."""
     import torch
 
     assert torch.cuda.is_available(), "no CUDA device: refusing to tune on CPU"
     run = Path("/vol/run")
     run.mkdir(parents=True, exist_ok=True)
-    model = f"pt-{encoder}+lr"
-    for args in (
-        ["backend.finetune", "--pretune", encoder],
-        ["backend.eval", "--dataset", "mtop", "--model", model, "--budget", str(budget)],
-    ):
-        subprocess.run(["python", "-m", *args], cwd=run, check=True)
+    subprocess.run(["python", "-m", "backend.finetune", "--pretune", encoder], cwd=run, check=True)
     volume.commit()
-    paths = [
-        f"docs/results/s2/pretune-pt-{encoder}.json",
-        f"docs/results/s3/card-mtop-{model}-b{budget}.json",
-        f"docs/results/s3/curves-mtop-{model}-b{budget}.json",
-    ]
-    return {path: (run / path).read_text() for path in paths}
+    return (run / f"docs/results/s2/pretune-pt-{encoder}.json").read_text()
 
 
 @app.local_entrypoint()
-def tuned(encoder: str = "bge"):
-    for path, text in pretune.remote(encoder).items():
-        (ROOT / path).write_text(text)
-        print(f"saved {path}")
+def tuned(encoder: str = "minilm"):
+    """Tune remotely, then fetch the encoder: score it locally with `backend.eval` (needs git)."""
+    (ROOT / f"docs/results/s2/pretune-pt-{encoder}.json").write_text(pretune.remote(encoder))
+    folder = ROOT / ".data/encoders"
+    folder.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "modal",
+            "volume",
+            "get",
+            "--force",
+            "secnd-bench",
+            f"/data/encoders/pt-{encoder}",
+            str(folder),
+        ],
+        check=True,
+    )
 
 
 @app.local_entrypoint()
