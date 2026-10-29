@@ -1,0 +1,23 @@
+backend/tests/test_handoff.py
+  s_f4216e91105995::t_07001ba255be5f 1-6,8-15,26-46,56-62,66-80,85-90,101-112
+  s_f4216e91105995::t_44b0371f64343a 7,16-25,47-55,63-65,81-84,91-100
+backend/handoff.py
+  s_f4216e91105995::t_07001ba255be5f 1-219
+  s_f4216e91105995::t_d04faa40c003ad 220-276
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "90ae22dca985a1ea8aee439c576de09a4d255d69",
+  "prompts": {},
+  "sessions": {
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
