@@ -181,3 +181,25 @@ input, split and classification prompt; paid predictions never fail over between
 models. Checkpoints and summaries are saved under `providers/<provider>/` and
 charged to that provider's shared ledger. Each experiment is capped at $4 across
 restarts, so the pair remains below $10. Invalid outputs count as incorrect.
+
+## Training-text augmentation
+
+`uv run python -m backend.augment --dataset banking77 --rows training`
+(and `mtop` or `ipsa`) selects only `training_rows` at budgets 100 and 500 for
+seeds 0–4. Each selection is checked against its own frozen split before texts
+are combined and deduplicated. Calibration and test rows are never selected.
+Only text and its SHA-256 key go to the provider; labels, amounts and dates do
+not. Blank descriptions are skipped.
+
+The cache contains two generated paraphrases per text in
+`<data_dir>/cache/paraphrase-<model>.parquet`, with the source text, model,
+provider and batch timing/cost. Batches are replaced atomically under a cache
+lock; reruns reuse saved texts without another paid call. Up to four batches
+are in flight, with new calls paced at one per second. Paid calls use the same
+independent provider guards and ledgers. A malformed batch stops the run and
+leaves completed batches intact. Generated paraphrases are training inputs;
+meaning preservation is requested but is not an independently measured guarantee.
+Per-dataset reports record selections, counts, successful-batch cost and p50
+batch latency. Successful-batch cost excludes failed/retried calls; the ledgers
+retain every paid attempt. Each consumer must join the cache to its own training
+rows, keeping the frozen calibration and test sets unchanged.
