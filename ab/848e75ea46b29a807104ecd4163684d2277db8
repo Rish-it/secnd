@@ -1,0 +1,24 @@
+backend/latency_reader.py
+  s_3e40618a94275e::t_f656727b98659f 1-168
+  s_3e40618a94275e::t_8c59bb325abaff 169-171
+backend/tests/test_latency_reader.py
+  s_3e40618a94275e::t_f656727b98659f 1-11
+backend/modal_latency_reader.py
+  s_3e40618a94275e::t_f656727b98659f 1-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ab848e75ea46b29a807104ecd4163684d2277db8",
+  "prompts": {},
+  "sessions": {
+    "s_3e40618a94275e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18916-7a5b-7ff2-bd5b-6019c2ec55ca",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
