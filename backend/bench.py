@@ -41,12 +41,14 @@ FINALISTS = ("char_tfidf+lr", "potion+lr", "stack+lr", "minilm+lr", "potion+knn"
 WEIGHTS_BYTES = {"potion": 30_236_760, "minilm": 90_868_376}
 
 
-def run(dataset: str, budgets, seeds, featurizers=FEATURIZERS, classifiers=CLASSIFIERS):
+def run(dataset, budgets, seeds, featurizers=FEATURIZERS, classifiers=CLASSIFIERS, out=None):
+    """Rows so far are rewritten to `out` after every fit; rows already in `out` are skipped."""
     settings = Settings()
     frame = load_dataset(dataset, settings.data_dir)
     labels = sorted(frame["label"].unique())
     cache = settings.data_dir / "cache"
-    rows = []
+    rows = pd.read_csv(out).to_dict("records") if out and out.exists() else []
+    done = {(r["model"], str(r["budget"]), r["seed"]) for r in rows}
     for seed in seeds:
         split = split_dataset(frame, seed)
         test = frame[split == "test"]
@@ -57,6 +59,8 @@ def run(dataset: str, budgets, seeds, featurizers=FEATURIZERS, classifiers=CLASS
             train = training_rows(frame, split, len(frame) if budget == "all" else budget, seed)
             for featurizer in featurizers:
                 for classifier in classifiers:
+                    if (f"{featurizer}+{classifier}", str(budget), seed) in done:
+                        continue
                     started = time.perf_counter()
                     model = Model(labels, featurizer, classifier, seed, cache).fit(train)
                     fit = time.perf_counter() - started
@@ -76,6 +80,8 @@ def run(dataset: str, budgets, seeds, featurizers=FEATURIZERS, classifiers=CLASS
                         }
                     )
                     print(rows[-1], flush=True)
+                    if out:
+                        pd.DataFrame(rows).to_csv(out, index=False)
     return pd.DataFrame(rows)
 
 
@@ -169,16 +175,18 @@ def main():
         OUT.mkdir(parents=True, exist_ok=True)
         speed().to_csv(OUT / "speed.csv", index=False)
         return
-    if args.gpu:
-        results = run(args.dataset, GPU["budgets"], list(GPU["seeds"]), GPU_FEATURIZERS, ("lr",))
-    else:
-        grid = QUICK if args.quick else {"budgets": BUDGETS, "seeds": SEEDS}
-        results = run(args.dataset, grid["budgets"], list(grid["seeds"]))
     name = (
         f"bakeoff-{args.dataset}" + ("-quick" if args.quick else "") + ("-gpu" if args.gpu else "")
     )
     OUT.mkdir(parents=True, exist_ok=True)
-    results.to_csv(OUT / f"{name}.csv", index=False)
+    out = OUT / f"{name}.csv"
+    if args.gpu:
+        results = run(
+            args.dataset, GPU["budgets"], list(GPU["seeds"]), GPU_FEATURIZERS, ("lr",), out
+        )
+    else:
+        grid = QUICK if args.quick else {"budgets": BUDGETS, "seeds": SEEDS}
+        results = run(args.dataset, grid["budgets"], list(grid["seeds"]), out=out)
     (OUT / f"{name}.md").write_text(table(results))
     print(table(results))
 

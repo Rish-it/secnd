@@ -9,6 +9,8 @@ import pandas as pd
 from scipy import sparse
 from sklearn.feature_extraction.text import HashingVectorizer
 
+from backend.config import Settings
+
 EMBEDDERS = {
     "potion": ("minishlab/potion-base-8M", "bf8b056651a2c21b8d2565580b8569da283cab23"),
     "minilm": (
@@ -41,7 +43,8 @@ def _encode(name: str, texts: list[str]) -> np.ndarray:
     if name not in _models:
         from sentence_transformers import SentenceTransformer
 
-        repo, revision = EMBEDDERS[name]
+        # `pt-<encoder>`: tuned once on public Meta data, saved under data_dir/encoders.
+        repo, revision = EMBEDDERS.get(name) or (str(Settings().data_dir / "encoders" / name), None)
         _models[name] = SentenceTransformer(repo, revision=revision, device="cpu")
     return _models[name].encode(texts, batch_size=256, normalize_embeddings=True)
 

@@ -5,7 +5,12 @@ label are pulled together, every other row in the batch is pushed away. The LR h
 unchanged, so only the encoder learns here and serving stays a CPU encode plus a linear layer.
 """
 
+import argparse
+import json
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import torch
 
 from backend.features import EMBEDDERS
@@ -34,7 +39,7 @@ def tune(name: str, texts: list[str], y: np.ndarray, seed: int = 0, steps: int =
     by_class = {c: np.flatnonzero(y == c) for c in np.unique(y)}
     anchors = [c for c, rows in by_class.items() if len(rows) >= 2]
     if not anchors:
-        return model.eval()
+        return release(model)
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     model.train()
     for _ in range(steps):
@@ -57,4 +62,66 @@ def tune(name: str, texts: list[str], y: np.ndarray, seed: int = 0, steps: int =
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    return model.eval()
+    del optimizer  # its moment buffers live on the GPU too
+    return release(model)
+
+
+def release(model):
+    """Serve the tuned encoder on CPU and hand its GPU memory back; a grid tunes dozens in a row."""
+    model = model.to("cpu").eval()
+    if torch.backends.mps.is_available():
+        torch.mps.empty_cache()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    return model
+
+
+PRETUNE_STEPS = 3000
+
+
+def _norm(texts: pd.Series) -> pd.Series:
+    return texts.fillna("").str.lower().str.replace(r"[^a-z0-9]+", " ", regex=True).str.strip()
+
+
+def pretune(name: str, steps: int = PRETUNE_STEPS) -> dict:
+    """Tune encoder `name` on Meta's TOPv2 and save it as `pt-<name>`.
+
+    Every TOPv2 request whose text also appears anywhere in MTOP is dropped first, so the encoder
+    has seen none of MTOP's rows: a workspace's MTOP labels still count only in its own budget.
+    """
+    from backend.config import Settings
+    from backend.data import load_dataset
+
+    data_dir = Settings().data_dir
+    top = load_dataset("topv2", data_dir)
+    seen = set(_norm(load_dataset("mtop", data_dir)["text"]))
+    keep = ~_norm(top["text"]).isin(seen)
+    top = top[keep]
+    y = pd.factorize(top["label"])[0]
+    model = tune(name, top["text"].fillna("").tolist(), y, seed=0, steps=steps)
+    model.save(str(data_dir / "encoders" / f"pt-{name}"))
+    return {
+        "encoder": f"pt-{name}",
+        "base": EMBEDDERS[name][0],
+        "rows": int(keep.sum()),
+        "dropped_mtop_overlap": int((~keep).sum()),
+        "intents": int(y.max() + 1),
+        "steps": steps,
+        "device": device(),
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pretune", required=True, help="encoder to tune on TOPv2, e.g. bge")
+    parser.add_argument("--steps", type=int, default=PRETUNE_STEPS)
+    args = parser.parse_args()
+    report = pretune(args.pretune, args.steps)
+    out = Path("docs/results/s2") / f"pretune-{report['encoder']}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps(report))
+
+
+if __name__ == "__main__":
+    main()

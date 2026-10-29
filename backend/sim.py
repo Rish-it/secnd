@@ -49,13 +49,16 @@ def score(ren: Loop, test: pd.DataFrame) -> dict:
     }
 
 
-def simulate(dataset: str, rounds=20, batch=100, seed=0, strategy="least", on_step=None):
+def simulate(
+    dataset: str, rounds=20, batch=100, seed=0, strategy="least", on_step=None, featurizer="minilm"
+):
     """One row per round; `on_step(event)` is called after every routed window and answer."""
     settings = Settings()
     frame = load_dataset(dataset, settings.data_dir)
     split = split_dataset(frame, seed)
     labels = sorted(frame["label"].unique())
-    ren = Loop(labels, frame[split == "calib"], seed=seed, cache_dir=settings.data_dir / "cache")
+    calib = frame[split == "calib"]
+    ren = Loop(labels, calib, featurizer, seed=seed, cache_dir=settings.data_dir / "cache")
     test = frame[split == "test"]
     seed_rows = frame[split == "seed"]
     ren.learn(seed_rows, seed_rows["label"], "seed")
@@ -96,11 +99,15 @@ def main():
     parser.add_argument("--batch", type=int, default=100)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--strategy", choices=STRATEGIES, default="random")
+    parser.add_argument("--featurizer", default="minilm", help="e.g. pt-minilm (TOPv2-tuned)")
     args = parser.parse_args()
     warnings.filterwarnings("ignore")
-    curve = simulate(args.dataset, args.rounds, args.batch, args.seed, args.strategy)
+    curve = simulate(
+        args.dataset, args.rounds, args.batch, args.seed, args.strategy, featurizer=args.featurizer
+    )
     OUT.mkdir(parents=True, exist_ok=True)
-    out = OUT / f"curve-{args.dataset}-{args.strategy}-s{args.seed}.csv"
+    encoder = "" if args.featurizer == "minilm" else f"-{args.featurizer}"
+    out = OUT / f"curve-{args.dataset}{encoder}-{args.strategy}-s{args.seed}.csv"
     curve.to_csv(out, index=False)
     print(curve.round(4).to_string(index=False))
     print(f"saved {out}")
