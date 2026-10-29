@@ -12,9 +12,11 @@ responses remain fixtures. A prepared workspace without a model has empty pages
 and returns 409 on predict. Imports and accepted answers can be durable before a
 model exists; the header describes model availability. Chat remains a fixture.
 
-**Metrics are published evaluations**, with `X-Secnd-Mode: evaluation`: real held-out
-cards and curves for MTOP (default), BANKING77 or IPSA, separate from workspace
-calibration. Model-version reads and pointer changes use the workspace registry.
+**Metrics default to the stored workspace:** the current calibration card, saved-version
+history, training-label count and live `guarded` flag. Explicit `dataset=mtop`,
+`banking77` or `ipsa` selects a published held-out test evaluation with
+`X-Secnd-Mode: evaluation`. Before import the default is the MTOP evaluation.
+Model-version reads and pointer changes use the workspace registry.
 
 ## Import and predict
 
@@ -47,7 +49,7 @@ curl --fail-with-body -sS "$API/queue"
 | `GET /feed` | Optional `cursor`, `limit` (1–100) | `Page<Decision>`, automatic items |
 | `GET /queue` | Optional `cursor`, `limit` (1–100) | `Page<Decision>`, uncertain items |
 | `POST /answers` | `{item_id, label}`, required `Idempotency-Key` header | `AnswerResult` |
-| `GET /metrics` | Optional `dataset=mtop\|banking77\|ipsa` | Published card and reliability/coverage–precision curves; empty learning history |
+| `GET /metrics` | Optional `dataset=mtop\|banking77\|ipsa` | Workspace calibration card, version history, label count and guard; dataset selects published test curves |
 | `GET /models` | None | `Page<ModelVersion>` |
 | `POST /models/{v}:promote` | None | Select an existing registry version atomically |
 | `POST /models/{v}:rollback` | None | `ModelVersion`; 404 for an unknown version |
@@ -94,7 +96,7 @@ Authentication belongs in a workspace router dependency.
 Postgres replaces the SQLite store behind the same storage calls.
 A worker queue replaces the per-workspace retraining dispatcher.
 SDKs can be generated from the committed OpenAPI schema.
-Chat and workspace learning-history handlers follow while preserving these types.
+Chat remains a fixture; the other workspace routes persist real data.
 
 ## Published metrics and versions
 
@@ -118,8 +120,13 @@ Published evaluations come from `docs/results/s3/card-*.json` and matching
 directory. `MetricsResult.dataset` identifies the benchmark and `curves` holds
 reliability bins (`confidence`, `accuracy`, `count`) and trade-off points
 (`threshold`, `coverage`, `precision`). A missing threshold on IPSA means no
-automatic answers are certified. An empty `history` means no workspace learning
-curve has been measured; the API does not substitute the trade-off curve.
+automatic answers are certified. Published evaluations have an empty `history`; workspace history contains one point
+per saved promoted model, with its original card-file timestamp and calibration
+coverage/precision. Refused candidates do not create a saved version or history
+point. The API never substitutes a benchmark trade-off curve for workspace history.
+The live `guarded` flag pauses automatic answers even if the saved card certified
+coverage. The browser polls for background updates. Spot-check state is held in
+memory and resets after a process restart.
 
 Registry cards must validate as `EvalCard`, including measured `coverage`.
 Cards written with only a threshold are unavailable until the training path
