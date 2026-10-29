@@ -43,7 +43,18 @@ export type ModelVersion = {
   current: boolean;
   card: EvalCard;
 };
+export type Dataset = "mtop" | "banking77" | "ipsa";
+export type EvalCurves = {
+  reliability: { confidence: number; accuracy: number; count: number }[];
+  coverage_precision: {
+    threshold: number;
+    coverage: number;
+    precision: number | null;
+  }[];
+};
 export type Metrics = {
+  dataset?: Dataset | null;
+  curves?: EvalCurves;
   card: EvalCard;
   history: {
     timestamp: string;
@@ -125,7 +136,8 @@ export const api = {
     request<Page<Decision>>(
       `${base}/queue${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
     ),
-  metrics: () => request<Metrics>(`${base}/metrics`),
+  metrics: (dataset: Dataset = "mtop") =>
+    request<Metrics>(`${base}/metrics?dataset=${dataset}`),
   models: () => request<Page<ModelVersion>>(`${base}/models`),
   answer(item_id: string, label: string, idempotencyKey: string) {
     return request<{
