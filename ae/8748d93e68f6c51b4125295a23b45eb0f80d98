@@ -1,0 +1,21 @@
+docs/results/s1/card-us_bank_v2-merchant_memory-b200.json
+  s_931864dc636ea3::t_679173368de1f2 2-26,28-35,37-39,41-60,63-66,68-77
+docs/results/s1/card-us_bank_v2-tfidf_lr-b200.json
+  s_931864dc636ea3::t_03d1d96369fffc 2-26,28-35,37-39,41-60,63-66,68-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ae8748d93e68f6c51b4125295a23b45eb0f80d98",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
