@@ -1,0 +1,33 @@
+backend/eval.py
+  s_99a14fdaab2d15::t_e5bd338b471ca8 3-5,21,62-91,97-105,114-124,150-152,156,177,245,260-265
+backend/tests/test_eval.py
+  s_99a14fdaab2d15::t_e1b711f8d68751 116-136
+docs/results/s3/card-banking77-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_fdde139820f777 1-138
+docs/results/s3/card-ipsa-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_e894b8889f61cf 1-123
+docs/results/s3/card-mtop-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_6ef2deb2fbfcb9 1-174
+docs/results/s3/curves-banking77-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_d32db004b56d9f 1-556
+docs/results/s3/curves-ipsa-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_fa4fca76ecb2e5 1-561
+docs/results/s3/curves-mtop-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_471ef9e35a4709 1-556
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ef928541ee2691f84d48d05e15433ea15b615a84",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
