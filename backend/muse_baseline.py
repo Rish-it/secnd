@@ -102,7 +102,20 @@ def predict(client, record, labels):
     )
 
 
-def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
+def collect(
+    settings,
+    plan,
+    test,
+    directory,
+    *,
+    limit,
+    git_sha,
+    transport=None,
+    ledger=None,
+    provider="baseten",
+    task=TASK,
+):
+    ledger = directory / SPEND_PATH.name if ledger is None else ledger
     directory.mkdir(parents=True, exist_ok=True)
     plan_path = directory / "muse-sample.json"
     if plan_path.exists() and json.loads(plan_path.read_text()) != plan:
@@ -128,9 +141,17 @@ def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
             }
         )
     else:
-        measured = Usage.model_validate(json.loads((directory / "smoke.json").read_text())["usage"])
+        smoke_path = directory / "smoke.json"
+        measured = (
+            Usage.model_validate(json.loads(smoke_path.read_text())["usage"])
+            if smoke_path.exists()
+            else Usage(prompt_tokens=1200, completion_tokens=1000)
+        )
     spent = sum(
-        (Decimal(row["cost_usd"]) for row in baseline_spend(directory / SPEND_PATH.name)),
+        (
+            Decimal(row["cost_usd"])
+            for row in baseline_spend(ledger, None if task == TASK else task)
+        ),
         Decimal(0),
     )
     settings = settings.model_copy(
@@ -139,10 +160,11 @@ def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
     with (
         BudgetRun(
             settings,
-            task=TASK,
+            task=task,
             rows=len(pending),
             measured_tokens=measured,
-            ledger_path=directory / SPEND_PATH.name,
+            ledger_path=ledger,
+            provider=provider,
         ) as run,
         MuseClient(settings, run=run, transport=transport) as client,
         predictions_path.open("a") as checkpoint,
@@ -196,9 +218,9 @@ def baseline_spend(ledger, task=None):
         ]
 
 
-def summarize(test, results, ledger):
+def summarize(test, results, ledger, task=TASK):
     ordered = [results[row_id] for row_id in test["id"]]
-    spend = baseline_spend(ledger, TASK)
+    spend = baseline_spend(ledger, task)
     cost = sum((Decimal(row["cost_usd"]) for row in spend), Decimal(0))
     return {
         "rows": len(ordered),
@@ -222,7 +244,13 @@ def summarize(test, results, ledger):
         "cost_usd": str(cost),
         "cost_per_1000_usd": str(cost * 1000 / len(ordered)),
         "experiment_spend_usd": str(
-            sum((Decimal(row["cost_usd"]) for row in baseline_spend(ledger)), Decimal(0))
+            sum(
+                (
+                    Decimal(row["cost_usd"])
+                    for row in baseline_spend(ledger, None if task == TASK else task)
+                ),
+                Decimal(0),
+            )
         ),
         "usage_includes_retry_estimates": any("estimated" in row["status"] for row in spend),
     }
