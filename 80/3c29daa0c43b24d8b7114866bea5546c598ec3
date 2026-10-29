@@ -1,0 +1,21 @@
+docs/results/s2/bakeoff-banking77-gpu.csv
+  s_1f3964e6251ccb::t_ab7c504bed6e43 1-51
+docs/results/s2/bakeoff-banking77-gpu.md
+  s_1f3964e6251ccb::t_26e6dc3d3ad497 1-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "803c29daa0c43b24d8b7114866bea5546c598ec3",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
