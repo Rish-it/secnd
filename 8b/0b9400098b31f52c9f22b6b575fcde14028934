@@ -1,0 +1,28 @@
+backend/incontext.py
+  s_99a14fdaab2d15::t_3bff5b5a6226c5 37-38,64-65,87,111,113-114,122-123,125-127,138-139,153,155-158,160-161,171
+  s_99a14fdaab2d15::t_84afa39b05e642 219,223
+  s_99a14fdaab2d15::t_eb46ddc6296a91 8-10,18,32-35,86,124
+  s_99a14fdaab2d15::t_a630dc9cc5915a 295-297,343-345,349-354,358,360,362,364,379,381-406,408-409,413-415,436-437,441,445-453,455-467,471,473-480,498-504,506-512,539
+backend/tests/test_incontext.py
+  s_99a14fdaab2d15::t_94f4c5cd009de3 40-52
+docs/results/s2/gate-study-plan.md
+  s_99a14fdaab2d15::t_3ebd5ec2b760b2 1-70
+backend/modal_bench.py
+  s_99a14fdaab2d15::t_cc0f15c7a0cea7 80,86-87,92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8b0b9400098b31f52c9f22b6b575fcde14028934",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
