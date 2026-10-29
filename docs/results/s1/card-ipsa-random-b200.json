@@ -1,53 +1,123 @@
 {
-  "provenance": {
-    "dataset": "ipsa",
-    "model": "random",
-    "budget": 200,
-    "train_rows": 200,
-    "seed": 0,
-    "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
-    "git_sha": "8d9e33b"
+  "model_version": "ipsa-random-b200-s0",
+  "accuracy": 0.0198,
+  "macro_f1": 0.0006,
+  "nll": 4.1271,
+  "brier": 0.9839,
+  "ece": 0.0037,
+  "aurc": 0.9793,
+  "classwise_ece": {
+    "Advertising and contact cards": 0.0037,
+    "Air travel": 0.0061,
+    "Approved costs outside the Scheme": 0.016,
+    "Bought-in services": 0.0029,
+    "Business rates": 0.0137,
+    "Cleaning services": 0.0042,
+    "Congestion charge & toll": 0.0089,
+    "Council tax": 0.0106,
+    "Equipment - hire": 0.0131,
+    "Equipment - purchase": 0.0691,
+    "Hospitality": 0.006,
+    "Hotel - European": 0.0147,
+    "Hotel - London": 0.0139,
+    "Hotel - UK Not London": 0.007,
+    "Hotel - late night": 0.0156,
+    "IPSA RICS Valuation": 0.0161,
+    "Insurance - buildings": 0.0142,
+    "Insurance - contents": 0.0138,
+    "Landline phone & internet - installation & equipment purchase": 0.0141,
+    "Landline phone & internet - rental & usage": 0.0264,
+    "Landline phone & internet - rental & usage MP Staff": 0.0161,
+    "MP Budget Overspend": 0.0157,
+    "Maintenance, Redecorations & Repairs": 0.0023,
+    "Mileage - bicycle": 0.0158,
+    "Mileage - car": 0.0259,
+    "Mileage - motorcycle": 0.0159,
+    "Mobile telephone - contract & usage": 0.0009,
+    "Mobile telephone - equipment purchase": 0.0115,
+    "Moving Fees": 0.0148,
+    "Newspapers, journals, magazines": 0.0041,
+    "Other": 0.0152,
+    "Other public transport": 0.0014,
+    "Parking": 0.0097,
+    "Payroll": 0.0158,
+    "Pooled staffing services": 0.0115,
+    "Postage & couriers": 0.008,
+    "Rail": 0.0466,
+    "Rail Booking Fee": 0.016,
+    "Railcard": 0.0134,
+    "Recruitment Services &Costs": 0.0145,
+    "Redundancy": 0.0078,
+    "Removals": 0.0153,
+    "Rent": 0.0608,
+    "Service charge & ground Rent": 0.0124,
+    "Software & applications": 0.0119,
+    "Stationery & printing": 0.2095,
+    "Subletting": 0.0146,
+    "Subsistence": 0.0058,
+    "TV licence": 0.0139,
+    "Taxi": 0.0161,
+    "Training - MP": 0.0155,
+    "Training - staff": 0.0033,
+    "Translation services (Welsh Language)": 0.0159,
+    "Translation services - other languages": 0.0156,
+    "Travel Associated Cost": 0.016,
+    "Utilities": 0.0338,
+    "Vehicle hire cost": 0.0143,
+    "Venue hire, meetings & surgeries": 0.02,
+    "Volunteer - agreed arrangement costs": 0.0049,
+    "Waste disposal, confidential waste & rubbish collection": 0.0087,
+    "Website hosting and design": 0.0118,
+    "Working From Home Allowance": 0.011
   },
-  "quality": {
-    "accuracy": 0.0198,
-    "macro_f1": 0.0006,
-    "nll": 4.1271,
-    "brier": 0.9839,
-    "ece": 0.0037,
-    "classwise_ece": 0.0178,
-    "aurc": 0.9793
+  "threshold": 0.99,
+  "coverage": 0.0,
+  "precision": null,
+  "cp_lower_bound": null,
+  "robustness_pass_rate": null,
+  "seen_merchant": {
+    "count": 10045,
+    "accuracy": 0.0008
   },
-  "claim": {
-    "tau": 0.99,
-    "coverage": 0.0,
-    "precision_above": null,
-    "calib_auto": {
-      "n": 0,
-      "correct": 0
-    },
-    "calib_cp_lower": 0.0
-  },
-  "slices": {
-    "seen_merchant": {
-      "rows": 10045,
-      "accuracy": 0.0008
-    },
-    "unseen_merchant": {
-      "rows": 32507,
-      "accuracy": 0.0257
-    }
+  "unseen_merchant": {
+    "count": 32507,
+    "accuracy": 0.0257
   },
   "worst_classes": {
-    "Other public transport": 0.0,
-    "Pooled staffing services": 0.0,
-    "Postage & couriers": 0.0,
-    "Rail": 0.0,
-    "Railcard": 0.0
+    "Other public transport": {
+      "count": 627,
+      "accuracy": 0.0
+    },
+    "Pooled staffing services": {
+      "count": 195,
+      "accuracy": 0.0
+    },
+    "Postage & couriers": {
+      "count": 347,
+      "accuracy": 0.0
+    },
+    "Rail": {
+      "count": 2669,
+      "accuracy": 0.0
+    },
+    "Railcard": {
+      "count": 114,
+      "accuracy": 0.0
+    }
   },
-  "speed": {
-    "fit_seconds": 0.0,
-    "predict_ms_p50": 0.027,
-    "predict_ms_p99": 0.045,
-    "peak_rss_mb": 539.7
-  }
+  "featurize_ms": null,
+  "predict_ms": {
+    "p50": 0.028,
+    "p99": 0.045
+  },
+  "retrain_ms": null,
+  "peak_rss_bytes": 560627712,
+  "artifact_bytes": null,
+  "image_bytes": null,
+  "cost_per_1000_usd": null,
+  "data_hash": "c0f340b2d1c250c0469221605d38790abed2e3f9f7f8a4f5bb8215d7fbb373e6",
+  "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
+  "featurizer_id": null,
+  "seed": 0,
+  "git_sha": "e2579c9"
 }
