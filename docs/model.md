@@ -53,7 +53,25 @@ Filled in as each part ships.
 
 ## Numbers
 
-Filled in as each part ships.
+On [500 fixed held-out IPSA claims](results/s5/comparison.json), zero-shot Muse
+Spark gets 37.0% right. The reference text classifier gets 36.2% with 200
+training labels and 45.2% with 5,000. These are the same test items; training
+uses only the fixed seed and stream partitions.
+
+| Model | Accuracy | ECE-10 | p50 latency | Cost per 1,000 |
+| --- | ---: | ---: | ---: | ---: |
+| Muse Spark, zero-shot | 37.0% | null | 1,577.04 ms | $2.3451 |
+| Text classifier, 200 labels | 36.2% | 0.1440 | 0.235 ms | unmeasured |
+| Text classifier, 5,000 labels | 45.2% | 0.2078 | 0.231 ms | unmeasured |
+
+Muse's confidence is self-reported; its NLL and ECE remain null. Its price
+includes retry estimates at the full input/output list rates, with no cached
+input discount. Remote HTTP latency and local CPU prediction latency are
+different operating conditions. The [protocol and raw results](results/s5/)
+record the sample, hashes, token usage and exploratory spend separately.
+
+These raw baselines do not establish 99% precision or automation coverage.
+Hosted CPU cost and the calibrated model comparison await their measured inputs.
 
 ## Limits
 
