@@ -62,3 +62,14 @@ was interrupted before any attack outcome was observed to enforce this match.
 No thresholds are adjusted to attack outcomes. The wrapper paraphrase is limited;
 a separately registered set of human-written test-message rewrites will supplement
 it. Max-length hits are reported as an upper bound on actual truncations.
+
+## Supplement: natural paraphrases (registered before their inference)
+
+Evaluate the first 50 primary source rows using the frozen rewrites in
+`paraphrases.json`, SHA-256 `acf30e35d78c2b742674f994ef6065cecdad539db39762403587005232d7424e`.
+They were written from the source texts without inspecting reader outcomes or
+gold intent labels. Preserve entities, requested actions and source ambiguity.
+No post-inference edits or exclusions. Report this small, author-written sample
+separately from the primary 500-row attack suite. Re-run paired original messages
+and re-encode changed messages for nearest-history retrieval. The same three
+full-history shot conditions and unchanged calibration rule apply.
