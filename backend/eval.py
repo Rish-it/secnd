@@ -1,5 +1,8 @@
 """Eval card: `uv run python -m backend.eval --model tfidf_lr --budget 200 [--dataset ipsa]`.
 
+A featurizer+classifier model (`--model minilm+lr`) gets the calibrated card: temperature and
+threshold fitted on calib, the claim measured on test, plus its curves in docs/results/s3/.
+
 Leakage audit: `uv run python -m backend.eval --leakage [--dataset ipsa]`.
 """
 
@@ -15,7 +18,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from backend import metrics
+from backend import calibrate, metrics
 from backend.baselines import BASELINES
 from backend.config import Settings
 from backend.data import DATASETS, download_dataset, load_dataset, split_dataset, split_manifest
@@ -56,13 +59,50 @@ def quality(y, p, labels: list[str]) -> dict:
     }
 
 
-def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
+def curves(y, p, bins: int = 10) -> dict:
+    """Reliability bins (top-label) and the coverage/precision trade-off as the threshold moves."""
+    confidence, hit = p.max(axis=1), p.argmax(axis=1) == y
+    edges = np.linspace(0, 1, bins + 1)
+    which = np.clip(np.digitize(confidence, edges[1:-1]), 0, bins - 1)
+    reliability = [
+        {
+            "confidence": round(float(confidence[which == b].mean()), 4),
+            "accuracy": round(float(hit[which == b].mean()), 4),
+            "count": int((which == b).sum()),
+        }
+        for b in range(bins)
+        if (which == b).any()
+    ]
+    order = np.argsort(-confidence, kind="stable")
+    precision = np.cumsum(hit[order]) / np.arange(1, len(y) + 1)
+    steps = np.unique(np.linspace(0, len(y) - 1, 101).astype(int))
+    trade_off = [
+        {
+            "threshold": round(float(confidence[order][i]), 4),
+            "coverage": round((i + 1) / len(y), 4),
+            "precision": round(float(precision[i]), 4),
+        }
+        for i in steps
+    ]
+    return {"reliability": reliability, "coverage_precision": trade_off}
+
+
+def card(dataset: str, model_name: str, budget: int, seed: int = 0, curves_out=None) -> dict:
+    """An EvalCard dict; with `curves_out`, the test-set curves are written there too."""
     frame = load_dataset(dataset, Settings().data_dir)
     split = split_dataset(frame, seed)
     labels = sorted(frame["label"].unique())
     train = training_rows(frame, split, budget, seed)
 
-    model = BASELINES[model_name](labels).fit(train)
+    calibrated = model_name not in BASELINES
+    if calibrated:
+        from backend.model import Model
+
+        featurizer, classifier = model_name.split("+")
+        cache = Settings().data_dir / "cache"
+        model = Model(labels, featurizer, classifier, seed, cache).fit(train)
+    else:
+        model = BASELINES[model_name](labels).fit(train)
 
     results = {}
     for part in ("calib", "test"):
@@ -71,7 +111,17 @@ def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
     test, y, p = results["test"]
     _, y_calib, p_calib = results["calib"]
 
-    kept = p_calib.max(axis=1) >= TAU
+    if calibrated:
+        temperature = calibrate.fit_temperature(y_calib, p_calib)
+        p, p_calib = calibrate.scale(p, temperature), calibrate.scale(p_calib, temperature)
+        tau, _, _, lower = calibrate.choose_threshold(y_calib, p_calib)
+        robustness = Path("docs/results/s3") / f"robustness-{dataset}-{model_name}-b{budget}.json"
+        pass_rate = json.loads(robustness.read_text())["pass_rate"] if robustness.exists() else None
+    else:
+        tau, pass_rate = TAU, None
+    kept = p_calib.max(axis=1) >= (tau if tau is not None else np.inf)
+    if curves_out:
+        curves_out.write_text(json.dumps(curves(y, p), indent=2) + "\n")
     correct = int((p_calib[kept].argmax(axis=1) == y_calib[kept]).sum())
     seen = test["merchant_key"].isin(set(train["merchant_key"]) - {""}).to_numpy()
     recall = (
@@ -97,13 +147,13 @@ def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
     return {
         "model_version": f"{dataset}-{model_name}-b{budget}-s{seed}",
         **quality(y, p, labels),
-        "threshold": TAU,
-        "coverage": round(metrics.coverage_at(p, TAU), 4),
-        "precision": _round(metrics.precision_above(y, p, TAU)),
+        "threshold": None if tau is None else round(tau, 6),
+        "coverage": 0.0 if tau is None else round(metrics.coverage_at(p, tau), 4),
+        "precision": None if tau is None else _round(metrics.precision_above(y, p, tau)),
         "cp_lower_bound": round(metrics.clopper_pearson_lower(correct, int(kept.sum())), 4)
         if kept.any()
         else None,
-        "robustness_pass_rate": None,
+        "robustness_pass_rate": pass_rate,
         **slices,
         "worst_classes": {
             label: {"count": int(row["size"]), "accuracy": round(row["mean"], 4)}
@@ -124,7 +174,7 @@ def card(dataset: str, model_name: str, budget: int, seed: int = 0) -> dict:
             json.dumps(manifest["sources"], sort_keys=True, separators=(",", ":")).encode()
         ).hexdigest(),
         "split_hash": manifest["hash"],
-        "featurizer_id": None,
+        "featurizer_id": model.id if calibrated else None,
         "seed": seed,
         "git_sha": sha.stdout.strip(),
     }
@@ -192,7 +242,7 @@ def leakage(dataset: str, seed: int = 0) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", choices=BASELINES)
+    parser.add_argument("--model", help=f"{', '.join(BASELINES)} or featurizer+classifier")
     parser.add_argument("--leakage", action="store_true")
     parser.add_argument("--budget", type=int, default=200)
     parser.add_argument("--dataset", default="ipsa")
@@ -207,9 +257,12 @@ def main() -> None:
         return
     if not args.model:
         parser.error("--model is required unless --leakage is given")
-    result = card(args.dataset, args.model, args.budget, args.seed)
-    out = Path("docs/results/s1") / f"card-{args.dataset}-{args.model}-b{args.budget}.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
+    folder = Path("docs/results") / ("s1" if args.model in BASELINES else "s3")
+    folder.mkdir(parents=True, exist_ok=True)
+    name = f"{args.dataset}-{args.model}-b{args.budget}"
+    extra = None if args.model in BASELINES else folder / f"curves-{name}.json"
+    result = card(args.dataset, args.model, args.budget, args.seed, extra)
+    out = folder / f"card-{name}.json"
     out.write_text(json.dumps(result, indent=2) + "\n")
     print(
         json.dumps(

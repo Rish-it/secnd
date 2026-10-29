@@ -76,22 +76,42 @@ from the calibration gate.
 Larger encoders and encoders fine-tuned on the training labels (on a GPU, contrastive loss) are
 being measured with the same grid and rule (`uv run python -m backend.bench --gpu`).
 
-**Calibration and the 99% gate.** One temperature is fitted on the calibration split by NLL. The
-automatic-answer threshold is the lowest confidence where the Clopper–Pearson 95% lower bound on
-precision is at least 99%; that needs at least 299 correct answers above it. If no threshold
-qualifies, nothing is answered automatically. A new model version is promoted only if that bound
-holds, its predictions have not collapsed to one class, and its accuracy on a fixed regression set
-drops by at most 1 point; any earlier version can be restored.
+**Calibration and the 99% gate.** One temperature is fitted on the calibration split by NLL.
+The automatic-answer threshold is found by walking down from the most confident answers and
+stopping at the first threshold whose Clopper–Pearson 95% lower bound on precision falls below
+99.3%. Stopping at the first failure keeps the 95% guarantee even though many thresholds are
+looked at. The threshold is selected at 99.3% while the claim stays at 99%, because a model just
+above 99% still measures below it on many finite test sets. If no threshold qualifies, nothing is
+answered automatically. A new model version is promoted only if the bound holds, its predictions
+have not collapsed to one class, and its accuracy on a fixed regression set drops by at most 1
+point; any earlier version can be restored.
 
-**Does the claim survive re-splitting?** ([run](results/s3/)) The held-out pool (calibration and
+**Does the claim survive re-splitting?** ([runs](results/s3/)) The held-out pool (calibration and
 test) is shuffled into two halves 2,000 times; temperature and threshold are refitted on one half
-and precision is measured on the other. On BANKING77 with 2,000 labels:
+and precision is measured on the other. A split passes if the answers it makes automatically are
+at least 99% correct, or if it makes none. With 2,000 training labels:
 
-| Splits | Pass rate | Splits that answer nothing | Coverage when answering (median) | Worst 1% precision |
-| ---: | ---: | ---: | ---: | ---: |
-| 2,000 | 91.4% | 60.4% | 45.0% | 98.4% |
+| Dataset | Held-out pool | Pass rate | Mean share answered automatically | Worst 1% precision |
+| --- | ---: | ---: | ---: | ---: |
+| MTOP | 6,184 | 99.1% | 27.4% | 99.0% |
+| BANKING77 | 3,630 | 98.0% | 0.8% | 98.4% |
+| IPSA | 78,722 | 98.4% | 0.0% | 98.2% |
 
-The target is a 95% pass rate, so the gate is not yet tight enough at this size.
+**On the fixed split** ([eval cards](results/s3/), 2,000 labels, MiniLM + logistic regression):
+
+| Dataset | Accuracy | ECE | Answered automatically | Precision of those answers | Calib lower bound |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| MTOP | 86.2% | 0.017 | 31.7% | 99.62% | 99.47% |
+| BANKING77 | 88.7% | 0.012 | 50.4% | 98.99% | 99.39% |
+| IPSA | 49.4% | 0.112 | 0.0% | – | – |
+
+BANKING77's fixed split is one of the rare splits where the claim narrowly fails: its calibration
+half certified a threshold that 98% of re-splits would not, and test precision lands 0.01 points
+below 99%. Each card has its reliability bins and coverage–precision curve next to it.
+
+The 99.3% selection level was chosen on MTOP (pass rate 93.4% at 99.0%) and then applied
+unchanged to BANKING77 and IPSA. With 2,000 labels the model is confident enough to answer a
+large share only on MTOP; on the other two it mostly abstains, which is the gate working.
 
 ## Numbers
 
@@ -125,5 +145,6 @@ Hosted CPU cost and the calibrated model comparison await their measured inputs.
 
 ## Limits
 
-- The 99% gate passes 91.4% of re-splits on BANKING77 at 2,000 labels, below its 95% target.
+- At 2,000 labels the gate answers almost nothing on IPSA, and on BANKING77 it certifies in only a
+  few re-splits; its fixed split misses 99% by 0.01 points.
 - English only.
