@@ -1,17 +1,17 @@
 {
-  "requested_unique_texts": 2300,
-  "cached_texts": 2300,
-  "paraphrases": 4600,
+  "requested_unique_texts": 2303,
+  "cached_texts": 2303,
+  "paraphrases": 4606,
   "complete": true,
   "cache_files": [
     "paraphrase-muse-spark-1.3.parquet"
   ],
-  "p50_batch_latency_ms": 4068.8257704969146,
+  "p50_batch_latency_ms": 4182.403708997299,
   "new_spend_usd": {
-    "meta": "1.34575750"
+    "meta": "0.38236650"
   },
-  "successful_batch_cost_usd": "1.39064075",
-  "input_text_hash": "609222321cc46b1753d480a55b18f71763c385994573b4a6781ec89d93208761",
+  "successful_batch_cost_usd": "1.75929325",
+  "input_text_hash": "b27f53f17daeb7895163e24ca61a103ea9bb1ecc004237065fa987922600f986",
   "labels_sent": false,
   "dataset": "banking77",
   "training_selections": [
@@ -19,13 +19,13 @@
       "seed": 0,
       "budget": 100,
       "rows": 100,
-      "row_ids_hash": "bcf8c3ef435c31250c01c598b0b6b4c6b0d336616d376687eeba89ade807ac0d"
+      "row_ids_hash": "84a58380b31abbab18045f128f0b03135ba737efa670b675c25793ce47660450"
     },
     {
       "seed": 0,
       "budget": 500,
       "rows": 500,
-      "row_ids_hash": "1e5a6f8dc3ce0daab814e153b103b685bf9d6fb7c04bec698d4e967b6c67cc10"
+      "row_ids_hash": "f6872abffeb9594e0ee1cfe2ce211bbf35a4d49a21491327ec6a5b4d80bd491e"
     },
     {
       "seed": 1,
@@ -43,37 +43,37 @@
       "seed": 2,
       "budget": 100,
       "rows": 100,
-      "row_ids_hash": "1104a11da6246246c6fba9b35944984f1008fd097310a9512e99f0a61f7895fe"
+      "row_ids_hash": "38f98ec42d6dcab4a969e4d9648a1ecdad8421a1d7deea64fca808876ae915d8"
     },
     {
       "seed": 2,
       "budget": 500,
       "rows": 500,
-      "row_ids_hash": "ee03c363e335880db795cb770c57697b6ca5a27ba9de122d8dd331cd8343d3c2"
+      "row_ids_hash": "1064f6193caf9405f3a95a3bb535d2c937950e00093f5e29096971cc8e534eb7"
     },
     {
       "seed": 3,
       "budget": 100,
       "rows": 100,
-      "row_ids_hash": "abd4888b4b4a3e9197b1f459d26809350ae86fa2cffe6fb08faa17a703e95186"
+      "row_ids_hash": "9b01d3ac1bcdc8e79240715e0c48d8afa4140e2dd44d4fe635f58842f600036b"
     },
     {
       "seed": 3,
       "budget": 500,
       "rows": 500,
-      "row_ids_hash": "e5a9f061726e61eae8e0a2d070b9ec7147b3c8929acef62a5474f806ddae162d"
+      "row_ids_hash": "889922945a1dbea6222dd8a687ae423a88ec74f5716e5a4026b5b6b5ab5d3250"
     },
     {
       "seed": 4,
       "budget": 100,
       "rows": 100,
-      "row_ids_hash": "4ab68d7fa769c89c46c5782b3298125261d5c9de04aabc8d76094d23195398ac"
+      "row_ids_hash": "2211037e88d04e91d44adfaf51740584905367121cf1b9da2ceb701a88ff5ec1"
     },
     {
       "seed": 4,
       "budget": 500,
       "rows": 500,
-      "row_ids_hash": "c2196301c1b13d95a93c39abd018253283f4ec03185ecae42cadf4b10d71b3fe"
+      "row_ids_hash": "76cfd6148052a1145ed365d6c14aa137558a7c119cc20d1c800c84985cd3172f"
     }
   ],
   "skipped_blank_selections": 0,
@@ -88,6 +88,6 @@
     3,
     4
   ],
-  "git_sha": "6f2d34fb7bc3326e018bd85f743aa81e59a8b804",
-  "measured_at": "2026-10-29T07:50:26.512743+00:00"
+  "git_sha": "d3deb2970a512b0cbe5127d7e314136b328a493e",
+  "measured_at": "2026-10-29T10:32:07.593401+00:00"
 }
