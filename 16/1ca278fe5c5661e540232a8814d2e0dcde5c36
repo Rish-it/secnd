@@ -1,0 +1,19 @@
+backend/tests/test_finetune.py
+  s_99a14fdaab2d15::t_d0f71b22bde66a 62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "161ca278fe5c5661e540232a8814d2e0dcde5c36",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
