@@ -1,0 +1,20 @@
+backend/incontext.py
+  s_99a14fdaab2d15::t_3bff5b5a6226c5 37-38
+  s_99a14fdaab2d15::t_609c65e4f04f23 39-40,140-141,155,157-159,161-166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4ad1e0a934f1a56eb941a25f70bfc788e53c733f",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
