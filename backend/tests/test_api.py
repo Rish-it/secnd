@@ -148,8 +148,8 @@ def test_contract_answers_metrics_rollback_and_chat(client: TestClient):
     )
     assert AnswerResult.model_validate(response.json()).retrain == "fixture"
     card = MetricsResult.model_validate(client.get(f"{API}/metrics").json()).card
-    assert card.coverage == 0.3168
-    assert card.precision == 0.9962
+    assert card.coverage == 0.4242
+    assert card.precision == 0.9993
     response = client.post(f"{API}/models/fixture-v0:rollback")
     assert response.status_code == 404
     response = client.post(f"{API}/chat", json={"question": "How many today?"})
