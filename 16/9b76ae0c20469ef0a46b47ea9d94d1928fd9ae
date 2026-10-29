@@ -1,0 +1,21 @@
+docs/results/s8/README.md
+  s_1f3964e6251ccb::t_cd94cb289759d0 8-16
+docs/results/s8/eval-ipsa-merchant_memory-b200.json
+  s_1f3964e6251ccb::t_38515b11bfa705 1-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "169b76ae0c20469ef0a46b47ea9d94d1928fd9ae",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
