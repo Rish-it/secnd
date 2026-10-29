@@ -73,6 +73,7 @@ def preview_csv(content: bytes, filename: str) -> CSVPreview:
 _DODATA = "https://huggingface.co/datasets/DoDataThings/us-bank-transaction-categories-v2/resolve/3e8d052cb7b362fb1a04b6064d2331982553ea56"
 _IPSA = "https://www.theipsa.org.uk/api/download?type=individualBusinessCosts&year="
 _BANKING77 = "https://raw.githubusercontent.com/PolyAI-LDN/task-specific-datasets/57ec275d8078af65b7731c2a98be812d844a6d6b/banking_data"
+_TOPV2 = "https://huggingface.co/datasets/WillHeld/top_v2/resolve/5e382a8497d4dd28842cc0bfa85387f965ac9d8d/data"
 
 # Public datasets pinned to a revision: name -> [(file name, URL, sha256)].
 DATASETS: dict[str, list[tuple[str, str, str]]] = {
@@ -113,6 +114,28 @@ DATASETS: dict[str, list[tuple[str, str, str]]] = {
             f"{_BANKING77}/test.csv",
             "d12d6e3bc4c3103966ae786dc435913c0c563dfa328f5a3646d0e62cfeeb474d",
         ),
+    ],
+    # Meta's TOPv2 assistant requests (8 domains), CC BY-SA 4.0. The original download is gone, so
+    # these are the release's three splits from a Hub mirror, pinned by revision and sha256.
+    "topv2": [
+        (f"{part}.parquet", f"{_TOPV2}/{part}-00000-of-00001-{suffix}.parquet", sha)
+        for part, suffix, sha in (
+            (
+                "train",
+                "4f5cf905029cbf9d",
+                "0a40d06e7ba33cba78cdf7c69022ebcf43639d7d33e6e34f1bb9614ad2e9cf68",
+            ),
+            (
+                "eval",
+                "3ffa52405fac46ab",
+                "f1a0976738a57aa0b4ee96378bdb43b4b2c365ebe82eda8faf12eb35812669be",
+            ),
+            (
+                "test",
+                "deac2888ce8ad39d",
+                "fd2437fc706f350d3e40404fa4422592ba27450dc819b955c159e7481c09140f",
+            ),
+        )
     ],
     # Meta's multilingual assistant intents (MTOP), CC BY-SA 4.0; only the English files are read.
     "mtop": [
@@ -216,6 +239,11 @@ def load_dataset(name: str, data_dir: Path) -> pd.DataFrame:
                 for part in ("train", "eval", "test")
             )
         return _frame(raw["text"], raw["intent"])
+    if name == "topv2":
+        raw = pd.concat(pd.read_parquet(folder / file) for file, _, _ in DATASETS[name])
+        intent = raw["semantic_parse"].str.extract(r"^\[(IN:[A-Z_]+)", expand=False)
+        keep = intent.notna()
+        return _frame(raw["utterance"][keep], intent[keep])
     raise KeyError(name)
 
 

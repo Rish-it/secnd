@@ -86,6 +86,26 @@ def test_load_dataset_reads_mtop_english_from_the_zip(tmp_path, monkeypatch):
     assert set(frame.label) == {"IN:GET_WEATHER"}
 
 
+def test_load_dataset_reads_topv2_top_intents(tmp_path, monkeypatch):
+    files = []
+    for part, parse in (
+        ("train", "[IN:CREATE_ALARM Set the alarm [SL:DATE_TIME for 6am ] ]"),
+        ("eval", "[IN:GET_WEATHER weather ]"),
+        ("test", "[SL:UNSUPPORTED not an intent ]"),
+    ):
+        path = tmp_path / f"{part}.parquet"
+        pd.DataFrame({"domain": ["x"], "utterance": [part], "semantic_parse": [parse]}).to_parquet(
+            path
+        )
+        files.append((path.name, path.as_uri(), hashlib.sha256(path.read_bytes()).hexdigest()))
+    monkeypatch.setitem(data.DATASETS, "topv2", files)
+
+    frame = data.load_dataset("topv2", tmp_path / "data")
+
+    assert list(frame.text) == ["train", "eval"]
+    assert list(frame.label) == ["IN:CREATE_ALARM", "IN:GET_WEATHER"]
+
+
 def _frame(n, dated):
     rng = np.random.default_rng(0)
     keys = rng.integers(0, 400, n)
