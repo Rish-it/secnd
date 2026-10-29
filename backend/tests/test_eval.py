@@ -23,6 +23,16 @@ def test_training_rows_take_seed_then_earliest_stream():
     assert rows["id"].tolist() == [2, 3, 1]
 
 
+def test_training_rows_below_the_seed_size_sample_the_seed_rows():
+    frame = data._frame(pd.Series([f"row {i}" for i in range(8)]), pd.Series(["a", "b"] * 4))
+    split = pd.Series(["seed"] * 6 + ["stream"] * 2, index=frame.index)
+
+    rows = eval.training_rows(frame, split, budget=4, seed=1)
+
+    assert len(rows) == 4 and set(split[rows.index]) == {"seed"}
+    assert rows.equals(eval.training_rows(frame, split, budget=4, seed=1))
+
+
 def test_lookup_accuracy_scores_a_label_revealing_column():
     column = pd.Series(["gas", "gas", "water", "gas", "water", ""])
     label = pd.Series(["utilities", "utilities", "utilities", "utilities", "rent", "rent"])

@@ -1,4 +1,5 @@
 import hashlib
+import zipfile
 
 import numpy as np
 import pandas as pd
@@ -62,6 +63,27 @@ def test_load_dataset_maps_ipsa_columns(tmp_path, monkeypatch):
     assert row.date == pd.Timestamp("2024-10-08")
     assert row.merchant_key == "office rent"
     assert set(frame.label) == {"Rent"}
+
+
+def test_load_dataset_reads_mtop_english_from_the_zip(tmp_path, monkeypatch):
+    source = tmp_path / "mtop.zip"
+    with zipfile.ZipFile(source, "w") as archive:
+        for part in ("train", "eval", "test"):
+            archive.writestr(
+                f"mtop/en/{part}.txt",
+                f"1\tIN:GET_WEATHER\t\tweather {part}?\tweather\ten_XX\t[]\t{{}}\n",
+            )
+        archive.writestr(
+            "mtop/de/train.txt", "2\tIN:GET_WEATHER\t\twetter?\tweather\tde_DE\t[]\t{}\n"
+        )
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    monkeypatch.setitem(data.DATASETS, "mtop", [("mtop.zip", source.as_uri(), digest)])
+
+    frame = data.load_dataset("mtop", tmp_path / "data")
+
+    assert list(frame.columns) == data.COLUMNS
+    assert list(frame.text) == ["weather train?", "weather eval?", "weather test?"]
+    assert set(frame.label) == {"IN:GET_WEATHER"}
 
 
 def _frame(n, dated):

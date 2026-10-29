@@ -15,12 +15,13 @@ free-text details and the MP office that filed it. Real decisions by a real orga
 [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/).
 Classes are imbalanced: the largest has 55,690 claims, the smallest a handful.
 
-**Two more sets** check that results are not specific to one source:
+**Three more sets** check that results are not specific to one source:
 
 - 68,000 synthetic US bank-statement descriptions in 17 spending categories (MIT).
 - BANKING77: 13,083 customer-support questions in 77 intents (CC-BY-4.0).
+- MTOP (English): 22,288 assistant requests in 113 intents, published by Meta (CC BY-SA 4.0).
 
-`uv run python -m backend.data` downloads all three, checks each file's SHA-256 and writes the split
+`uv run python -m backend.data` downloads them, checks each file's SHA-256 and writes the split
 manifests.
 
 **How the data is split** ([manifests](results/s1/)):
@@ -49,7 +50,31 @@ the pinned source-data hash and the split hash; unmeasured values stay null.
 
 ## How
 
-Filled in as each part ships.
+**The model** is a sentence encoder followed by one logistic-regression softmax over the
+organisation's own labels, so probabilities over every class sum to 1 and there is no limit on the
+number of labels. A payee's latest known label enters as an input the classifier learns to weigh,
+not as an override. Only the linear head retrains when a new label arrives; the encoder stays fixed
+between batch re-tunes.
+
+**How it was chosen** ([bake-off](results/s2/)): 4 text featurizers (hashed character n-grams,
+potion-base-8M static embeddings, all-MiniLM-L6-v2, and n-grams stacked with potion) times 3
+classifiers (logistic regression, linear SGD, k-nearest neighbours), at 50, 100, 200, 500 and all
+labels, 5 seeds each, scored on the fixed test split. The decision rule was written before the
+table was read: keep models within 1 accuracy point and 0.05 nats NLL of the best at 100 and 500
+labels, then take the lightest.
+
+| Labels | IPSA accuracy | BANKING77 accuracy |
+| --- | ---: | ---: |
+| 100 | 34.1% ± 2.8 | 43.3% ± 1.7 |
+| 500 | 44.6% ± 1.1 | 77.7% ± 1.3 |
+| all | 66.3% (1 seed) | 91.2% (1 seed) |
+
+MiniLM with logistic regression was the only model inside the rule at both budgets on IPSA and the
+best at every budget on BANKING77. These numbers are before calibration; the coverage claim comes
+from the calibration gate.
+
+Larger encoders and encoders fine-tuned on the training labels (on a GPU, contrastive loss) are
+being measured with the same grid and rule (`uv run python -m backend.bench --gpu`).
 
 ## Numbers
 
