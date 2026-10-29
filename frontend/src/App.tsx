@@ -4,6 +4,7 @@ import "./App.css";
 import { api, percent } from "./api";
 import type { EvalCard, Preview } from "./api";
 import Companion from "./Companion";
+import Metrics from "./Metrics";
 
 type View = "Teach" | "Companion" | "Metrics";
 type Connection = "connecting" | "online" | "offline";
@@ -65,7 +66,7 @@ function Icon({ kind }: { kind: View | "upload" | "arrow" }) {
 
 export default function App() {
   const [panelOpen, setPanelOpen] = useState(false);
-  const [, setMetricsRefresh] = useState(0);
+  const [metricsRefresh, setMetricsRefresh] = useState(0);
   const [view, setView] = useState<View>("Teach");
   const [connection, setConnection] = useState<Connection>("connecting");
   const [retry, setRetry] = useState(0);
@@ -485,44 +486,7 @@ export default function App() {
                   </p>
                 </div>
               </div>
-              <div className="metric-grid">
-                {[
-                  {
-                    label: "Coverage",
-                    note: "Decisions handled automatically",
-                  },
-                  { label: "Precision", note: "Correct automatic decisions" },
-                  {
-                    label: "Calibration error",
-                    note: "How well confidence matches outcomes",
-                  },
-                ].map((metric) => (
-                  <section className="metric-card" key={metric.label}>
-                    <h2>{metric.label}</h2>
-                    <div className="metric-value" aria-label="Not measured">
-                      —
-                    </div>
-                    <p>{metric.note}</p>
-                  </section>
-                ))}
-              </div>
-              <section className="empty-card">
-                <div className="empty-icon">
-                  <Icon kind="Metrics" />
-                </div>
-                <h2>Real progress starts with a first model.</h2>
-                <p>
-                  Training and evaluation will unlock your learning curve and
-                  the Muse Spark comparison. No measurements yet.
-                </p>
-                <button
-                  className="primary-button"
-                  onClick={() => setView("Teach")}
-                >
-                  Explore your examples
-                  <Icon kind="arrow" />
-                </button>
-              </section>
+              <Metrics refresh={metricsRefresh} />
             </>
           )}
           <footer className="page-footer">
