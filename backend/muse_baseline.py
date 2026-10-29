@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
+from threading import Lock
 
 import numpy as np
 import pandas as pd
@@ -147,9 +148,17 @@ def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
         predictions_path.open("a") as checkpoint,
         ThreadPoolExecutor(max_workers=8) as pool,
     ):
-        futures = [
-            pool.submit(predict, client, item(row), plan["labels"]) for _, row in pending.iterrows()
-        ]
+        pace_lock = Lock()
+        next_request = time.monotonic()
+
+        def paced_predict(record):
+            nonlocal next_request
+            with pace_lock:
+                time.sleep(max(0, next_request - time.monotonic()))
+                next_request = time.monotonic() + 1
+            return predict(client, record, plan["labels"])
+
+        futures = [pool.submit(paced_predict, item(row)) for _, row in pending.iterrows()]
         try:
             for future in as_completed(futures):
                 trial = future.result()

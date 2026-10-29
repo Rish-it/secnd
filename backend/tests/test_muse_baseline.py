@@ -1,4 +1,5 @@
 import json
+import time
 from decimal import Decimal
 
 import httpx
@@ -47,18 +48,20 @@ def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(
     tmp_path, invalid_id
 ):
     settings = Settings(muse_api_key="test-only-key", _env_file=None)
-    test = frame().iloc[[1, 3]].assign(id=["1", "3"])
+    test = frame().iloc[[1, 3, 5]].assign(id=["1", "3", "5"])
     plan = {"row_ids": test["id"].tolist(), "labels": ["Office", "Travel"]}
     (tmp_path / "smoke.json").write_text(
         json.dumps({"usage": {"prompt_tokens": 100, "completion_tokens": 50}})
     )
     requested = []
+    called_at = []
 
     def handler(request):
         data = json.loads(request.content)
         supplied = json.loads(data["messages"][1]["content"])
         assert set(supplied["item"]) == {"item_id", "text", "amount", "date"}
         requested.append(supplied["item"]["item_id"])
+        called_at.append(time.monotonic())
         content = json.dumps({"label": "Travel", "confidence": 0.9})
         if supplied["item"]["item_id"] == invalid_id:
             content = "invalid distribution"
@@ -93,14 +96,15 @@ def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(
                     transport=httpx.MockTransport(handler),
                 )
             assert requested == ["1"]
-    assert requested == ["1", "3"]
-    assert list(result) == ["1", "3"]
+    assert requested[0] == "1" and set(requested[1:]) == {"3", "5"}
+    assert called_at[-1] - called_at[-2] >= 0.9
+    assert set(result) == {"1", "3", "5"}
     measured = summarize(test, result, tmp_path / "spend.csv")
-    assert measured["rows"] == 2
-    assert measured["accuracy"] == (0.5 if invalid_id else 1)
+    assert measured["rows"] == 3
+    assert measured["accuracy"] == (2 / 3 if invalid_id else 1)
     assert measured["invalid_outputs"] == (1 if invalid_id else 0)
     assert measured["nll"] is measured["ece"] is None
-    assert measured["usage"]["prompt_tokens"] == 200
+    assert measured["usage"]["prompt_tokens"] == 300
     assert Decimal(measured["cost_per_1000_usd"]) == Decimal("0.3375")
     assert "test-only-key" not in (tmp_path / "muse-predictions.jsonl").read_text()
     changed = {**plan, "labels": ["Different"]}
