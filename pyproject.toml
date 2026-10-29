@@ -8,6 +8,7 @@ dependencies = [
     "httpx>=0.28,<1",
     "numpy>=2,<3",
     "pandas>=2.2,<4",
+    "pyarrow>=19,<25",
     "pydantic-settings>=2.7,<3",
     "python-multipart>=0.0.20,<1",
     "scikit-learn>=1.6,<2",

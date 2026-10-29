@@ -154,3 +154,94 @@ counts against the experiment's $10 ceiling across restarts. Final inference
 costs use the compact protocol's ledger entries; total experiment spend also
 includes the exploratory calls. Cached input is charged at the full list
 price throughout, so these are conservative token costs rather than invoices.
+
+## Provider routing
+
+`backend.providers.MuseProviders` tries Meta Model API (`muse-spark-1.3`),
+Baseten (`meta-models/muse-spark-open-1026`), then Nebius Token Factory
+(`meta-models/muse-spark-open`). Only timeouts, HTTP 429 and HTTP 5xx allow
+failover after three bounded attempts. A valid answer, invalid model output,
+authentication error or exhausted budget never triggers another provider.
+Missing keys skip an unconfigured provider. These calls remain off the decision path.
+
+Prices checked **2026-10-29**: all three providers list $1.25 per million input,
+$0.15 per million cached input and $4.25 per million output tokens.
+Sources: [Meta pricing](https://dev.meta.ai/docs/pricing-rate-limits),
+[Baseten model page](https://www.baseten.co/library/muse-spark-open/),
+[Nebius catalog](https://tokenfactory.nebius.com/model-catalog.md).
+The guard conservatively charges cached input at the full input price; reasoning
+is included in output. Each provider has its own run budget and locked ledger:
+`spend-meta.csv` ($30 total), `spend.csv` (Baseten, $30 total), and
+`spend-nebius.csv` ($25 total). Keys stay in backend `.env` settings.
+
+For the fresh version comparison, run
+`uv run python -m backend.provider_comparison --provider meta` and the same
+command with `--provider baseten`. Each fixes the original 500 IPSA row IDs,
+input, split and classification prompt; paid predictions never fail over between
+models. Checkpoints and summaries are saved under `providers/<provider>/` and
+charged to that provider's shared ledger. Each experiment is capped at $4 across
+restarts, so the pair remains below $10. Invalid outputs count as incorrect.
+
+## Training-text augmentation
+
+`uv run python -m backend.augment --dataset banking77 --rows training`
+(and `mtop` or `ipsa`) selects only `training_rows` at budgets 100 and 500 for
+seeds 0–4. Each selection is checked against its own frozen split before texts
+are combined and deduplicated. Calibration and test rows are never selected.
+Only text and its SHA-256 key go to the provider; labels, amounts and dates do
+not. Blank descriptions are skipped.
+
+The cache contains two generated paraphrases per text in
+`<data_dir>/cache/paraphrase-<model>.parquet`, with the source text, model,
+provider and batch timing/cost. Batches are replaced atomically under a cache
+lock; reruns reuse saved texts without another paid call. Up to four batches
+are in flight, with new calls paced at one per second. Paid calls use the same
+independent provider guards and ledgers. Paraphrases request a JSON schema; Meta constrains decoding to that schema.
+Malformed batches get at most three attempts on the same provider, all billed;
+continued failure stops the run and leaves completed batches intact. Generated paraphrases are training inputs;
+meaning preservation is requested but is not an independently measured guarantee.
+Per-dataset reports record selections, counts, successful-batch cost and p50
+batch latency. Successful-batch cost excludes failed/retried calls; the ledgers
+retain every paid attempt. Each consumer must join the cache to its own training
+rows, keeping the frozen calibration and test sets unchanged.
+
+## Fresh provider comparison
+
+On **2026-10-29**, the same 500 IPSA rows and classification prompt produced:
+
+| Provider / model | Accuracy | Invalid outputs | HTTP p50 | Conservative $ / 1,000 |
+| --- | ---: | ---: | ---: | ---: |
+| Meta / muse-spark-1.3 | 39.4% | 0 / 500 | 1,892 ms | $2.465243 |
+| Baseten / muse-spark-open-1026 | 37.4% | 0 / 500 | 1,610 ms | $2.0050175 |
+
+[Combined result](provider-comparison.json), [Meta trials](providers/meta/),
+[Baseten trials](providers/baseten/). Combined comparison spend: **$2.23513025**.
+Meta remains the default because its observed accuracy is higher; Baseten is
+cheaper and faster on this run. This two-point accuracy gap is descriptive,
+not a statistical significance claim. The operational default was selected
+using this test sample, so it is not an independent estimate of winner quality.
+NLL/ECE stay null because confidence is self-reported. No calibrated precision
+or automation coverage is claimed by these raw zero-shot results.
+
+Structured output: [Meta documentation](https://dev.meta.ai/docs/structured-output),
+checked 2026-10-29. The classification comparison keeps its original prompt and
+request shape; schema-constrained output applies only to paraphrases.
+
+## Completed paraphrase cache
+
+[Reports](augmentation.json), generated 2026-10-29 using Muse Spark 1.3:
+
+| Dataset | Unique training texts | Paraphrases | Successful-batch cost | p50 batch latency |
+| --- | ---: | ---: | ---: | ---: |
+| BANKING77 | 2,300 | 4,600 | $1.390641 | 4,069 ms |
+| MTOP | 2,393 | 4,786 | $1.370108 | 3,793 ms |
+| IPSA | 615 | 1,230 | $0.465591 | 6,028 ms |
+
+Total: **5,308 texts / 10,616 paraphrases**. Full augmentation spend was
+**$3.59346625**, including malformed batches, bounded repairs and paid in-flight
+responses that did not become cache entries after a failure. The successful-batch
+figures in the table omit those attempts; the ledger retains them. Blank IPSA
+texts were skipped (164 selections across the ten training subsets). The cache
+is local data and is excluded from version control; rerun the documented CLI to
+recreate it with your own provider budget. No held-out labels or training labels
+were sent. Paraphrase quality has not been separately scored.

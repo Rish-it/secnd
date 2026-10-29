@@ -1,0 +1,46 @@
+{
+  "datasets": [
+    {
+      "dataset": "banking77",
+      "cached_texts": 2300,
+      "paraphrases": 4600,
+      "successful_batch_cost_usd": "1.39064075",
+      "p50_batch_latency_ms": 4068.8257704969146,
+      "input_text_hash": "609222321cc46b1753d480a55b18f71763c385994573b4a6781ec89d93208761"
+    },
+    {
+      "dataset": "mtop",
+      "cached_texts": 2393,
+      "paraphrases": 4786,
+      "successful_batch_cost_usd": "1.37010825",
+      "p50_batch_latency_ms": 3792.528708494501,
+      "input_text_hash": "58b95791facb34aee952a9990c9b6367829811d808015e601a6b285c40b6ab15"
+    },
+    {
+      "dataset": "ipsa",
+      "cached_texts": 615,
+      "paraphrases": 1230,
+      "successful_batch_cost_usd": "0.46559050",
+      "p50_batch_latency_ms": 6027.973104006378,
+      "input_text_hash": "9b408bdaacab84e3410b481701f54bfde5cf04b1e382398c1165a372e20c959e"
+    }
+  ],
+  "total_unique_texts": 5308,
+  "total_paraphrases": 10616,
+  "augmentation_spend_usd": "3.59346625",
+  "provider": "meta",
+  "model": "muse-spark-1.3",
+  "budgets": [
+    100,
+    500
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "labels_sent": false,
+  "note": "Ledger spend includes failed batches, same-provider repairs and paid in-flight responses not saved after a batch failure. Per-dataset successful-batch costs omit these attempts."
+}
