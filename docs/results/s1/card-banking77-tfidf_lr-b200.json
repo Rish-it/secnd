@@ -1,17 +1,17 @@
 {
   "model_version": "banking77-tfidf_lr-b200-s0",
-  "accuracy": 0.3272,
-  "macro_f1": 0.284,
-  "nll": 3.9102,
-  "brier": 0.9697,
-  "ece": 0.2986,
-  "aurc": 0.4796,
+  "accuracy": 0.3354,
+  "macro_f1": 0.2868,
+  "nll": 3.9135,
+  "brier": 0.9698,
+  "ece": 0.3067,
+  "aurc": 0.4738,
   "classwise_ece": {
     "Refund_not_showing_up": 0.0003,
     "activate_my_card": 0.0021,
-    "age_limit": 0.0057,
+    "age_limit": 0.0056,
     "apple_pay_or_google_pay": 0.0032,
-    "atm_support": 0.0017,
+    "atm_support": 0.0018,
     "automatic_top_up": 0.0041,
     "balance_not_updated_after_bank_transfer": 0.0019,
     "balance_not_updated_after_cheque_or_cash_deposit": 0.0035,
@@ -27,29 +27,29 @@
     "card_payment_not_recognised": 0.0056,
     "card_payment_wrong_exchange_rate": 0.0044,
     "card_swallowed": 0.0016,
-    "cash_withdrawal_charge": 0.0074,
-    "cash_withdrawal_not_recognised": 0.0081,
+    "cash_withdrawal_charge": 0.0073,
+    "cash_withdrawal_not_recognised": 0.0031,
     "change_pin": 0.0026,
-    "compromised_card": 0.0024,
+    "compromised_card": 0.0023,
     "contactless_not_working": 0.0001,
     "country_support": 0.0032,
     "declined_card_payment": 0.0003,
     "declined_cash_withdrawal": 0.0007,
     "declined_transfer": 0.0015,
     "direct_debit_payment_not_recognised": 0.0018,
-    "disposable_card_limits": 0.0021,
-    "edit_personal_details": 0.0005,
+    "disposable_card_limits": 0.0028,
+    "edit_personal_details": 0.0043,
     "exchange_charge": 0.0027,
     "exchange_rate": 0.0054,
-    "exchange_via_app": 0.0037,
+    "exchange_via_app": 0.0038,
     "extra_charge_on_statement": 0.0168,
     "failed_transfer": 0.0039,
     "fiat_currency_support": 0.0047,
-    "get_disposable_virtual_card": 0.0029,
+    "get_disposable_virtual_card": 0.0028,
     "get_physical_card": 0.0002,
     "getting_spare_card": 0.0016,
     "getting_virtual_card": 0.0068,
-    "lost_or_stolen_card": 0.0007,
+    "lost_or_stolen_card": 0.0008,
     "lost_or_stolen_phone": 0.0014,
     "order_physical_card": 0.0027,
     "passcode_forgotten": 0.0003,
@@ -60,20 +60,20 @@
     "pin_blocked": 0.0028,
     "receiving_money": 0.0014,
     "request_refund": 0.0014,
-    "reverted_card_payment?": 0.0073,
+    "reverted_card_payment?": 0.0072,
     "supported_cards_and_currencies": 0.0043,
     "terminate_account": 0.0007,
-    "top_up_by_bank_transfer_charge": 0.0013,
+    "top_up_by_bank_transfer_charge": 0.0014,
     "top_up_by_card_charge": 0.0004,
     "top_up_by_cash_or_cheque": 0.0059,
     "top_up_failed": 0.0043,
     "top_up_limits": 0.0012,
     "top_up_reverted": 0.0058,
     "topping_up_by_card": 0.0007,
-    "transaction_charged_twice": 0.0056,
+    "transaction_charged_twice": 0.0107,
     "transfer_fee_charged": 0.0021,
     "transfer_into_account": 0.0052,
-    "transfer_not_received_by_recipient": 0.0015,
+    "transfer_not_received_by_recipient": 0.0016,
     "transfer_timing": 0.0002,
     "unable_to_verify_identity": 0.0053,
     "verify_my_identity": 0.0011,
@@ -96,43 +96,43 @@
   },
   "unseen_merchant": {
     "count": 1962,
-    "accuracy": 0.3272
+    "accuracy": 0.3354
   },
   "worst_classes": {
-    "top_up_limits": {
-      "count": 22,
+    "atm_support": {
+      "count": 23,
       "accuracy": 0.0
     },
-    "pending_top_up": {
-      "count": 36,
+    "card_not_working": {
+      "count": 20,
       "accuracy": 0.0
     },
     "card_payment_not_recognised": {
       "count": 31,
       "accuracy": 0.0
     },
-    "order_physical_card": {
-      "count": 25,
+    "extra_charge_on_statement": {
+      "count": 53,
       "accuracy": 0.0
     },
-    "card_not_working": {
-      "count": 20,
+    "fiat_currency_support": {
+      "count": 29,
       "accuracy": 0.0
     }
   },
   "featurize_ms": null,
   "predict_ms": {
-    "p50": 0.226,
-    "p99": 0.344
+    "p50": 0.255,
+    "p99": 0.459
   },
   "retrain_ms": null,
-  "peak_rss_bytes": 289816576,
+  "peak_rss_bytes": 336723968,
   "artifact_bytes": null,
   "image_bytes": null,
   "cost_per_1000_usd": null,
   "data_hash": "156972db31eaffa6e0a85574d591faca057448981a56d1706569b345c6d0eec1",
-  "split_hash": "99a7451cd906ef7b193bcce77a470e9227bc593168795bf7e61db7caf902c591",
+  "split_hash": "d6cebbe860b44c2ade0c30839ec399238863accfbaa8c1e6810440485b80388b",
   "featurizer_id": null,
   "seed": 0,
-  "git_sha": "e2579c9"
+  "git_sha": "531aa13"
 }

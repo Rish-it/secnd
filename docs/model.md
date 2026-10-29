@@ -94,7 +94,7 @@ at least 99% correct, or if it makes none. With 2,000 training labels:
 | Dataset | Held-out pool | Pass rate | Mean share answered automatically | Worst 1% precision |
 | --- | ---: | ---: | ---: | ---: |
 | MTOP | 6,184 | 99.1% | 27.4% | 99.0% |
-| BANKING77 | 3,630 | 98.0% | 0.8% | 98.4% |
+| BANKING77 | 3,630 | 99.0% | 1.8% | 98.6% |
 | IPSA | 78,722 | 98.4% | 0.0% | 98.2% |
 
 **On the fixed split** ([eval cards](results/s3/), 2,000 labels, MiniLM + logistic regression):
@@ -102,16 +102,14 @@ at least 99% correct, or if it makes none. With 2,000 training labels:
 | Dataset | Accuracy | ECE | Answered automatically | Precision of those answers | Calib lower bound |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | MTOP | 86.2% | 0.017 | 31.7% | 99.62% | 99.47% |
-| BANKING77 | 88.7% | 0.012 | 50.4% | 98.99% | 99.39% |
+| BANKING77 | 88.4% | 0.011 | 36.9% | 99.03% | 99.50% |
 | IPSA | 49.4% | 0.112 | 0.0% | – | – |
 
-BANKING77's fixed split is one of the rare splits where the claim narrowly fails: its calibration
-half certified a threshold that 98% of re-splits would not, and test precision lands 0.01 points
-below 99%. Each card has its reliability bins and coverage–precision curve next to it.
+Each card has its reliability bins and coverage–precision curve next to it.
 
 The 99.3% selection level was chosen on MTOP (pass rate 93.4% at 99.0%) and then applied
-unchanged to BANKING77 and IPSA. With 2,000 labels the model is confident enough to answer a
-large share only on MTOP; on the other two it mostly abstains, which is the gate working.
+unchanged to BANKING77 and IPSA. Across re-splits of half the held-out data, the model answers a
+large share only on MTOP; on the other two it mostly abstains at that size, which is the gate working.
 
 ## Numbers
 
@@ -146,5 +144,5 @@ Hosted CPU cost and the calibrated model comparison await their measured inputs.
 ## Limits
 
 - At 2,000 labels the gate answers almost nothing on IPSA, and on BANKING77 it certifies in only a
-  few re-splits; its fixed split misses 99% by 0.01 points.
+  few re-splits of half the held-out data.
 - English only.

@@ -2,7 +2,7 @@
   "model_version": "banking77-merchant_memory-b200-s0",
   "accuracy": 0.0153,
   "macro_f1": 0.0004,
-  "nll": 4.3545,
+  "nll": 4.3563,
   "brier": 0.9873,
   "ece": 0.0047,
   "aurc": 0.9756,
@@ -28,7 +28,7 @@
     "card_payment_wrong_exchange_rate": 0.0042,
     "card_swallowed": 0.0016,
     "cash_withdrawal_charge": 0.0079,
-    "cash_withdrawal_not_recognised": 0.0083,
+    "cash_withdrawal_not_recognised": 0.0033,
     "change_pin": 0.0028,
     "compromised_card": 0.0024,
     "contactless_not_working": 0.0001,
@@ -37,8 +37,8 @@
     "declined_cash_withdrawal": 0.0008,
     "declined_transfer": 0.0012,
     "direct_debit_payment_not_recognised": 0.0017,
-    "disposable_card_limits": 0.0022,
-    "edit_personal_details": 0.0007,
+    "disposable_card_limits": 0.0028,
+    "edit_personal_details": 0.0043,
     "exchange_charge": 0.0028,
     "exchange_rate": 0.0053,
     "exchange_via_app": 0.0038,
@@ -70,7 +70,7 @@
     "top_up_limits": 0.0012,
     "top_up_reverted": 0.0058,
     "topping_up_by_card": 0.0007,
-    "transaction_charged_twice": 0.0059,
+    "transaction_charged_twice": 0.0109,
     "transfer_fee_charged": 0.0023,
     "transfer_into_account": 0.0053,
     "transfer_not_received_by_recipient": 0.0018,
@@ -103,36 +103,36 @@
       "count": 29,
       "accuracy": 0.0
     },
-    "getting_spare_card": {
-      "count": 26,
-      "accuracy": 0.0
-    },
-    "lost_or_stolen_card": {
-      "count": 21,
-      "accuracy": 0.0
-    },
-    "lost_or_stolen_phone": {
-      "count": 26,
-      "accuracy": 0.0
-    },
-    "order_physical_card": {
+    "activate_my_card": {
       "count": 25,
+      "accuracy": 0.0
+    },
+    "apple_pay_or_google_pay": {
+      "count": 23,
+      "accuracy": 0.0
+    },
+    "atm_support": {
+      "count": 23,
+      "accuracy": 0.0
+    },
+    "automatic_top_up": {
+      "count": 21,
       "accuracy": 0.0
     }
   },
   "featurize_ms": null,
   "predict_ms": {
-    "p50": 0.036,
-    "p99": 0.062
+    "p50": 0.04,
+    "p99": 0.069
   },
   "retrain_ms": null,
-  "peak_rss_bytes": 175751168,
+  "peak_rss_bytes": 224198656,
   "artifact_bytes": null,
   "image_bytes": null,
   "cost_per_1000_usd": null,
   "data_hash": "156972db31eaffa6e0a85574d591faca057448981a56d1706569b345c6d0eec1",
-  "split_hash": "99a7451cd906ef7b193bcce77a470e9227bc593168795bf7e61db7caf902c591",
+  "split_hash": "d6cebbe860b44c2ade0c30839ec399238863accfbaa8c1e6810440485b80388b",
   "featurizer_id": null,
   "seed": 0,
-  "git_sha": "e2579c9"
+  "git_sha": "531aa13"
 }
