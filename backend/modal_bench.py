@@ -58,6 +58,48 @@ def pretune(encoder: str, steps: int = 3000) -> str:
     return (run / f"docs/results/s2/pretune-{out}.json").read_text()
 
 
+@app.function(gpu="A10G", volumes={"/vol": volume}, timeout=4 * 3600)
+def incontext(encoder: str, steps: int) -> str:
+    """Train the in-context reader on the volume's training sets; score it on the held-out ones."""
+    import torch
+
+    assert torch.cuda.is_available(), "no CUDA device: refusing to train on CPU"
+    run = Path("/vol/run")
+    run.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["python", "-m", "backend.incontext", "--encoder", encoder, "--steps", str(steps)],
+        cwd=run,
+        check=True,
+    )
+    volume.commit()
+    return (run / f"docs/results/s2/incontext-ic-{encoder}-s{steps}-near.json").read_text()
+
+
+@app.function(gpu="A10G", volumes={"/vol": volume}, timeout=2 * 3600)
+def reader_budgets(out: str) -> str:
+    """Re-score a saved reader at each labelled-history budget."""
+    import torch
+
+    assert torch.cuda.is_available(), "no CUDA device: refusing to score on CPU"
+    run = Path("/vol/run")
+    subprocess.run(["python", "-m", "backend.incontext", "--evaluate", out], cwd=run, check=True)
+    return (run / f"docs/results/s2/incontext-{out}-budgets.json").read_text()
+
+
+@app.local_entrypoint()
+def budgets(out: str = "ic-ettin-32m-s6000-near"):
+    path = ROOT / f"docs/results/s2/incontext-{out}-budgets.json"
+    path.write_text(reader_budgets.remote(out))
+    print(f"saved {path}")
+
+
+@app.local_entrypoint()
+def reader(encoder: str = "ettin-32m", steps: int = 6000):
+    out = ROOT / f"docs/results/s2/incontext-ic-{encoder}-s{steps}-near.json"
+    out.write_text(incontext.remote(encoder, steps))
+    print(f"saved {out}")
+
+
 @app.local_entrypoint()
 def tuned(encoder: str = "minilm", steps: int = 3000):
     """Tune remotely, then fetch the encoder: score it locally on MPS with `backend.eval`."""
