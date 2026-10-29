@@ -37,11 +37,13 @@ def fit_temperature(y: np.ndarray, p: np.ndarray) -> float:
 
 
 def choose_threshold(y: np.ndarray, p: np.ndarray, target: float = TARGET, alpha: float = ALPHA):
-    """Lowest tau whose calib answers at confidence >= tau have a CP lower bound >= target.
+    """The lowest tau reached by walking down from the most confident answers while the calib
+    answers at confidence >= tau keep a CP lower bound >= target; the walk stops at the first tau
+    that fails (fixed-sequence testing, so picking among many taus keeps the 95% guarantee).
 
-    Returns (tau, n_auto, correct, lower_bound); tau is None when no tau qualifies, so nothing is
-    answered automatically. The bound alone implies n_auto >= ceil(log(alpha) / log(target))
-    (299 rows with no errors at 0.99 / 0.05).
+    The walk starts at the first tau with ceil(log(alpha) / log(target)) answers (299 at 0.99 /
+    0.05): above it no tau can pass, so those are not tested. Returns (tau, n_auto, correct,
+    lower_bound); tau is None when the first tested tau fails, so nothing is answered.
     """
     confidence = p.max(axis=1)
     order = np.argsort(-confidence, kind="stable")
@@ -51,8 +53,10 @@ def choose_threshold(y: np.ndarray, p: np.ndarray, target: float = TARGET, alpha
     # A threshold must take every row tied at its confidence, so only the last of a tie counts.
     last = np.append(confidence[1:] != confidence[:-1], True)
     lower = np.where(hits > 0, beta.ppf(alpha, hits, n - hits + 1), 0.0)
-    qualifies = np.flatnonzero(last & (lower >= target))
-    if len(qualifies) == 0:
+    tested = np.flatnonzero(last & (n >= np.ceil(np.log(alpha) / np.log(target))))
+    failed = lower[tested] < target
+    passed = tested[: np.argmax(failed)] if failed.any() else tested
+    if len(passed) == 0:
         return None, 0, 0, 0.0
-    i = qualifies[-1]
+    i = passed[-1]
     return float(confidence[i]), int(n[i]), int(hits[i]), float(lower[i])

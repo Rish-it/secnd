@@ -45,6 +45,16 @@ def test_threshold_needs_299_clean_answers():
     assert calibrate.choose_threshold(y, p) == (None, 0, 0, 0.0)
 
 
+def test_threshold_stops_at_the_first_tau_that_fails():
+    # Scanning every tau and keeping the lowest that passes tests many hypotheses at once; walking
+    # down from the top and stopping at the first failure keeps the 95% guarantee.
+    conf = [0.99] * 400 + [0.97] * 20 + [0.95] * 2000
+    right = [True] * 400 + [True] * 10 + [False] * 10 + [True] * 2000
+    y, p = _rows(conf, right)
+    tau, n, correct, _ = calibrate.choose_threshold(y, p)
+    assert (tau, n, correct) == (0.99, 400, 400)
+
+
 def test_threshold_takes_the_lowest_qualifying_tau_and_whole_ties():
     conf = [0.99] * 600 + [0.95] * 100 + [0.9] * 10
     right = [True] * 600 + [True] * 99 + [False] + [False] * 10
