@@ -5,7 +5,7 @@
 - Use `uv sync --locked` and `npm ci`. Keep both lockfiles updated when dependencies change.
 - Run `npm run check` for API and frontend changes. Use `docker compose up --build`
   to verify production packaging when the Dockerfile changes.
-- Model work runs on CPU. Keep calibration/test data out of training, report measured
+- Serving runs on CPU; encoder fine-tuning may use a GPU (MPS or CUDA). Keep calibration/test data out of training, report measured
   results only, and preserve fixed evaluation splits across retraining rounds.
 - Keep secrets, uploaded data, model files, and caches out of Git.
 
