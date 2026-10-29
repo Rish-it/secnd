@@ -7,6 +7,10 @@ from scipy.optimize import minimize_scalar
 from scipy.stats import beta
 
 TARGET = 0.99
+# The threshold is selected at a stricter bound than the 99% claim: a model just above 0.99 still
+# measures below it on many finite test sets. Chosen on MTOP (re-split pass 93.4% -> 99.0%),
+# then held unchanged on banking77 (98.0%) and ipsa (98.4%).
+SELECT = 0.993
 ALPHA = 0.05
 LOG_T_BOUNDS = (np.log(0.05), np.log(20))
 
@@ -36,12 +40,12 @@ def fit_temperature(y: np.ndarray, p: np.ndarray) -> float:
     return float(np.exp(minimize_scalar(nll, bounds=LOG_T_BOUNDS, method="bounded").x))
 
 
-def choose_threshold(y: np.ndarray, p: np.ndarray, target: float = TARGET, alpha: float = ALPHA):
+def choose_threshold(y: np.ndarray, p: np.ndarray, target: float = SELECT, alpha: float = ALPHA):
     """The lowest tau reached by walking down from the most confident answers while the calib
     answers at confidence >= tau keep a CP lower bound >= target; the walk stops at the first tau
     that fails (fixed-sequence testing, so picking among many taus keeps the 95% guarantee).
 
-    The walk starts at the first tau with ceil(log(alpha) / log(target)) answers (299 at 0.99 /
+    The walk starts at the first tau with ceil(log(alpha) / log(target)) answers (427 at 0.993 /
     0.05): above it no tau can pass, so those are not tested. Returns (tau, n_auto, correct,
     lower_bound); tau is None when the first tested tau fails, so nothing is answered.
     """

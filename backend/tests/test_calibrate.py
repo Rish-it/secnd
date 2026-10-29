@@ -36,13 +36,20 @@ def _rows(confidences, correct):
     return y, p
 
 
-def test_threshold_needs_299_clean_answers():
+def test_threshold_needs_299_clean_answers_at_99():
     y, p = _rows([0.999] * 299 + [0.6] * 50, [True] * 299 + [False] * 50)
-    tau, n, correct, lower = calibrate.choose_threshold(y, p)
+    tau, n, correct, lower = calibrate.choose_threshold(y, p, target=0.99)
     assert (tau, n, correct) == (0.999, 299, 299) and lower >= 0.99
 
     y, p = _rows([0.999] * 298, [True] * 298)
-    assert calibrate.choose_threshold(y, p) == (None, 0, 0, 0.0)
+    assert calibrate.choose_threshold(y, p, target=0.99) == (None, 0, 0, 0.0)
+
+
+def test_default_selection_is_stricter_than_the_claim():
+    y, p = _rows([0.999] * 299, [True] * 299)
+    assert calibrate.choose_threshold(y, p)[0] is None
+    y, p = _rows([0.999] * 427, [True] * 427)
+    assert calibrate.choose_threshold(y, p)[2] == 427
 
 
 def test_threshold_stops_at_the_first_tau_that_fails():
@@ -51,7 +58,7 @@ def test_threshold_stops_at_the_first_tau_that_fails():
     conf = [0.99] * 400 + [0.97] * 20 + [0.95] * 2000
     right = [True] * 400 + [True] * 10 + [False] * 10 + [True] * 2000
     y, p = _rows(conf, right)
-    tau, n, correct, _ = calibrate.choose_threshold(y, p)
+    tau, n, correct, _ = calibrate.choose_threshold(y, p, target=0.99)
     assert (tau, n, correct) == (0.99, 400, 400)
 
 
@@ -59,6 +66,6 @@ def test_threshold_takes_the_lowest_qualifying_tau_and_whole_ties():
     conf = [0.99] * 600 + [0.95] * 100 + [0.9] * 10
     right = [True] * 600 + [True] * 99 + [False] + [False] * 10
     y, p = _rows(conf, right)
-    tau, n, correct, _ = calibrate.choose_threshold(y, p)
+    tau, n, correct, _ = calibrate.choose_threshold(y, p, target=0.99)
     # 699/700 still clears 0.99; adding the ten wrong 0.9 rows does not.
     assert (tau, n, correct) == (0.95, 700, 699)
