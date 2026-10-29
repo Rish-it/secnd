@@ -112,6 +112,14 @@ input discount. Remote HTTP latency and local CPU prediction latency are
 different operating conditions. The [protocol and raw results](results/s5/)
 record the sample, hashes, token usage and exploratory spend separately.
 
+A [fresh matched version comparison](results/s5/provider-comparison.json) on
+2026-10-29 measured Muse Spark 1.3 at **39.4%** and Spark Open 1026 at **37.4%**,
+each with 500 valid outputs. Their conservative costs were $2.465243 and
+$2.0050175 per 1,000; HTTP p50 was 1,892 and 1,610 ms. Combined spend was
+$2.23513025. The operational default is 1.3 because its observed accuracy was
+higher. Selection used this test sample; the two-point gap is descriptive,
+not a significance claim or an independent estimate of winner quality.
+
 These raw baselines do not establish 99% precision or automation coverage.
 Hosted CPU cost and the calibrated model comparison await their measured inputs.
 
