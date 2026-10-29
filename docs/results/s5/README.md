@@ -196,8 +196,9 @@ The cache contains two generated paraphrases per text in
 provider and batch timing/cost. Batches are replaced atomically under a cache
 lock; reruns reuse saved texts without another paid call. Up to four batches
 are in flight, with new calls paced at one per second. Paid calls use the same
-independent provider guards and ledgers. A malformed batch stops the run and
-leaves completed batches intact. Generated paraphrases are training inputs;
+independent provider guards and ledgers. Paraphrases request a JSON schema; Meta constrains decoding to that schema.
+Malformed batches get at most three attempts on the same provider, all billed;
+continued failure stops the run and leaves completed batches intact. Generated paraphrases are training inputs;
 meaning preservation is requested but is not an independently measured guarantee.
 Per-dataset reports record selections, counts, successful-batch cost and p50
 batch latency. Successful-batch cost excludes failed/retried calls; the ledgers
@@ -221,3 +222,7 @@ not a statistical significance claim. The operational default was selected
 using this test sample, so it is not an independent estimate of winner quality.
 NLL/ECE stay null because confidence is self-reported. No calibrated precision
 or automation coverage is claimed by these raw zero-shot results.
+
+Structured output: [Meta documentation](https://dev.meta.ai/docs/structured-output),
+checked 2026-10-29. The classification comparison keeps its original prompt and
+request shape; schema-constrained output applies only to paraphrases.
