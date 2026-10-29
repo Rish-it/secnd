@@ -1,0 +1,28 @@
+{
+  "dataset": "banking77",
+  "test_rows": 1962,
+  "budgets": {
+    "200": {
+      "test_rows_with_seen_merchant": 0.0,
+      "test_keys_seen": 0.0,
+      "test_text_exact_in_train": 0.0,
+      "memory_accuracy_all_test": 0.0153,
+      "memory_accuracy_seen": null
+    },
+    "5000": {
+      "test_rows_with_seen_merchant": 0.0,
+      "test_keys_seen": 0.0,
+      "test_text_exact_in_train": 0.0,
+      "memory_accuracy_all_test": 0.0153,
+      "memory_accuracy_seen": null
+    },
+    "9453": {
+      "test_rows_with_seen_merchant": 0.0,
+      "test_keys_seen": 0.0,
+      "test_text_exact_in_train": 0.0,
+      "memory_accuracy_all_test": 0.0127,
+      "memory_accuracy_seen": null
+    }
+  },
+  "empty_text_test": 0.0
+}

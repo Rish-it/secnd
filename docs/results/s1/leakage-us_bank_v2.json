@@ -1,0 +1,28 @@
+{
+  "dataset": "us_bank_v2",
+  "test_rows": 10200,
+  "budgets": {
+    "200": {
+      "test_rows_with_seen_merchant": 0.0,
+      "test_keys_seen": 0.0,
+      "test_text_exact_in_train": 0.0002,
+      "memory_accuracy_all_test": 0.0451,
+      "memory_accuracy_seen": null
+    },
+    "5000": {
+      "test_rows_with_seen_merchant": 0.0,
+      "test_keys_seen": 0.0,
+      "test_text_exact_in_train": 0.0002,
+      "memory_accuracy_all_test": 0.0616,
+      "memory_accuracy_seen": null
+    },
+    "49131": {
+      "test_rows_with_seen_merchant": 0.0,
+      "test_keys_seen": 0.0,
+      "test_text_exact_in_train": 0.0002,
+      "memory_accuracy_all_test": 0.0451,
+      "memory_accuracy_seen": null
+    }
+  },
+  "empty_text_test": 0.0
+}

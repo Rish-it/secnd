@@ -1,0 +1,78 @@
+{
+  "model_version": "us_bank_v2-tfidf_lr-b200-s0",
+  "accuracy": 0.465,
+  "macro_f1": 0.4459,
+  "nll": 2.3848,
+  "brier": 0.8583,
+  "ece": 0.3419,
+  "aurc": 0.3096,
+  "classwise_ece": {
+    "Education": 0.0414,
+    "Entertainment": 0.0065,
+    "Fees": 0.0635,
+    "Groceries": 0.0396,
+    "Healthcare": 0.0249,
+    "Income": 0.0754,
+    "Insurance": 0.0319,
+    "Mortgage": 0.0792,
+    "Personal Care": 0.0466,
+    "Rent": 0.0901,
+    "Restaurants": 0.0031,
+    "Shopping": 0.0336,
+    "Subscription": 0.0157,
+    "Transfer": 0.0519,
+    "Transportation": 0.0245,
+    "Travel": 0.04,
+    "Utilities": 0.0364
+  },
+  "threshold": 0.99,
+  "coverage": 0.0,
+  "precision": null,
+  "cp_lower_bound": null,
+  "robustness_pass_rate": null,
+  "seen_merchant": {
+    "count": 0,
+    "accuracy": null
+  },
+  "unseen_merchant": {
+    "count": 10200,
+    "accuracy": 0.465
+  },
+  "worst_classes": {
+    "Transfer": {
+      "count": 1090,
+      "accuracy": 0.0963
+    },
+    "Restaurants": {
+      "count": 560,
+      "accuracy": 0.1161
+    },
+    "Entertainment": {
+      "count": 563,
+      "accuracy": 0.1474
+    },
+    "Subscription": {
+      "count": 532,
+      "accuracy": 0.2274
+    },
+    "Transportation": {
+      "count": 439,
+      "accuracy": 0.2779
+    }
+  },
+  "featurize_ms": null,
+  "predict_ms": {
+    "p50": 0.227,
+    "p99": 0.429
+  },
+  "retrain_ms": null,
+  "peak_rss_bytes": 268861440,
+  "artifact_bytes": null,
+  "image_bytes": null,
+  "cost_per_1000_usd": null,
+  "data_hash": "ebf7305bf1fa9a43a578d4d54df4075e6d7eda57c3e2bbf01c392aec273b58e7",
+  "split_hash": "7c14a573dd76f3190ea4848a4e0efaa5e191c366634db6cd383aaf5aeca3df75",
+  "featurizer_id": null,
+  "seed": 0,
+  "git_sha": "e2579c9"
+}

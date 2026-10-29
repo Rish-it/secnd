@@ -1,0 +1,40 @@
+{
+  "dataset": "ipsa",
+  "test_rows": 42552,
+  "budgets": {
+    "200": {
+      "test_rows_with_seen_merchant": 0.2361,
+      "test_keys_seen": 0.0077,
+      "test_text_exact_in_train": 0.1009,
+      "memory_accuracy_all_test": 0.2555,
+      "memory_accuracy_seen": 0.885
+    },
+    "5000": {
+      "test_rows_with_seen_merchant": 0.3115,
+      "test_keys_seen": 0.0501,
+      "test_text_exact_in_train": 0.1374,
+      "memory_accuracy_all_test": 0.311,
+      "memory_accuracy_seen": 0.8764
+    },
+    "204960": {
+      "test_rows_with_seen_merchant": 0.7504,
+      "test_keys_seen": 0.2874,
+      "test_text_exact_in_train": 0.2286,
+      "memory_accuracy_all_test": 0.4931,
+      "memory_accuracy_seen": 0.6385
+    }
+  },
+  "empty_text_test": 0.0745,
+  "side_columns": {
+    "Short Description": {
+      "filled": 0.2811,
+      "values": 52,
+      "lookup_accuracy_on_test": 0.9776
+    },
+    "Category": {
+      "filled": 1.0,
+      "values": 8,
+      "lookup_accuracy_on_test": 0.3368
+    }
+  }
+}

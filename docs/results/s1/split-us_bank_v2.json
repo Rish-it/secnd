@@ -1,0 +1,106 @@
+{
+  "dataset": "us_bank_v2",
+  "rows": 68000,
+  "hash": "7c14a573dd76f3190ea4848a4e0efaa5e191c366634db6cd383aaf5aeca3df75",
+  "sources": {
+    "transactions.csv": "0424aed6e76f74a5b3b1ff61ccec43bc321622e6806da353b910b3b2c8108f6e"
+  },
+  "splits": {
+    "seed": {
+      "rows": 200,
+      "first_date": null,
+      "last_date": null,
+      "classes": {
+        "Education": 12,
+        "Entertainment": 11,
+        "Fees": 10,
+        "Groceries": 13,
+        "Healthcare": 11,
+        "Income": 13,
+        "Insurance": 11,
+        "Mortgage": 14,
+        "Personal Care": 13,
+        "Rent": 12,
+        "Restaurants": 11,
+        "Shopping": 12,
+        "Subscription": 11,
+        "Transfer": 10,
+        "Transportation": 11,
+        "Travel": 13,
+        "Utilities": 12
+      }
+    },
+    "stream": {
+      "rows": 48931,
+      "first_date": null,
+      "last_date": null,
+      "classes": {
+        "Education": 2787,
+        "Entertainment": 2970,
+        "Fees": 2350,
+        "Groceries": 2877,
+        "Healthcare": 2928,
+        "Income": 3044,
+        "Insurance": 2907,
+        "Mortgage": 3196,
+        "Personal Care": 3063,
+        "Rent": 2858,
+        "Restaurants": 2910,
+        "Shopping": 2825,
+        "Subscription": 2849,
+        "Transfer": 2486,
+        "Transportation": 3032,
+        "Travel": 2928,
+        "Utilities": 2921
+      }
+    },
+    "calib": {
+      "rows": 8669,
+      "first_date": null,
+      "last_date": null,
+      "classes": {
+        "Education": 491,
+        "Entertainment": 456,
+        "Fees": 752,
+        "Groceries": 476,
+        "Healthcare": 458,
+        "Income": 399,
+        "Insurance": 573,
+        "Mortgage": 330,
+        "Personal Care": 495,
+        "Rent": 504,
+        "Restaurants": 519,
+        "Shopping": 744,
+        "Subscription": 608,
+        "Transfer": 414,
+        "Transportation": 518,
+        "Travel": 493,
+        "Utilities": 439
+      }
+    },
+    "test": {
+      "rows": 10200,
+      "first_date": null,
+      "last_date": null,
+      "classes": {
+        "Education": 710,
+        "Entertainment": 563,
+        "Fees": 888,
+        "Groceries": 634,
+        "Healthcare": 603,
+        "Income": 544,
+        "Insurance": 509,
+        "Mortgage": 460,
+        "Personal Care": 429,
+        "Rent": 626,
+        "Restaurants": 560,
+        "Shopping": 419,
+        "Subscription": 532,
+        "Transfer": 1090,
+        "Transportation": 439,
+        "Travel": 566,
+        "Utilities": 628
+      }
+    }
+  }
+}
