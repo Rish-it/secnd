@@ -1,0 +1,93 @@
+{
+  "requested_unique_texts": 2393,
+  "cached_texts": 2393,
+  "paraphrases": 4786,
+  "complete": true,
+  "cache_files": [
+    "paraphrase-muse-spark-1.3.parquet"
+  ],
+  "p50_batch_latency_ms": 3792.528708494501,
+  "new_spend_usd": {
+    "meta": "0.40157550"
+  },
+  "successful_batch_cost_usd": "1.37010825",
+  "input_text_hash": "58b95791facb34aee952a9990c9b6367829811d808015e601a6b285c40b6ab15",
+  "labels_sent": false,
+  "dataset": "mtop",
+  "training_selections": [
+    {
+      "seed": 0,
+      "budget": 100,
+      "rows": 100,
+      "row_ids_hash": "567bb61b6754b2da5d9bd8129958c43929e75f09ddfba35b2e254c1f785f697b"
+    },
+    {
+      "seed": 0,
+      "budget": 500,
+      "rows": 500,
+      "row_ids_hash": "6fafc8466b42fa2eef948a45f0fb1e1a4aa7a9809be605498cc50d3fdd44be92"
+    },
+    {
+      "seed": 1,
+      "budget": 100,
+      "rows": 100,
+      "row_ids_hash": "a7306b5a7b8d7314fd0b36b0ab8a9929191c524b56945ea388ded4f106fbbc6d"
+    },
+    {
+      "seed": 1,
+      "budget": 500,
+      "rows": 500,
+      "row_ids_hash": "a0ae7155dd5c5de43a03e00d22a05963eab1c3e3b790c4bb573119b323ba8426"
+    },
+    {
+      "seed": 2,
+      "budget": 100,
+      "rows": 100,
+      "row_ids_hash": "c83784546bd550e05bd8f59288f94de0d674f5911d3c5a5787dbd6908fee70bb"
+    },
+    {
+      "seed": 2,
+      "budget": 500,
+      "rows": 500,
+      "row_ids_hash": "1b7f2b4fb2afd7d71e1215c9df105aa0f7ed5ad74c436f7227ae62d9ce770ef8"
+    },
+    {
+      "seed": 3,
+      "budget": 100,
+      "rows": 100,
+      "row_ids_hash": "581c6c3420f067e08168ff8638faad4dcce82f129ea17af74c769829077ddcf3"
+    },
+    {
+      "seed": 3,
+      "budget": 500,
+      "rows": 500,
+      "row_ids_hash": "2c1a5532dfe7b8bddb6aecbc3eab3820fc5fdd34573fc77b22ccbc1906d87307"
+    },
+    {
+      "seed": 4,
+      "budget": 100,
+      "rows": 100,
+      "row_ids_hash": "0f2f3017531c8b0461b58c08679d6852adde5fdd98b093246c0a2f2d18d78e3a"
+    },
+    {
+      "seed": 4,
+      "budget": 500,
+      "rows": 500,
+      "row_ids_hash": "c643d4a3599752364361afb16c9bf2ada2922e2473f920cb8405d62c7f1c4da4"
+    }
+  ],
+  "skipped_blank_selections": 0,
+  "budgets": [
+    100,
+    500
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "git_sha": "d02297da4431621e5db046de63801871e7051ce6",
+  "measured_at": "2026-10-29T08:03:36.883102+00:00"
+}
