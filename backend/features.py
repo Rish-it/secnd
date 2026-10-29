@@ -29,6 +29,7 @@ _hashing = HashingVectorizer(
     analyzer="char_wb", ngram_range=(3, 5), n_features=2**18, alternate_sign=False
 )
 _models = {}
+_loaded = {}  # cache file -> {sha256(text): vector}, read from disk once per process
 
 
 def char_tfidf(texts: pd.Series) -> sparse.csr_matrix:
@@ -50,10 +51,10 @@ def embed(name: str, texts: pd.Series, cache_dir: Path | None = None) -> np.ndar
     texts = texts.fillna("").tolist()
     keys = [hashlib.sha256(text.encode()).hexdigest() for text in texts]
     path = cache_dir / f"{name}.npz" if cache_dir else None
-    cache = {}
-    if path and path.exists():
+    cache = _loaded.setdefault(path, {})
+    if path and not cache and path.exists():
         stored = np.load(path)
-        cache = dict(zip(stored["keys"], stored["vectors"], strict=True))
+        cache.update(zip(stored["keys"], stored["vectors"], strict=True))
     missing = list(dict.fromkeys(key for key in keys if key not in cache))
     if missing:
         first = dict(zip(keys, texts, strict=True))

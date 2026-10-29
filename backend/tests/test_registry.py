@@ -27,6 +27,14 @@ def test_gate_passes_a_sound_candidate_and_names_every_failure():
     assert "regression" in registry.gate(y, _p(worse), good)[0]
 
 
+def test_gate_refuses_a_candidate_that_certifies_less():
+    y = np.array([0, 1, 2, 0, 1, 2] * 20)
+    good = _p(y)
+    assert registry.gate(y, good, good, tau=0.95, calib_lower=0.991, current_tau=0.95) == []
+    reasons = registry.gate(y, good, good, tau=None, current_tau=0.95)
+    assert len(reasons) == 1 and reasons[0].startswith("certified coverage drops 0.2")
+
+
 def test_gate_flags_flat_confidence_as_collapse():
     assert registry.collapsed(_p(np.array([0, 1, 2]), confidence=0.5))
     p = _p(np.array([0, 1, 2]))
