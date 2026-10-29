@@ -109,3 +109,45 @@ def test_cache_resumes_atomically_without_sending_labels_or_repeating_texts(tmp_
         Decimal(row.split(",")[-2])
         for row in (tmp_path / "ledgers/spend-meta.csv").read_text().splitlines()[1:]
     )
+
+
+def test_malformed_json_is_retried_within_same_provider_and_billed(tmp_path):
+    calls = []
+
+    def handler(request):
+        calls.append(request.url.host)
+        supplied = json.loads(json.loads(request.content)["messages"][1]["content"])
+        content = (
+            '{"items":[] channel_subscribe}'
+            if len(calls) == 1
+            else json.dumps(
+                {
+                    "items": [
+                        {
+                            "key": row["key"],
+                            "paraphrases": ["fare for the train", "rail ticket cost"],
+                        }
+                        for row in supplied
+                    ]
+                }
+            )
+        )
+        return httpx.Response(
+            200,
+            json={
+                "model": "muse-spark-1.3",
+                "usage": {"prompt_tokens": 100, "completion_tokens": 100},
+                "choices": [{"message": {"content": content}}],
+            },
+        )
+
+    result = generate(
+        ["train fare"],
+        Settings(meta_api_key="meta-test", _env_file=None),
+        directory=tmp_path / "cache",
+        ledger_directory=tmp_path / "ledger",
+        transport=httpx.MockTransport(handler),
+    )
+    assert result["complete"] and calls == ["api.meta.ai", "api.meta.ai"]
+    assert result["new_spend_usd"]["meta"] == "0.00110"
+    assert len(read_cache(tmp_path / "cache")) == 1

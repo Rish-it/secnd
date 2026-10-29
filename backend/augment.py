@@ -54,7 +54,7 @@ def training_texts(frame):
     return unique, manifests, sum(not text.strip() for text in selected)
 
 
-def paraphrase_batch(client, texts):
+def paraphrase_batch(client, texts, attempt=0):
     originals = {text_key(text): text for text in texts}
     completion = client._request(
         [
@@ -95,6 +95,8 @@ def paraphrase_batch(client, texts):
                 raise ValueError("Invalid paraphrases")
             result[key] = [v.strip() for v in values]
     except (ValueError, TypeError, KeyError):
+        if attempt < 2:
+            return paraphrase_batch(client, texts, attempt + 1)
         raise MuseOutputError("Invalid paraphrase batch; no partial cache was saved.") from None
     return completion, result
 
