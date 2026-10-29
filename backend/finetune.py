@@ -93,9 +93,10 @@ def pretune(name: str, steps: int = PRETUNE_STEPS) -> dict:
     top = top[keep]
     y = pd.factorize(top["label"])[0]
     model = tune(name, top["text"].fillna("").tolist(), y, seed=0, steps=steps)
-    model.save(str(data_dir / "encoders" / f"pt-{name}"))
+    out = f"pt-{name}" if steps == PRETUNE_STEPS else f"pt-{name}-s{steps}"
+    model.save(str(data_dir / "encoders" / out))
     return {
-        "encoder": f"pt-{name}",
+        "encoder": out,
         "base": EMBEDDERS[name][0],
         "rows": int(keep.sum()),
         "dropped_mtop_overlap": int((~keep).sum()),

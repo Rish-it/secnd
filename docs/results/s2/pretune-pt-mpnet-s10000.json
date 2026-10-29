@@ -1,0 +1,9 @@
+{
+  "encoder": "pt-mpnet-s10000",
+  "base": "sentence-transformers/all-mpnet-base-v2",
+  "rows": 157405,
+  "dropped_mtop_overlap": 23137,
+  "intents": 69,
+  "steps": 10000,
+  "device": "cuda"
+}
