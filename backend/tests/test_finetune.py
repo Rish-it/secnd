@@ -23,9 +23,10 @@ def test_tuning_pulls_same_label_rows_together():
     assert after > before + 0.1
 
 
-def test_tuned_encoder_is_returned_on_cpu():
+def test_tuned_encoder_stays_on_the_tuning_device():
     model = finetune.tune("minilm", ["a b", "a c", "d e", "d f"], np.array([0, 0, 1, 1]), steps=1)
-    assert str(model.device) == "cpu"
+    assert model.device.type == finetune.device()
+    assert not model.training
 
 
 def test_pretune_drops_every_mtop_text_before_tuning(tmp_path, monkeypatch):

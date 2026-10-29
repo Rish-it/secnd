@@ -39,13 +39,22 @@ def char_tfidf(texts: pd.Series) -> sparse.csr_matrix:
     return _hashing.transform(texts.fillna(""))
 
 
+def device() -> str:
+    """The GPU when there is one; serving machines have none and encode on CPU."""
+    import torch
+
+    if torch.cuda.is_available():
+        return "cuda"
+    return "mps" if torch.backends.mps.is_available() else "cpu"
+
+
 def _encode(name: str, texts: list[str]) -> np.ndarray:
     if name not in _models:
         from sentence_transformers import SentenceTransformer
 
         # `pt-<encoder>`: tuned once on public Meta data, saved under data_dir/encoders.
         repo, revision = EMBEDDERS.get(name) or (str(Settings().data_dir / "encoders" / name), None)
-        _models[name] = SentenceTransformer(repo, revision=revision, device="cpu")
+        _models[name] = SentenceTransformer(repo, revision=revision, device=device())
     return _models[name].encode(texts, batch_size=256, normalize_embeddings=True)
 
 
