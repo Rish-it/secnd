@@ -1,0 +1,35 @@
+{
+  "dataset": "ipsa",
+  "seed": 0,
+  "rows": 500,
+  "data_hash": "c0f340b2d1c250c0469221605d38790abed2e3f9f7f8a4f5bb8215d7fbb373e6",
+  "split_hash": "c6694620aaa0cde2a3bc4efcd9660e62aad72b091471679f843a4978407c09ca",
+  "sample_hash": "a9e02430774578aa9d50d168002570cdec267db93363b864bc0b017485e86220",
+  "input_hash": "6c96ef09eb589287775bf46e4dac528f7c9256e6959df45629f6028b10bc44fb",
+  "protocol_hash": "a58be7a704e3b10fc6dac6aa3b06f44470c1b1cf3ec65fe1aa07c376d5cd6aa8",
+  "concurrency": 8,
+  "invalid_output_policy": "count_as_incorrect_without_semantic_retry",
+  "model": "muse-spark-1.3",
+  "provider": "meta",
+  "git_sha": "4b8fe1dafd4e0425aa5eff98705f6a63de4d5312",
+  "measured_at": "2026-10-29T07:37:02.735017+00:00",
+  "accuracy": 0.394,
+  "invalid_outputs": 0,
+  "nll": null,
+  "ece": null,
+  "confidence_source": "self_reported",
+  "predict_ms": {
+    "p50": 1892.060833000869,
+    "p99": 4351.397017841955
+  },
+  "usage": {
+    "prompt_tokens": 239549,
+    "completion_tokens": 219573,
+    "reasoning_tokens": 206924,
+    "cached_tokens": 0
+  },
+  "cost_usd": "1.23262150",
+  "cost_per_1000_usd": "2.46524300",
+  "experiment_spend_usd": "1.23262150",
+  "usage_includes_retry_estimates": false
+}
