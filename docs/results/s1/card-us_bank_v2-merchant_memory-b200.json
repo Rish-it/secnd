@@ -1,49 +1,78 @@
 {
-  "provenance": {
-    "dataset": "us_bank_v2",
-    "model": "merchant_memory",
-    "budget": 200,
-    "train_rows": 200,
-    "seed": 0,
-    "split_hash": "7c14a573dd76f3190ea4848a4e0efaa5e191c366634db6cd383aaf5aeca3df75",
-    "git_sha": "8d9e33b"
+  "model_version": "us_bank_v2-merchant_memory-b200-s0",
+  "accuracy": 0.0451,
+  "macro_f1": 0.0051,
+  "nll": 2.8521,
+  "brier": 0.9433,
+  "ece": 0.0249,
+  "aurc": 0.9564,
+  "classwise_ece": {
+    "Education": 0.0096,
+    "Entertainment": 0.0002,
+    "Fees": 0.0371,
+    "Groceries": 0.0028,
+    "Healthcare": 0.0041,
+    "Income": 0.0117,
+    "Insurance": 0.0051,
+    "Mortgage": 0.0249,
+    "Personal Care": 0.0229,
+    "Rent": 0.0014,
+    "Restaurants": 0.0001,
+    "Shopping": 0.0189,
+    "Subscription": 0.0028,
+    "Transfer": 0.0569,
+    "Transportation": 0.012,
+    "Travel": 0.0095,
+    "Utilities": 0.0016
   },
-  "quality": {
-    "accuracy": 0.0451,
-    "macro_f1": 0.0051,
-    "nll": 2.8521,
-    "brier": 0.9433,
-    "ece": 0.0249,
-    "classwise_ece": 0.013,
-    "aurc": 0.9564
+  "threshold": 0.99,
+  "coverage": 0.0,
+  "precision": null,
+  "cp_lower_bound": null,
+  "robustness_pass_rate": null,
+  "seen_merchant": {
+    "count": 0,
+    "accuracy": null
   },
-  "claim": {
-    "tau": 0.99,
-    "coverage": 0.0,
-    "precision_above": null,
-    "calib_auto": {
-      "n": 0,
-      "correct": 0
-    },
-    "calib_cp_lower": 0.0
-  },
-  "slices": {
-    "unseen_merchant": {
-      "rows": 10200,
-      "accuracy": 0.0451
-    }
+  "unseen_merchant": {
+    "count": 10200,
+    "accuracy": 0.0451
   },
   "worst_classes": {
-    "Education": 0.0,
-    "Transportation": 0.0,
-    "Transfer": 0.0,
-    "Subscription": 0.0,
-    "Shopping": 0.0
+    "Education": {
+      "count": 710,
+      "accuracy": 0.0
+    },
+    "Transportation": {
+      "count": 439,
+      "accuracy": 0.0
+    },
+    "Transfer": {
+      "count": 1090,
+      "accuracy": 0.0
+    },
+    "Subscription": {
+      "count": 532,
+      "accuracy": 0.0
+    },
+    "Shopping": {
+      "count": 419,
+      "accuracy": 0.0
+    }
   },
-  "speed": {
-    "fit_seconds": 0.001,
-    "predict_ms_p50": 0.039,
-    "predict_ms_p99": 0.07,
-    "peak_rss_mb": 198.6
-  }
+  "featurize_ms": null,
+  "predict_ms": {
+    "p50": 0.036,
+    "p99": 0.085
+  },
+  "retrain_ms": null,
+  "peak_rss_bytes": 208191488,
+  "artifact_bytes": null,
+  "image_bytes": null,
+  "cost_per_1000_usd": null,
+  "data_hash": "ebf7305bf1fa9a43a578d4d54df4075e6d7eda57c3e2bbf01c392aec273b58e7",
+  "split_hash": "7c14a573dd76f3190ea4848a4e0efaa5e191c366634db6cd383aaf5aeca3df75",
+  "featurizer_id": null,
+  "seed": 0,
+  "git_sha": "e2579c9"
 }
