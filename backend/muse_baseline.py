@@ -34,6 +34,7 @@ from backend.muse import (
 )
 
 RESULTS = Path("docs/results/s5")
+TASK = "muse-baseline-compact"
 
 
 class Trial(BaseModel):
@@ -79,14 +80,9 @@ def read_predictions(path: Path, plan: dict) -> dict[str, Trial]:
         ):
             raise ValueError("Prediction checkpoint does not match the fixed experiment.")
         if result is not None and (
-            result.item_id != trial.item_id
-            or set(result.probabilities) != set(plan["labels"])
-            or result.label not in result.probabilities
-            or abs(sum(result.probabilities.values()) - 1) > 1e-6
-            or result.confidence != result.probabilities[result.label]
-            or result.confidence != max(result.probabilities.values())
+            result.item_id != trial.item_id or result.label not in plan["labels"]
         ):
-            raise ValueError("Prediction checkpoint contains an invalid distribution.")
+            raise ValueError("Prediction checkpoint contains an invalid category.")
         results[trial.item_id] = trial
     return results
 
@@ -142,7 +138,7 @@ def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
     with (
         BudgetRun(
             settings,
-            task="muse-baseline",
+            task=TASK,
             rows=len(pending),
             measured_tokens=measured,
             ledger_path=directory / SPEND_PATH.name,
@@ -180,16 +176,20 @@ def collect(settings, plan, test, directory, *, limit, git_sha, transport=None):
     return results
 
 
-def baseline_spend(ledger):
+def baseline_spend(ledger, task=None):
     if not ledger.exists():
         return []
     with ledger.open() as source:
-        return [row for row in csv.DictReader(source) if row["task"] == "muse-baseline"]
+        return [
+            row
+            for row in csv.DictReader(source)
+            if row["task"] == task or (task is None and row["task"].startswith("muse-baseline"))
+        ]
 
 
 def summarize(test, results, ledger):
     ordered = [results[row_id] for row_id in test["id"]]
-    spend = baseline_spend(ledger)
+    spend = baseline_spend(ledger, TASK)
     cost = sum((Decimal(row["cost_usd"]) for row in spend), Decimal(0))
     return {
         "rows": len(ordered),
@@ -212,6 +212,9 @@ def summarize(test, results, ledger):
         "usage": {field: sum(int(row[field]) for row in spend) for field in Usage.model_fields},
         "cost_usd": str(cost),
         "cost_per_1000_usd": str(cost * 1000 / len(ordered)),
+        "experiment_spend_usd": str(
+            sum((Decimal(row["cost_usd"]) for row in baseline_spend(ledger)), Decimal(0))
+        ),
         "usage_includes_retry_estimates": any("estimated" in row["status"] for row in spend),
     }
 
@@ -271,6 +274,8 @@ def main():
         "sample_hash": digest(test["id"].tolist()),
         "input_hash": digest([item(row).model_dump(mode="json") for _, row in test.iterrows()]),
         "protocol_hash": digest(inspect.getsource(MuseClient.zero_shot)),
+        "concurrency": 8,
+        "invalid_output_policy": "count_as_incorrect_without_semantic_retry",
         "model": settings.muse_model,
         "base_url": settings.muse_base_url,
     }

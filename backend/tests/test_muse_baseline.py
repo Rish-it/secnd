@@ -59,7 +59,7 @@ def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(
         supplied = json.loads(data["messages"][1]["content"])
         assert set(supplied["item"]) == {"item_id", "text", "amount", "date"}
         requested.append(supplied["item"]["item_id"])
-        content = json.dumps({"label": "Travel", "probabilities": {"Office": 0.1, "Travel": 0.9}})
+        content = json.dumps({"label": "Travel", "confidence": 0.9})
         if supplied["item"]["item_id"] == invalid_id:
             content = "invalid distribution"
         return httpx.Response(

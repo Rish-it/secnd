@@ -220,7 +220,7 @@ def test_labeling_is_typed_label_constrained_and_marks_self_reported_confidence(
             json.dumps(
                 {
                     "label": "Travel",
-                    "probabilities": {"Travel": 0.8, "Software": 0.2},
+                    "confidence": 0.8,
                 }
             )
         )
@@ -242,16 +242,16 @@ def test_labeling_is_typed_label_constrained_and_marks_self_reported_confidence(
     "content",
     [
         "not json",
-        '{"label":"Other","probabilities":{"Other":1}}',
-        '{"label":"Travel","probabilities":{"Travel":0.9,"Software":0.2}}',
-        '{"label":"Travel","probabilities":{"Travel":1}}',
-        '{"label":"Travel","probabilities":{"Travel":0.2,"Software":0.8}}',
-        '{"label":"Travel","probabilities":{"Travel":NaN,"Software":0.2}}',
+        '{"label":"Other","confidence":1}',
+        '{"label":"Travel","confidence":1.1}',
+        '{"label":"Travel"}',
+        '{"label":"Travel","confidence":-0.1}',
+        '{"label":"Travel","confidence":NaN}',
     ],
 )
-def test_invalid_distributions_are_rejected_after_accounting(tmp_path, content):
+def test_invalid_labels_and_confidence_are_rejected_after_accounting(tmp_path, content):
     with client_for(tmp_path, lambda request: completion(content)) as (client, run):
-        with pytest.raises(MuseError, match="invalid label distribution"):
+        with pytest.raises(MuseError, match="invalid label or confidence"):
             client.zero_shot([MuseItem(item_id="a", text="Train")], ["Travel", "Software"])
         assert run.usage.prompt_tokens == 100
 
