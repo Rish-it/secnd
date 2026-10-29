@@ -312,7 +312,14 @@ class MuseClient:
     def __exit__(self, *error):
         self.http.close()
 
-    def _request(self, messages: list[dict], *, max_tokens: int, tools: list | None = None):
+    def _request(
+        self,
+        messages: list[dict],
+        *,
+        max_tokens: int,
+        tools: list | None = None,
+        response_format: dict | None = None,
+    ):
         payload = {
             "model": self.settings.muse_model,
             "messages": messages,
@@ -321,6 +328,8 @@ class MuseClient:
         }
         if tools:
             payload["tools"] = tools
+        if response_format is not None:
+            payload["response_format"] = response_format
         reservation = Usage(
             prompt_tokens=len(json.dumps(payload, ensure_ascii=False).encode()) + 1024,
             completion_tokens=max_tokens,

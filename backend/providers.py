@@ -64,7 +64,7 @@ class MuseProviders(MuseClient):
     def __exit__(self, *error):
         return self.stack.__exit__(*error)
 
-    def _request(self, messages, *, max_tokens, tools=None):
+    def _request(self, messages, *, max_tokens, tools=None, response_format=None):
         if self.stack is None:
             raise MuseError("Provider calls need an active context.")
         for provider in PROVIDERS:
@@ -88,7 +88,9 @@ class MuseProviders(MuseClient):
                     )
             self.last_provider = provider
             try:
-                return self.clients[provider]._request(messages, max_tokens=max_tokens, tools=tools)
+                return self.clients[provider]._request(
+                    messages, max_tokens=max_tokens, tools=tools, response_format=response_format
+                )
             except MuseUnavailable:
                 continue
         raise MuseUnavailable("No configured provider is available.")
