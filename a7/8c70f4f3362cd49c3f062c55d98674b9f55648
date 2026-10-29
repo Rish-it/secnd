@@ -1,0 +1,21 @@
+frontend/src/App.tsx
+  s_1f3964e6251ccb::t_4c73500399e645 6,67-68,186,534
+frontend/src/Companion.tsx
+  s_1f3964e6251ccb::t_fc7f215abeeea9 1-119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a78c70f4f3362cd49c3f062c55d98674b9f55648",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
