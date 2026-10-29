@@ -65,12 +65,13 @@ labels, then take the lightest.
 
 | Labels | IPSA accuracy | BANKING77 accuracy |
 | --- | ---: | ---: |
-| 100 | 34.1% ± 2.8 | 43.3% ± 1.7 |
-| 500 | 44.6% ± 1.1 | 77.7% ± 1.3 |
+| 100 | 34.1% ± 2.8 | 44.3% ± 3.5 |
+| 500 | 44.6% ± 1.1 | 78.2% ± 2.0 |
 | all | 66.3% (1 seed) | 91.2% (1 seed) |
 
-MiniLM with logistic regression was the only model inside the rule at both budgets on IPSA and the
-best at every budget on BANKING77. These numbers are before calibration; the coverage claim comes
+MiniLM with logistic regression was the only model inside the rule at both budgets on IPSA, the
+dataset the rule is judged on. On BANKING77 it is best from 200 labels up; at 50 and 100 labels MiniLM
+with a linear SGD classifier is ahead (46.2% vs 44.3% at 100, with lower NLL). These numbers are before calibration; the coverage claim comes
 from the calibration gate.
 
 Larger encoders and encoders fine-tuned on the training labels (on a GPU, contrastive loss) are
