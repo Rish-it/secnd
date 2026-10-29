@@ -1,0 +1,21 @@
+backend/tests/test_ci_eval.py
+  s_1f3964e6251ccb::t_e09c302ba2d18a 1,3,33-44
+docs/results/s8/eval-banking77-merchant_memory-b200.json
+  s_1f3964e6251ccb::t_ededc6e4bd85a7 1-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b57cba6c204fa1526cfc3dbfbf8abe3f219365e6",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
