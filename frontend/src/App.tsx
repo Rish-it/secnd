@@ -145,6 +145,7 @@ export default function App() {
       const result = await api.teach(sourceFile, target);
       setTrained(result.data.card);
       setPreviewMode(result.fixture);
+      setMetricsRefresh((value) => value + 1);
     } catch (cause) {
       setError(
         cause instanceof Error

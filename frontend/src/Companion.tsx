@@ -51,7 +51,10 @@ export default function Companion({ open, onOpen, onClose, onAnswer }: Props) {
   }, []);
   useEffect(() => {
     void load();
-  }, [load]);
+    if (!open) return;
+    const timer = window.setInterval(() => void load(), 2000);
+    return () => window.clearInterval(timer);
+  }, [load, open]);
   useEffect(() => {
     const node = dialog.current;
     if (open && !node?.open) node?.showModal();
