@@ -34,6 +34,7 @@ def digest(value) -> str:
 def sample(frame: pd.DataFrame, seed: int = 0, rows: int = 500):
     split = split_dataset(frame, seed)
     test = frame[split == "test"].sample(n=rows, random_state=seed)
+    test["id"] = test["id"].astype(str)
     return split, test
 
 

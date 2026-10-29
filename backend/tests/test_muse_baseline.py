@@ -15,7 +15,7 @@ from backend.muse_baseline import collect, compare, digest, read_predictions, sa
 def frame():
     return pd.DataFrame(
         {
-            "id": [str(i) for i in range(2000)],
+            "id": list(range(2000)),
             "text": ["Rail fare" if i % 2 else "Stationery paper" for i in range(2000)],
             "amount": 10.0,
             "date": pd.date_range("2020-01-01", periods=2000),
@@ -32,6 +32,7 @@ def test_comparison_uses_identical_fixed_test_items_without_training_leakage():
     _, again = sample(data, rows=12)
     assert test["id"].tolist() == again["id"].tolist()
     assert set(split.loc[test.index]) == {"test"}
+    assert all(isinstance(row_id, str) for row_id in test["id"])
     manifest = split_manifest("ipsa", data, split)
     assert len(manifest["hash"]) == 64
     compared = compare(data, split, test, budgets=(200, 500))
@@ -43,7 +44,7 @@ def test_comparison_uses_identical_fixed_test_items_without_training_leakage():
 
 def test_checkpoint_resumes_without_repeat_calls_and_accounts_for_all_paid_rows(tmp_path):
     settings = Settings(muse_api_key="test-only-key", _env_file=None)
-    test = frame().iloc[[1, 3]]
+    test = frame().iloc[[1, 3]].assign(id=["1", "3"])
     plan = {"row_ids": test["id"].tolist(), "labels": ["Office", "Travel"]}
     (tmp_path / "smoke.json").write_text(
         json.dumps({"usage": {"prompt_tokens": 100, "completion_tokens": 50}})
