@@ -1,0 +1,21 @@
+docs/results/s2/bakeoff-ipsa.csv
+  s_99a14fdaab2d15::t_13f490f59cc8d0 1-253
+docs/results/s2/bakeoff-ipsa.md
+  s_99a14fdaab2d15::t_855e4cfc974de2 1-62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "509e7c1b1e373248c95abac31908fb4d181085da",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
