@@ -1,0 +1,21 @@
+backend/ci_eval.py
+  s_1f3964e6251ccb::t_ad686e8ad02ee2 9,31,34
+docs/results/s8/README.md
+  s_1f3964e6251ccb::t_4486eab426090e 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "40d911b37e644e8ce2d0a95efb0bf07ebaf45165",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
