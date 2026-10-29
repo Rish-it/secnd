@@ -5,6 +5,9 @@ Sequence: [CLS] question [MASK] label0 [MASK] label1 ... [SEP] message [SEP] exa
 Each option is scored from its [MASK] hidden state. Training draws episodes from many intent
 sets with 0 to 32 examples of the same set in context; evaluation runs on sets never trained on
 (BANKING77, and MTOP, whose texts are removed from every training pool).
+
+Each held-out set has three parts: history (examples and fitted heads read only this), calib
+(half fits the temperature, the other half certifies the 99% gate) and test (scored once).
 """
 
 import argparse
@@ -12,7 +15,7 @@ import csv
 import json
 import time
 import zipfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
@@ -26,11 +29,13 @@ from backend.finetune import _norm
 from backend.metrics import ece
 
 ENCODERS = {
-    "ettin-32m": "jhu-clsp/ettin-encoder-32m",
-    "ettin-68m": "jhu-clsp/ettin-encoder-68m",
-    "ettin-150m": "jhu-clsp/ettin-encoder-150m",
-    "ettin-400m": "jhu-clsp/ettin-encoder-400m",
+    "ettin-32m": ("jhu-clsp/ettin-encoder-32m", "1b8ba06455dd44f80fc9c1ca9e22806157a57379"),
+    "ettin-68m": ("jhu-clsp/ettin-encoder-68m", "ac19ae4bc51093b31c475665ac872a936d056cc2"),
+    "ettin-150m": ("jhu-clsp/ettin-encoder-150m", "45d08642849e5c5701b162671ac811b7654bfd9f"),
+    "ettin-400m": ("jhu-clsp/ettin-encoder-400m", "7662476d60abb071a5bd319c9f3074f3072c062d"),
 }
+# BANKING77 ships no dev split: this many training rows, drawn once with seed 0, calibrate instead.
+BANKING77_CALIB = 3000
 MAX_LEN = 1536
 MAX_OPTIONS = 128
 SHOTS = (0, 0, 1, 2, 4, 8, 16, 32)
@@ -56,6 +61,8 @@ class Task:
     test: list[tuple[str, int]]
     train_vecs: torch.Tensor | None = None
     test_vecs: torch.Tensor | None = None
+    calib: list[tuple[str, int]] = field(default_factory=list)
+    calib_vecs: torch.Tensor | None = None
 
 
 def index(tasks: list[Task]) -> None:
@@ -76,6 +83,8 @@ def index(tasks: list[Task]) -> None:
 
     for task in tasks:
         task.train_vecs, task.test_vecs = encode(task.train), encode(task.test)
+        if task.calib:
+            task.calib_vecs = encode(task.calib)
 
 
 def nearest(
@@ -99,9 +108,10 @@ def humanize(label: str) -> str:
     return label.replace("_", " ").replace("+", " or ").lower().strip()
 
 
-def _task(name, train: pd.DataFrame, test: pd.DataFrame, seen: set[str]) -> Task:
+def _task(name, train: pd.DataFrame, test: pd.DataFrame, seen: set[str], calib=None) -> Task:
     """Rows are (text, label); training rows whose text a held-out set also has are dropped."""
-    labels = sorted(set(train["label"]) | set(test["label"]))
+    calib = _frame([], []) if calib is None else calib
+    labels = sorted(set(train["label"]) | set(test["label"]) | set(calib["label"]))
     index = {label: i for i, label in enumerate(labels)}
 
     def rows(frame):
@@ -109,7 +119,12 @@ def _task(name, train: pd.DataFrame, test: pd.DataFrame, seen: set[str]) -> Task
         return list(zip(frame["text"], frame["label"].map(index), strict=True))
 
     return Task(
-        name, QUESTIONS.get(name, INTENT), [humanize(x) for x in labels], rows(train), rows(test)
+        name,
+        QUESTIONS.get(name, INTENT),
+        [humanize(x) for x in labels],
+        rows(train),
+        rows(test),
+        calib=rows(calib),
     )
 
 
@@ -120,7 +135,8 @@ def _frame(text, label) -> pd.DataFrame:
 
 
 def held_out(data_dir: Path) -> dict[str, Task]:
-    """The evaluation sets, with their official train/test splits."""
+    """The evaluation sets: official train (history), MTOP's official eval or a fixed slice of
+    BANKING77's train (calib), and official test."""
     folder = data_dir / "datasets"
     bank = {p: pd.read_csv(folder / "banking77" / f"{p}.csv", dtype=str) for p in ("train", "test")}
     with zipfile.ZipFile(folder / "mtop" / "mtop.zip") as archive:
@@ -134,17 +150,15 @@ def held_out(data_dir: Path) -> dict[str, Task]:
                 dtype=str,
                 quoting=csv.QUOTE_NONE,
             )
-            for p in ("train", "test")
+            for p in ("train", "eval", "test")
         }
+    shuffled = bank["train"].sample(frac=1, random_state=0)
+    bank["calib"], bank["train"] = shuffled[:BANKING77_CALIB], shuffled[BANKING77_CALIB:]
+    bank = {p: _frame(f["text"], f["category"]) for p, f in bank.items()}
+    mtop = {p: _frame(f["text"], f["intent"]) for p, f in mtop.items()}
     return {
-        "banking77": _task(
-            "banking77",
-            *(_frame(bank[p]["text"], bank[p]["category"]) for p in ("train", "test")),
-            set(),
-        ),
-        "mtop": _task(
-            "mtop", *(_frame(mtop[p]["text"], mtop[p]["intent"]) for p in ("train", "test")), set()
-        ),
+        "banking77": _task("banking77", bank["train"], bank["test"], set(), bank["calib"]),
+        "mtop": _task("mtop", mtop["train"], mtop["test"], set(), mtop["eval"]),
     }
 
 
@@ -154,7 +168,7 @@ def training_pool(data_dir: Path, evals: dict[str, Task]) -> list[Task]:
     seen = {
         t
         for task in evals.values()
-        for t in _norm(pd.Series([r[0] for r in task.train + task.test]))
+        for t in _norm(pd.Series([r[0] for r in task.train + task.calib + task.test]))
     }
     folder = data_dir / "datasets"
     read = lambda name, part: pd.read_parquet(folder / name / f"{part}.parquet")  # noqa: E731
@@ -202,11 +216,11 @@ def training_pool(data_dir: Path, evals: dict[str, Task]) -> list[Task]:
 class Reader(nn.Module):
     """An encoder plus a scorer read at every [MASK] marker."""
 
-    def __init__(self, repo: str):
+    def __init__(self, repo: str, revision: str | None = None):
         from transformers import AutoModel
 
         super().__init__()
-        self.encoder = AutoModel.from_pretrained(repo)
+        self.encoder = AutoModel.from_pretrained(repo, revision=revision)
         d = self.encoder.config.hidden_size
         self.scorer = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, d), nn.GELU(), nn.Linear(d, 1))
 
@@ -278,8 +292,9 @@ def train(name: str, tasks: list[Task], steps: int, batch_size: int = 16, seed: 
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     dev = device()
-    tok = AutoTokenizer.from_pretrained(ENCODERS[name])
-    model = Reader(ENCODERS[name]).to(dev)
+    repo, revision = ENCODERS[name]
+    tok = AutoTokenizer.from_pretrained(repo, revision=revision)
+    model = Reader(repo, revision).to(dev)
     optim = torch.optim.AdamW(
         [
             {"params": model.encoder.parameters(), "lr": 5e-5},
@@ -325,20 +340,28 @@ def train(name: str, tasks: list[Task], steps: int, batch_size: int = 16, seed: 
     )
 
 
+PARTS = ("calib", "test")
+
+
 @torch.no_grad()
 def predict(
     model, tok, task: Task, shots: int, near: bool = False, seed: int = 0, batch_size: int = 32
-) -> np.ndarray:
-    """P(label) for every test row, with `shots` training examples in context: random or nearest."""
+) -> dict[str, np.ndarray]:
+    """P(label) for every calib and test row, with `shots` history examples in context."""
+    return {part: _predict(model, tok, task, part, shots, near, seed, batch_size) for part in PARTS}
+
+
+def _predict(model, tok, task, part, shots, near, seed, batch_size) -> np.ndarray:
     dev = next(model.parameters()).device.type
     rng = np.random.default_rng(seed)
     options = list(range(len(task.labels)))
+    rows, vecs = getattr(task, part), getattr(task, f"{part}_vecs")
     out = []
-    for start in range(0, len(task.test), batch_size):
+    for start in range(0, len(rows), batch_size):
         items = []
-        for j, (text, gold) in enumerate(task.test[start : start + batch_size], start):
+        for j, (text, gold) in enumerate(rows[start : start + batch_size], start):
             if near and shots:
-                context = nearest(task, task.test_vecs[j], shots, skip=text)
+                context = nearest(task, vecs[j], shots, skip=text)
             else:
                 context = (
                     [task.train[i] for i in rng.choice(len(task.train), size=shots, replace=False)]
@@ -353,32 +376,43 @@ def predict(
     return np.concatenate(out)
 
 
-def vote(task: Task, shots: int) -> np.ndarray:
+def vote(task: Task, shots: int) -> dict[str, np.ndarray]:
     """Baseline with no reader: P(label) from a vote of the nearest examples."""
-    p = np.full((len(task.test), len(task.labels)), 1e-3)
-    for j, (text, _) in enumerate(task.test):
-        for _, y in nearest(task, task.test_vecs[j], shots, skip=text):
-            p[j, y] += 1.0
-    return p / p.sum(1, keepdims=True)
+    out = {}
+    for part in PARTS:
+        rows, vecs = getattr(task, part), getattr(task, f"{part}_vecs")
+        p = np.full((len(rows), len(task.labels)), 1e-3)
+        for j, (text, _) in enumerate(rows):
+            for _, y in nearest(task, vecs[j], shots, skip=text):
+                p[j, y] += 1.0
+        out[part] = p / p.sum(1, keepdims=True)
+    return out
 
 
-def score(task: Task, p: np.ndarray, seed: int = 0) -> dict:
-    """Accuracy, then temperature and the 99% gate fitted on half of test, checked on the other."""
-    y = np.array([g for _, g in task.test])
-    half = np.random.default_rng(seed).permutation(len(y))
-    calib, test = half[: len(y) // 2], half[len(y) // 2 :]
-    t = fit_temperature(y[calib], p[calib])
-    pc, pt = scale(p[calib], t), scale(p[test], t)
-    tau, n_auto, _, lower = choose_threshold(y[calib], pc)
-    auto = pt.max(1) >= tau if tau is not None else np.zeros(len(test), bool)
-    hits = pt.argmax(1) == y[test]
+def labels_of(rows) -> np.ndarray:
+    return np.array([g for _, g in rows])
+
+
+def score(task: Task, p: dict[str, np.ndarray], seed: int = 0) -> dict:
+    """Temperature from one half of calib, the 99% gate certified on the other half, then both
+    applied to test. Test labels only score; they choose nothing."""
+    yc, yt = labels_of(task.calib), labels_of(task.test)
+    half = np.random.default_rng(seed).permutation(len(yc))
+    fit, cert = half[: len(yc) // 2], half[len(yc) // 2 :]
+    t = fit_temperature(yc[fit], p["calib"][fit])
+    tau, n_auto, _, lower = choose_threshold(yc[cert], scale(p["calib"][cert], t))
+    pt = scale(p["test"], t)
+    auto = pt.max(1) >= tau if tau is not None else np.zeros(len(yt), bool)
+    hits = pt.argmax(1) == yt
     return {
-        "accuracy": round(float((p.argmax(1) == y).mean()), 4),
-        "ece_test": round(float(ece(y[test], pt)), 4),
+        "accuracy": round(float(hits.mean()), 4),
+        "ece_test": round(float(ece(yt, pt)), 4),
         "temperature": round(t, 3),
         "certified_coverage_test": round(float(auto.mean()), 4),
         "precision_auto_test": round(float(hits[auto].mean()), 4) if auto.any() else None,
-        "calib_cp_lower": round(lower, 4),
+        "cert_rows": len(cert),
+        "cert_accepted": n_auto,
+        "cert_cp_lower": round(lower, 4),
     }
 
 
@@ -399,32 +433,51 @@ def capped(task: Task, n: int | None, seed: int = 0) -> Task:
         task.test,
         task.train_vecs[keep],
         task.test_vecs,
+        task.calib,
+        task.calib_vecs,
     )
 
 
-def head(task: Task) -> np.ndarray:
+def head(task: Task) -> dict[str, np.ndarray]:
     """Ren 1.0.0's recipe on the same history: logistic regression on the MiniLM vectors."""
     from sklearn.linear_model import LogisticRegression
 
-    y = np.array([r[1] for r in task.train])
-    clf = LogisticRegression(C=10, max_iter=3000).fit(task.train_vecs.float().cpu().numpy(), y)
-    p = np.zeros((len(task.test), len(task.labels)))
-    p[:, clf.classes_] = clf.predict_proba(task.test_vecs.float().cpu().numpy())
-    return p
+    clf = LogisticRegression(C=10, max_iter=3000)
+    clf.fit(task.train_vecs.float().cpu().numpy(), labels_of(task.train))
+    out = {}
+    for part in PARTS:
+        vecs = getattr(task, f"{part}_vecs").float().cpu().numpy()
+        out[part] = np.zeros((len(vecs), len(task.labels)))
+        out[part][:, clf.classes_] = clf.predict_proba(vecs)
+    return out
 
 
-def budgeted(model, tok, evals: dict[str, Task]) -> dict:
-    """Reader, vote and head given the same 200, 1,000 or all labelled history rows per set."""
+def budgeted(model, tok, evals: dict[str, Task], save: Path) -> dict:
+    """Reader, vote and head given the same 200, 1,000 or all labelled history rows per set.
+    Every probability matrix is also saved under `save`, so gate rules can be compared on CPU."""
+    save.mkdir(parents=True, exist_ok=True)
+
+    def kept(task, key, p):
+        np.savez_compressed(
+            save / f"{key}.npz",
+            **{f"p_{k}": v.astype(np.float16) for k, v in p.items()},
+            y_calib=labels_of(task.calib),
+            y_test=labels_of(task.test),
+        )
+        return score(task, p)
+
     out = {}
     for name, task in evals.items():
-        out[name] = {"reader-0": score(task, predict(model, tok, task, 0))}
+        out[name] = {"reader-0": kept(task, f"{name}-reader-0", predict(model, tok, task, 0))}
         for n in BUDGETS:
-            t = capped(task, n)
-            out[name][str(n or "all")] = {
-                "head": score(t, head(t)),
-                "vote-8": score(t, vote(t, 8)),
-                "reader-8": score(t, predict(model, tok, t, 8, near=True)),
-                "reader-32": score(t, predict(model, tok, t, 32, near=True)),
+            t, b = capped(task, n), str(n or "all")
+            out[name][b] = {
+                "head": kept(t, f"{name}-{b}-head", head(t)),
+                "vote-8": kept(t, f"{name}-{b}-vote-8", vote(t, 8)),
+                "reader-8": kept(t, f"{name}-{b}-reader-8", predict(model, tok, t, 8, near=True)),
+                "reader-32": kept(
+                    t, f"{name}-{b}-reader-32", predict(model, tok, t, 32, near=True)
+                ),
             }
     return out
 
@@ -442,9 +495,21 @@ def evaluate(out: str) -> None:
     model = model.to(device()).eval()
     tok = AutoTokenizer.from_pretrained(folder / "encoder")
     evals = held_out(data_dir)
+    # Readers trained before calib was held out saw some of its texts (MTOP's eval shares ~1,000
+    # with TOPv2): calibrate on the rest only.
+    texts = lambda rows: _norm(pd.Series([r[0] for r in rows]))  # noqa: E731
+    trained = {t for task in training_pool(data_dir, {}) for t in texts(task.train)}
+    for task in evals.values():
+        fresh = ~texts(task.calib).isin(trained)
+        task.calib = [r for r, ok in zip(task.calib, fresh, strict=True) if ok]
     index(list(evals.values()))
-    report = {"model": out, "device": device(), "budgets": budgeted(model, tok, evals)}
-    path = Path("docs/results/s2") / f"incontext-{out}-budgets.json"
+    split = {
+        name: {p: len(getattr(t, p)) for p in ("train", "calib", "test")}
+        for name, t in evals.items()
+    }
+    budgets = budgeted(model, tok, evals, data_dir / "predictions" / out)
+    report = {"model": out, "device": device(), "split": split, "budgets": budgets}
+    path = Path("docs/results/s2") / f"incontext-{out}-clean.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report["budgets"]))
@@ -471,7 +536,7 @@ def main():
     torch.save(model.scorer.state_dict(), data_dir / "encoders" / out / "scorer.pt")
     report |= {
         "model": out,
-        "base": ENCODERS[args.encoder],
+        "base": "@".join(ENCODERS[args.encoder]),
         "parameters": sum(p.numel() for p in model.parameters()),
         "device": device(),
         "train_sets": {t.name: len(t.train) for t in tasks},

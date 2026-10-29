@@ -77,18 +77,19 @@ def incontext(encoder: str, steps: int) -> str:
 
 @app.function(gpu="A10G", volumes={"/vol": volume}, timeout=2 * 3600)
 def reader_budgets(out: str) -> str:
-    """Re-score a saved reader at each labelled-history budget."""
+    """Re-score a saved reader at each history budget; its predictions stay on the volume."""
     import torch
 
     assert torch.cuda.is_available(), "no CUDA device: refusing to score on CPU"
     run = Path("/vol/run")
     subprocess.run(["python", "-m", "backend.incontext", "--evaluate", out], cwd=run, check=True)
-    return (run / f"docs/results/s2/incontext-{out}-budgets.json").read_text()
+    volume.commit()
+    return (run / f"docs/results/s2/incontext-{out}-clean.json").read_text()
 
 
 @app.local_entrypoint()
 def budgets(out: str = "ic-ettin-32m-s6000-near"):
-    path = ROOT / f"docs/results/s2/incontext-{out}-budgets.json"
+    path = ROOT / f"docs/results/s2/incontext-{out}-clean.json"
     path.write_text(reader_budgets.remote(out))
     print(f"saved {path}")
 
