@@ -1,0 +1,230 @@
+{
+  "model": "ic-ettin-150m-s6000-near",
+  "device": "cuda",
+  "budgets": {
+    "banking77": {
+      "reader-0": {
+        "accuracy": 0.614,
+        "ece_test": 0.0391,
+        "temperature": 1.929,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "200": {
+        "head": {
+          "accuracy": 0.5068,
+          "ece_test": 0.053,
+          "temperature": 0.624,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.3299,
+          "ece_test": 0.1059,
+          "temperature": 1.787,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.6646,
+          "ece_test": 0.0434,
+          "temperature": 1.743,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.6604,
+          "ece_test": 0.0347,
+          "temperature": 1.667,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        }
+      },
+      "1000": {
+        "head": {
+          "accuracy": 0.8302,
+          "ece_test": 0.0248,
+          "temperature": 0.535,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.736,
+          "ece_test": 0.145,
+          "temperature": 1.185,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.7532,
+          "ece_test": 0.0432,
+          "temperature": 1.593,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.7403,
+          "ece_test": 0.0511,
+          "temperature": 1.514,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        }
+      },
+      "all": {
+        "head": {
+          "accuracy": 0.9295,
+          "ece_test": 0.0102,
+          "temperature": 0.681,
+          "certified_coverage_test": 0.5026,
+          "precision_auto_test": 0.9922,
+          "calib_cp_lower": 0.9938
+        },
+        "vote-8": {
+          "accuracy": 0.9156,
+          "ece_test": 0.0187,
+          "temperature": 1.068,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.8646,
+          "ece_test": 0.0256,
+          "temperature": 1.472,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.8539,
+          "ece_test": 0.0488,
+          "temperature": 1.406,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        }
+      }
+    },
+    "mtop": {
+      "reader-0": {
+        "accuracy": 0.8098,
+        "ece_test": 0.046,
+        "temperature": 1.515,
+        "certified_coverage_test": 0.2544,
+        "precision_auto_test": 0.9982,
+        "calib_cp_lower": 0.9942
+      },
+      "200": {
+        "head": {
+          "accuracy": 0.6968,
+          "ece_test": 0.0566,
+          "temperature": 0.597,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.6256,
+          "ece_test": 0.1393,
+          "temperature": 1.329,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.8541,
+          "ece_test": 0.0408,
+          "temperature": 1.422,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.8502,
+          "ece_test": 0.0427,
+          "temperature": 1.41,
+          "certified_coverage_test": 0.2522,
+          "precision_auto_test": 0.9982,
+          "calib_cp_lower": 0.9942
+        }
+      },
+      "1000": {
+        "head": {
+          "accuracy": 0.819,
+          "ece_test": 0.015,
+          "temperature": 0.721,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.7585,
+          "ece_test": 0.1021,
+          "temperature": 1.154,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.8967,
+          "ece_test": 0.0267,
+          "temperature": 1.342,
+          "certified_coverage_test": 0.2585,
+          "precision_auto_test": 0.9965,
+          "calib_cp_lower": 0.9942
+        },
+        "reader-32": {
+          "accuracy": 0.8935,
+          "ece_test": 0.0184,
+          "temperature": 1.333,
+          "certified_coverage_test": 0.2868,
+          "precision_auto_test": 0.9984,
+          "calib_cp_lower": 0.995
+        }
+      },
+      "all": {
+        "head": {
+          "accuracy": 0.9382,
+          "ece_test": 0.0082,
+          "temperature": 0.736,
+          "certified_coverage_test": 0.4045,
+          "precision_auto_test": 0.9989,
+          "calib_cp_lower": 0.9946
+        },
+        "vote-8": {
+          "accuracy": 0.8653,
+          "ece_test": 0.0465,
+          "temperature": 0.992,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "calib_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.93,
+          "ece_test": 0.0187,
+          "temperature": 1.275,
+          "certified_coverage_test": 0.2225,
+          "precision_auto_test": 1.0,
+          "calib_cp_lower": 0.9935
+        },
+        "reader-32": {
+          "accuracy": 0.9337,
+          "ece_test": 0.0108,
+          "temperature": 1.249,
+          "certified_coverage_test": 0.6566,
+          "precision_auto_test": 0.9986,
+          "calib_cp_lower": 0.9936
+        }
+      }
+    }
+  }
+}
