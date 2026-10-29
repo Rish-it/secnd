@@ -248,3 +248,30 @@ texts were skipped (164 selections across the ten training subsets). The cache
 is local data and is excluded from version control; rerun the documented CLI to
 recreate it with your own provider budget. No held-out labels or training labels
 were sent. Paraphrase quality has not been separately scored.
+
+## Reproduce the cold-start handoff
+
+`backend.handoff` selects 500 stream rows at seed 0. Meta teacher labels are
+cached locally by model, item ID and text hash; fixed calibration and test rows
+are never sent for labeling or used to train. Human-label comparisons use 50
+and 200 seed labels, before and after the same teacher labels are added at weight
+0.3. A separate 20-round simulation starts with zero human labels.
+
+```sh
+uv run python -m backend.handoff --label  # paid; explicit $10 task cap
+uv run python -m backend.handoff          # cache-only; no new provider calls
+uv run --with matplotlib python docs/results/s5/plot-handoff.py
+```
+
+The task cap includes earlier attempts under the same ledger task, so resuming
+cannot reset its allowance. Keep the current spend ledger. The conservative
+preflight uses 6,000 input tokens and the 2,048-output-token ceiling per item;
+actual and estimated failed-attempt charges come from the existing client ledger.
+Eight requests can run concurrently. Local teacher caches and encoder files stay
+outside Git. Raw request text is absent from the result report.
+
+Curve shares count cumulative completed decisions by teacher, automatic model
+and human. Unanswered items are recorded separately as `pending` and excluded
+from that denominator. Fixed-test coverage and automatic precision are separate
+metrics. True stream labels stand in for human answers; this is an offline
+simulation. No claim about live customer behavior follows from it.
