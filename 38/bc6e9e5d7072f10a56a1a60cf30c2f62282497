@@ -1,0 +1,21 @@
+Dockerfile
+  s_f4216e91105995::t_baa151d60f9185 36
+compose.yaml
+  s_f4216e91105995::t_baa151d60f9185 4-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "38bc6e9e5d7072f10a56a1a60cf30c2f62282497",
+  "prompts": {},
+  "sessions": {
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
