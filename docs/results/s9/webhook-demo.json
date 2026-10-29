@@ -1,0 +1,79 @@
+{
+  "command": "uv run python -m backend.tests.http_meta --base-url http://127.0.0.1:8022",
+  "fixture_sources": "backend/tests/fixtures/meta/README.md",
+  "runs": [
+    {
+      "source_revision": "8dbd9e63c8a638b428f6de24c1b095faf68a927a",
+      "scope": "Illustrative local integration, not benchmark quality.",
+      "featurizer": "char_tfidf",
+      "handshake": true,
+      "messages": [
+        {
+          "platform": "whatsapp",
+          "status": "queued",
+          "duplicate": true
+        },
+        {
+          "platform": "messenger",
+          "status": "queued",
+          "duplicate": true
+        }
+      ],
+      "answered_queue_empty": true,
+      "background_retrain": true,
+      "outbound_sends": 0
+    },
+    {
+      "source_revision": "8dbd9e63c8a638b428f6de24c1b095faf68a927a",
+      "scope": "Illustrative local integration, not benchmark quality.",
+      "featurizer": "char_tfidf",
+      "handshake": true,
+      "messages": [
+        {
+          "platform": "whatsapp",
+          "status": "queued",
+          "duplicate": true
+        },
+        {
+          "platform": "messenger",
+          "status": "queued",
+          "duplicate": true
+        }
+      ],
+      "answered_queue_empty": true,
+      "background_retrain": true,
+      "outbound_sends": 0
+    },
+    {
+      "source_revision": "3acff9d7f03ddcd23c7cb18df041f3235d4fbd15",
+      "scope": "Illustrative local integration, not benchmark quality.",
+      "featurizer": "char_tfidf",
+      "handshake": true,
+      "messages": [
+        {
+          "platform": "whatsapp",
+          "status": "queued",
+          "duplicate": true
+        },
+        {
+          "platform": "messenger",
+          "status": "queued",
+          "duplicate": true
+        }
+      ],
+      "answered_queue_empty": true,
+      "background_retrain": true,
+      "outbound_sends": 0
+    }
+  ],
+  "curl_handshake_delivery_replay": true,
+  "checks": {
+    "tests": 190,
+    "clean_runs": 2
+  },
+  "limits": [
+    "Local illustrative integration; outbound HTTP is mocked in unit tests.",
+    "Messenger outbound replies remain dry-run.",
+    "No real outbound messages sent."
+  ]
+}
