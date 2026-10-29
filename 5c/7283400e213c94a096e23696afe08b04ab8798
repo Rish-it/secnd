@@ -1,0 +1,23 @@
+backend/muse.py
+  s_931864dc636ea3::t_3ef84e357e07d2 4-5,7-10,19-29,58-160,171-176,179-186
+  s_931864dc636ea3::t_956b0b7a59b5d9 187,203,206,210,212,214-215
+backend/tests/test_muse.py
+  s_931864dc636ea3::t_da4b002db5ab0f 3,9,16,39-41,48,51,55-113
+  s_931864dc636ea3::t_51c373c96f7ca2 1,114-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5c7283400e213c94a096e23696afe08b04ab8798",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
