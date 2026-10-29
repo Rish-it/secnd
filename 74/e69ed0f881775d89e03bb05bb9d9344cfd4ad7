@@ -1,0 +1,21 @@
+docs/results/s3r/paraphrases.json
+  s_1327be57a67224::t_fba1310bd46c8f 1-52
+docs/results/s3r/protocol.md
+  s_1327be57a67224::t_8c1d7a895f4e3e 65-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "74e69ed0f881775d89e03bb05bb9d9344cfd4ad7",
+  "prompts": {},
+  "sessions": {
+    "s_1327be57a67224": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a1890a-afae-7d30-972c-76425591d4d6",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
