@@ -19,6 +19,7 @@ from scipy import sparse
 from sklearn.linear_model import LogisticRegression
 
 from backend import calibrate, metrics, registry
+from backend.calibrate import TARGET
 from backend.features import featurize
 from backend.model import LR, memory_block, tune_c
 
@@ -55,6 +56,9 @@ class Loop:
         self.rows, self.y, self.weights, self.memory = [], [], [], {}
         self.c = None
         self.current = None  # {"model", "temperature", "tau", "lower", "version"}
+        # Spot-checks of the live version: predicted label per item, then [right, checked].
+        # ponytail: pending predictions live in memory; a restart forgets unanswered spot-checks.
+        self.pending, self.checks = {}, [0, 0]
         self.versions = 0
         # ponytail: one lock per workspace serialises retrains; a queue per workspace if answers
         # arrive faster than a retrain (~0.3 s at 10k rows) finishes.
@@ -87,6 +91,21 @@ class Loop:
             self.weights.append(weight)
             if key:
                 self.memory[key] = self.index[label]
+        if source == "spot_check":
+            for item, label in zip(frame["id"].astype(str), frame["label"], strict=True):
+                if item in self.pending:
+                    self.checks[0] += self.pending.pop(item) == label
+                    self.checks[1] += 1
+
+    @property
+    def guarded(self) -> bool:
+        """Stop answering automatically once spot-checks show precision below the claim.
+
+        True when the one-sided 95% lower bound on the spot-check error rate exceeds 1 - TARGET,
+        i.e. the evidence says the live version is below 99%. A newly promoted version starts clean.
+        """
+        right, checked = self.checks
+        return metrics.clopper_pearson_lower(checked - right, checked) > 1 - TARGET
 
     def retrain(self) -> dict:
         """Refit, recalibrate on the fixed calib set, gate; promote or keep the current version."""
@@ -114,8 +133,9 @@ class Loop:
             current = None
             if self.current:
                 current = self._proba(self.current["model"], calib_x, self.current["temperature"])
+            live_tau = self.current and self.current["tau"]  # a guarded version gets no ratchet
             reasons = registry.gate(
-                self.calib_y, p, current, tau, lower, self.current and self.current["tau"]
+                self.calib_y, p, current, tau, lower, None if self.guarded else live_tau
             )
             promoted = not reasons
             if promoted:
@@ -127,12 +147,14 @@ class Loop:
                     version = f"{registry.PREFIX}{self.versions}"
                 self.versions += 1
                 self.current = {**candidate, "version": version}
+                self.pending, self.checks = {}, [0, 0]
             return {
                 "promoted": promoted,
                 "reasons": reasons,
                 "model_version": self.current["version"] if self.current else None,
                 "threshold": self.current["tau"] if self.current else None,
                 "labels": len(y),
+                "guarded": self.guarded,
                 "retrain_ms": round((time.perf_counter() - started) * 1000, 1),
             }
 
@@ -161,12 +183,14 @@ class Loop:
         if self.current is None:
             raise RuntimeError("no model yet: learn from the seed labels and retrain first")
         p = self._proba(self.current["model"], self._x(frame), self.current["temperature"])
-        tau = self.current["tau"]
+        tau = None if self.guarded else self.current["tau"]
         decisions = []
         for row, probs in zip(frame.itertuples(), p, strict=True):
             top = np.argsort(-probs, kind="stable")[:TOP_K]
             auto = tau is not None and probs[top[0]] >= tau
             spot_check = bool(auto and self.rng.random() < self.spot_check_rate)
+            if spot_check:
+                self.pending[str(row.id)] = self.labels[top[0]]
             decisions.append(
                 {
                     "item_id": str(row.id),
