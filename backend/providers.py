@@ -2,6 +2,7 @@
 
 from contextlib import ExitStack
 from pathlib import Path
+from threading import RLock
 from typing import Literal
 
 import httpx
@@ -53,6 +54,7 @@ class MuseProviders(MuseClient):
         self.directory, self.transport = directory, transport
         self.last_provider: Provider | None = None
         self.clients: dict[Provider, MuseClient] = {}
+        self.clients_lock = RLock()
         self.stack = None
 
     def __enter__(self):
@@ -69,20 +71,21 @@ class MuseProviders(MuseClient):
             settings = provider_settings(self.config, provider)
             if not settings.muse_api_key.get_secret_value():
                 continue
-            if provider not in self.clients:
-                run = self.stack.enter_context(
-                    BudgetRun(
-                        settings,
-                        task=self.task,
-                        rows=self.rows,
-                        measured_tokens=self.measured_tokens,
-                        provider=provider,
-                        ledger_path=ledger_path(self.directory, provider),
+            with self.clients_lock:
+                if provider not in self.clients:
+                    run = self.stack.enter_context(
+                        BudgetRun(
+                            settings,
+                            task=self.task,
+                            rows=self.rows,
+                            measured_tokens=self.measured_tokens,
+                            provider=provider,
+                            ledger_path=ledger_path(self.directory, provider),
+                        )
                     )
-                )
-                self.clients[provider] = self.stack.enter_context(
-                    MuseClient(settings, run=run, transport=self.transport)
-                )
+                    self.clients[provider] = self.stack.enter_context(
+                        MuseClient(settings, run=run, transport=self.transport)
+                    )
             self.last_provider = provider
             try:
                 return self.clients[provider]._request(messages, max_tokens=max_tokens, tools=tools)

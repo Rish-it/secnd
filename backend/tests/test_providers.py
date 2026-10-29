@@ -145,3 +145,41 @@ def test_budget_and_connection_errors_do_not_trigger_failover(tmp_path):
                 client.zero_shot([MuseItem(item_id="a", text="Train")], ["Travel"])
     assert calls == ["api.meta.ai"]
     assert not ledger_path(tmp_path, "baseten").exists()
+
+
+def test_concurrent_calls_share_one_provider_run_and_record_actual_provider(tmp_path):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+
+    entered = Barrier(2)
+
+    def handler(request):
+        entered.wait(timeout=5)
+        return httpx.Response(
+            200,
+            json={
+                "model": "muse-spark-1.3",
+                "usage": {"prompt_tokens": 100, "completion_tokens": 40},
+                "choices": [{"message": {"content": "ok"}}],
+            },
+        )
+
+    with (
+        MuseProviders(
+            settings(),
+            task="parallel",
+            rows=2,
+            measured_tokens=Usage(prompt_tokens=100, completion_tokens=40),
+            directory=tmp_path,
+            transport=httpx.MockTransport(handler),
+        ) as client,
+        ThreadPoolExecutor(max_workers=2) as pool,
+    ):
+        futures = [
+            pool.submit(client._request, [{"role": "user", "content": "text"}], max_tokens=64)
+            for _ in range(2)
+        ]
+        assert [future.result().provider for future in futures] == ["meta", "meta"]
+        assert len(client.clients) == 1
+    rows = list(csv.DictReader(ledger_path(tmp_path, "meta").open()))
+    assert len(rows) == 1 and int(rows[0]["prompt_tokens"]) == 200

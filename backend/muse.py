@@ -255,6 +255,7 @@ class AssistantMessage(BaseModel):
 
 class Completion(BaseModel):
     model: Annotated[str, Field(min_length=1)]
+    provider: Literal["meta", "baseten", "nebius"] = "baseten"
     message: AssistantMessage
     usage: Usage
     latency_ms: float
@@ -365,6 +366,7 @@ class MuseClient:
                 )
             return Completion(
                 model=data["model"],
+                provider=self.run.provider,
                 message=choice["message"],
                 usage=usage,
                 latency_ms=(time.perf_counter() - started) * 1000,
