@@ -4,7 +4,7 @@ CI builds and starts the production image, checks database health and the
 frontend, and sends the example CSV through the preview endpoint. Cleanup runs
 on success and failure. The job is limited to ten minutes.
 
-`uv run python -m backend.ci_eval` reproduces the committed BANKING77 merchant
+`uv run python -m backend.ci_eval` reproduces the committed IPSA merchant
 memory card with 200 training rows and seed 0. Every deterministic field must
 match, including all quality metrics, per-class calibration, slices, threshold,
 bound, data/split hashes, seed and schema. The only excluded fields are measured
