@@ -1,0 +1,29 @@
+docs/results/s5/providers/baseten/muse-predictions.jsonl
+  s_931864dc636ea3::t_e4ec52dd7a4fb7 1-500
+docs/results/s5/providers/baseten/muse-sample.json
+  s_1f3964e6251ccb::t_c337db54bfe37e 1-581
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ecee8bdc79d1c56605f00797e3c3876452de24f9",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
