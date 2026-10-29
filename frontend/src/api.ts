@@ -26,6 +26,7 @@ export type Decision = {
   spot_check: boolean;
 };
 export type EvalCard = {
+  featurizer_id?: string | null;
   model_version: string;
   coverage: number;
   accuracy?: number | null;
