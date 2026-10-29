@@ -1,0 +1,21 @@
+docs/results/s1/card-ipsa-merchant_memory-b200.json
+  s_931864dc636ea3::t_0e46a4f532a5a2 2-71,73-80,82-84,86-93,95-105,108-111,113-122
+docs/results/s1/card-ipsa-merchant_memory-b5000.json
+  s_931864dc636ea3::t_14c2636e7ed007 2-71,73-80,82-84,86-93,95-105,108-111,113-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b4fbbae97e2b17f4efd4070ea6c8822986fdf208",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
