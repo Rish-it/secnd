@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     data_dir: Path = Path(".data")
     frontend_dist: Path = Path("frontend/dist")
+    evaluation_dir: Path = Path(__file__).resolve().parents[1] / "docs/results/s3"
     muse_api_key: SecretStr = SecretStr("")
     muse_base_url: str = "https://inference.baseten.co/v1"
     muse_model: str = "meta-models/muse-spark-open-1026"

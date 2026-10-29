@@ -13,7 +13,6 @@ from backend.schemas import (
     Error,
     ImportResult,
     MetricsResult,
-    ModelVersion,
     Page,
 )
 
@@ -135,7 +134,7 @@ def test_contract_import_and_predictions_are_explicit_fixtures(client: TestClien
 
 @pytest.mark.parametrize(
     ("route", "schema"),
-    [("feed", Page[Decision]), ("queue", Page[Decision]), ("models", Page[ModelVersion])],
+    [("feed", Page[Decision]), ("queue", Page[Decision])],
 )
 def test_contract_pages(client: TestClient, route, schema):
     response = client.get(f"{API}/{route}")
@@ -153,10 +152,10 @@ def test_contract_answers_metrics_rollback_and_chat(client: TestClient):
     )
     assert AnswerResult.model_validate(response.json()).retrain == "fixture"
     card = MetricsResult.model_validate(client.get(f"{API}/metrics").json()).card
-    assert card.coverage == 0
-    assert card.precision is None
+    assert card.coverage == 0.3168
+    assert card.precision == 0.9962
     response = client.post(f"{API}/models/fixture-v0:rollback")
-    assert ModelVersion.model_validate(response.json()).current
+    assert response.status_code == 404
     response = client.post(f"{API}/chat", json={"question": "How many today?"})
     assert ChatResult.model_validate(response.json()).model_version is None
 
@@ -184,3 +183,47 @@ def test_contract_errors_and_boundaries(client: TestClient):
     assert response.status_code == 404
     assert Error.model_validate(response.json()).code == "http_404"
     assert client.get(f"{API}/queue?cursor=fixture-end").json()["items"] == []
+
+
+def test_real_evaluations_are_distinct_from_fixture_workspace_data(client):
+    for dataset in ("mtop", "banking77", "ipsa"):
+        response = client.get(f"{API}/metrics?dataset={dataset}")
+        assert response.status_code == 200
+        assert response.headers["X-Secnd-Mode"] == "evaluation"
+        measured = MetricsResult.model_validate(response.json())
+        assert measured.dataset == dataset
+        assert measured.card.model_version.startswith(dataset)
+        assert measured.history == []
+        assert measured.curves.reliability and measured.curves.coverage_precision
+    assert client.get(f"{API}/metrics?dataset=unknown").status_code == 422
+    assert client.get(f"{API}/models").json() == {"items": [], "next_cursor": None}
+
+
+def test_registry_models_promote_and_rollback_are_workspace_scoped(client, tmp_path):
+    from backend.registry import Registry
+
+    registry = Registry(tmp_path / "storage", "default")
+    first = registry.save({}, {"coverage": 0.1})
+    second = registry.save({}, {"coverage": 0.2})
+    registry.promote(first)
+    versions = client.get(f"{API}/models")
+    assert versions.headers["X-Secnd-Mode"] == "live"
+    assert [v["current"] for v in versions.json()["items"]] == [True, False]
+    assert client.post(f"{API}/models/{second}:promote").json()["current"]
+    assert registry.current() == second
+    assert client.post(f"{API}/models/{first}:rollback").json()["card"]["coverage"] == 0.1
+    assert registry.current() == first
+    assert client.get("/api/v1/workspaces/other/models").json()["items"] == []
+    assert client.post(f"{API}/models/missing:promote").status_code == 404
+    incomplete = registry.save({}, {"threshold": None})
+    assert client.post(f"{API}/models/{incomplete}:promote").status_code == 503
+    assert registry.current() == first
+    assert client.get(f"{API}/models").status_code == 503
+
+
+def test_missing_published_evaluation_returns_typed_404(tmp_path):
+    settings = Settings(data_dir=tmp_path, evaluation_dir=tmp_path / "absent", _env_file=None)
+    with TestClient(create_app(settings)) as client:
+        response = client.get(f"{API}/metrics")
+        assert response.status_code == 404
+        assert Error.model_validate(response.json()).code == "http_404"

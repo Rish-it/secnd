@@ -22,6 +22,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev
 COPY backend backend
+COPY docs/results/s3/card-*.json docs/results/s3/
+COPY docs/results/s3/curves-*.json docs/results/s3/
 COPY --from=frontend /build/frontend/dist frontend/dist
 RUN useradd --create-home --uid 10001 secnd \
     && mkdir -p /app/.data \

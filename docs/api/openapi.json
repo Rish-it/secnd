@@ -176,6 +176,43 @@
         "title": "ChatResult",
         "type": "object"
       },
+      "CoveragePrecisionPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "coverage": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Coverage",
+            "type": "number"
+          },
+          "precision": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precision"
+          },
+          "threshold": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "threshold",
+          "coverage",
+          "precision"
+        ],
+        "title": "CoveragePrecisionPoint",
+        "type": "object"
+      },
       "Decision": {
         "properties": {
           "auto": {
@@ -605,6 +642,27 @@
         "title": "EvalCard",
         "type": "object"
       },
+      "EvalCurves": {
+        "additionalProperties": false,
+        "properties": {
+          "coverage_precision": {
+            "items": {
+              "$ref": "#/components/schemas/CoveragePrecisionPoint"
+            },
+            "title": "Coverage Precision",
+            "type": "array"
+          },
+          "reliability": {
+            "items": {
+              "$ref": "#/components/schemas/ReliabilityBin"
+            },
+            "title": "Reliability",
+            "type": "array"
+          }
+        },
+        "title": "EvalCurves",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -775,6 +833,25 @@
           "card": {
             "$ref": "#/components/schemas/EvalCard"
           },
+          "curves": {
+            "$ref": "#/components/schemas/EvalCurves"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "enum": [
+                  "mtop",
+                  "banking77",
+                  "ipsa"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset"
+          },
           "history": {
             "items": {
               "$ref": "#/components/schemas/HistoryPoint"
@@ -937,6 +1014,35 @@
           }
         },
         "title": "Reasons",
+        "type": "object"
+      },
+      "ReliabilityBin": {
+        "additionalProperties": false,
+        "properties": {
+          "accuracy": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Accuracy",
+            "type": "number"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "count": {
+            "minimum": 0.0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "confidence",
+          "accuracy",
+          "count"
+        ],
+        "title": "ReliabilityBin",
         "type": "object"
       },
       "SliceMetrics": {
@@ -1173,6 +1279,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Answers",
@@ -1247,6 +1363,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Chat",
@@ -1321,6 +1447,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Import Decisions",
@@ -1413,6 +1549,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Feed",
@@ -1423,7 +1569,7 @@
     },
     "/api/v1/workspaces/{ws}/metrics": {
       "get": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Published evaluation card and curves, separate from workspace learning.",
         "operationId": "metrics_api_v1_workspaces__ws__metrics_get",
         "parameters": [
           {
@@ -1433,6 +1579,21 @@
             "schema": {
               "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
               "title": "Ws",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dataset",
+            "required": false,
+            "schema": {
+              "default": "mtop",
+              "enum": [
+                "mtop",
+                "banking77",
+                "ipsa"
+              ],
+              "title": "Dataset",
               "type": "string"
             }
           }
@@ -1477,6 +1638,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Metrics",
@@ -1487,7 +1658,7 @@
     },
     "/api/v1/workspaces/{ws}/models": {
       "get": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Workspace registry versions and their measured cards; empty before training.",
         "operationId": "models_api_v1_workspaces__ws__models_get",
         "parameters": [
           {
@@ -1541,6 +1712,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Models",
@@ -1549,9 +1730,92 @@
         ]
       }
     },
+    "/api/v1/workspaces/{ws}/models/{v}:promote": {
+      "post": {
+        "description": "Select an existing registry version using the atomic current pointer.",
+        "operationId": "rollback_api_v1_workspaces__ws__models__v__promote_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "v",
+            "required": true,
+            "schema": {
+              "title": "V",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelVersion"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Rollback",
+        "tags": [
+          "Workspace contract fixtures"
+        ]
+      }
+    },
     "/api/v1/workspaces/{ws}/models/{v}:rollback": {
       "post": {
-        "description": "Contract fixture only: no model runs and nothing is saved. Responses carry X-Secnd-Mode: fixture. Metrics are unmeasured.",
+        "description": "Restore an existing registry version using the atomic current pointer.",
         "operationId": "rollback_api_v1_workspaces__ws__models__v__rollback_post",
         "parameters": [
           {
@@ -1614,6 +1878,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Rollback",
@@ -1692,6 +1966,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Predict",
@@ -1784,6 +2068,16 @@
               }
             },
             "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "summary": "Queue",
