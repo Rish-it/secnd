@@ -1,0 +1,21 @@
+docs/hf/README-draft.md
+  s_1f3964e6251ccb::t_aefe0f32337a6a 57-61
+docs/results/final/model-release.md
+  s_1f3964e6251ccb::t_729f8648c9fb25 43-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1fe44085b747ebf38a09afeeb5613d71b428ab54",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
