@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     data_dir: Path = Path(".data")
     frontend_dist: Path = Path("frontend/dist")
     evaluation_dir: Path = Path(__file__).resolve().parents[1] / "docs/results/s3"
+    featurizer: str = "pt-minilm"
+    encoder_repo: str = "Secnd-AI/ren"
+    encoder_revision: str = "5560f25414195f1d1224a6ae7efd19c6b7646d3f"
     muse_api_key: SecretStr = SecretStr("")
     muse_base_url: str = "https://inference.baseten.co/v1"
     muse_model: str = "meta-models/muse-spark-open-1026"
