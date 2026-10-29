@@ -197,3 +197,55 @@ def test_http_predict_and_answer_use_persisted_workspace(service, tmp_path):
             ).status_code
             == 422
         )
+
+
+def test_real_loop_promotions_are_readable_through_models_api(tmp_path):
+    from fastapi.testclient import TestClient
+
+    from backend.api import create_app
+    from backend.config import Settings
+    from backend.schemas import EvalCard
+
+    def rows(n, start):
+        return pd.DataFrame(
+            [
+                dict(
+                    id=str(i),
+                    text=("flight travel ticket" if i % 2 else "pizza meal restaurant")
+                    + f" {i % 9}",
+                    amount=float(i % 5),
+                    date=None,
+                    merchant_key="",
+                    label="Travel" if i % 2 else "Food",
+                )
+                for i in range(start, start + n)
+            ]
+        )
+
+    store = Store(tmp_path / "store.sqlite3")
+    service = WorkspaceService(store, tmp_path)
+    calib = rows(500, 10000)
+    noisy = calib.index % 17 == 0
+    calib.loc[noisy, "label"] = calib.loc[noisy, "label"].map({"Food": "Travel", "Travel": "Food"})
+    service.create("default", ["Food", "Travel"], calib, featurizer="char_tfidf")
+    train = rows(100, 0)
+    store.put_items("default", train.to_dict("records"))
+    for row in train.itertuples():
+        store.add_label("default", row.id, row.label, "seed")
+    settings = Settings(data_dir=tmp_path, frontend_dist=tmp_path / "none", _env_file=None)
+    with TestClient(create_app(settings, workspace_service=service)) as client:
+        assert len(service.route("default", rows(2, 20000))) == 2
+        response = client.get("/api/v1/workspaces/default/models")
+        assert response.status_code == 200
+        versions = response.json()["items"]
+        assert len(versions) == 1 and versions[0]["current"]
+        measured = EvalCard.model_validate(versions[0]["card"])
+        assert measured.model_version == "ren-1.0"
+        assert measured.accuracy is not None and measured.ece is not None
+        service.answer("default", "20000", "Food", "real-answer")
+        service.drain()
+        response = client.get("/api/v1/workspaces/default/models")
+        assert response.status_code == 200
+        assert sum(v["current"] for v in response.json()["items"]) == 1
+        assert len(store.labels("default")) == 101
+        assert len(store.predictions("default")) == 2
