@@ -31,15 +31,19 @@ QUALITY = ["accuracy", "macro_f1", "nll", "brier", "ece", "aurc"]
 
 
 def training_rows(frame: pd.DataFrame, split: pd.Series, budget: int, seed: int) -> pd.DataFrame:
-    """The seed rows, then the earliest stream rows (a seeded shuffle if undated) up to budget."""
+    """The seed rows, then the earliest stream rows (a seeded shuffle if undated) up to budget.
+
+    A budget below the seed size takes a seeded sample of the seed rows.
+    """
+    seed_rows = frame[split == "seed"]
+    if budget < len(seed_rows):
+        return seed_rows.sample(budget, random_state=seed)
     stream = frame[split == "stream"]
     if stream["date"].notna().all():
         stream = stream.sort_values(["date", "id"])
     else:
         stream = stream.sample(frac=1, random_state=seed)
-    return pd.concat(
-        [frame[split == "seed"], stream.head(max(budget - len(frame[split == "seed"]), 0))]
-    )
+    return pd.concat([seed_rows, stream.head(budget - len(seed_rows))])
 
 
 def quality(y, p, labels: list[str]) -> dict:
