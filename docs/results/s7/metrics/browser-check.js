@@ -6,7 +6,7 @@ async () => {
   const button = text => [...document.querySelectorAll('button')].find(b=>b.textContent.trim()===text);
   const text = () => document.querySelector('.metrics-workspace')?.innerText ?? '';
   const select = async name => { button(name).click(); await settle(()=>text().includes(`Recorded ${name} evaluation`)); };
-  const report={datasets:{},source_revision:'34544ed',api_revision:'52e7d87',timestamp:new Date().toISOString()};
+  const report={datasets:{},source_revision:'bae2b3f',api_revision:'d3deb29',timestamp:new Date().toISOString()};
   for(const name of ['MTOP','BANKING77','IPSA']) {
     await select(name);
     const response=await fetch('/api/v1/workspaces/default/metrics?dataset='+name.toLowerCase());
@@ -14,7 +14,8 @@ async () => {
     const p=n=>(n*100).toFixed(2)+'%';
     if(!text().includes(p(data.card.coverage)))throw Error('Coverage mismatch '+name);
     if(data.card.precision!=null&&!text().includes(p(data.card.precision)))throw Error('Precision mismatch '+name);
-    if(data.card.precision<.99&&data.card.precision!=null&&!text().includes('precision target missed'))throw Error('Missing target warning');
+    if((data.card.precision!=null&&data.card.precision<.99)!==text().includes('precision target missed'))throw Error('Incorrect target state');
+    if(!text().includes(p(data.card.robustness_pass_rate)))throw Error('Re-split pass rate mismatch '+name);
     if(data.card.threshold==null&&!text().includes('Not certified yet'))throw Error('Missing abstention state');
     const bins=document.querySelectorAll('svg[aria-label^="Reliability"] circle').length;
     if(bins!==data.curves.reliability.length)throw Error('Reliability bin mismatch');

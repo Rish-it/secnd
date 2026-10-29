@@ -12,10 +12,10 @@
           "mode": "evaluation"
         },
         "BANKING77": {
-          "coverage": 0.5041,
-          "precision": 0.9899,
-          "threshold": 0.971222,
-          "pass_rate": 0.9795,
+          "coverage": 0.369,
+          "precision": 0.9903,
+          "threshold": 0.986952,
+          "pass_rate": 0.9895,
           "reliability_bins": 9,
           "tradeoff_points": 101,
           "mode": "evaluation"
@@ -30,9 +30,9 @@
           "mode": "evaluation"
         }
       },
-      "source_revision": "34544ed",
-      "api_revision": "52e7d87",
-      "timestamp": "2026-10-29T09:37:40.713Z",
+      "source_revision": "bae2b3f",
+      "api_revision": "d3deb29",
+      "timestamp": "2026-10-29T10:29:12.251Z",
       "active_selection_refresh": true,
       "data_table": true,
       "retry_recovered": true,
@@ -55,10 +55,10 @@
           "mode": "evaluation"
         },
         "BANKING77": {
-          "coverage": 0.5041,
-          "precision": 0.9899,
-          "threshold": 0.971222,
-          "pass_rate": 0.9795,
+          "coverage": 0.369,
+          "precision": 0.9903,
+          "threshold": 0.986952,
+          "pass_rate": 0.9895,
           "reliability_bins": 9,
           "tradeoff_points": 101,
           "mode": "evaluation"
@@ -73,9 +73,9 @@
           "mode": "evaluation"
         }
       },
-      "source_revision": "34544ed",
-      "api_revision": "52e7d87",
-      "timestamp": "2026-10-29T09:37:50.699Z",
+      "source_revision": "bae2b3f",
+      "api_revision": "d3deb29",
+      "timestamp": "2026-10-29T10:29:12.843Z",
       "active_selection_refresh": true,
       "data_table": true,
       "retry_recovered": true,
@@ -98,10 +98,10 @@
           "mode": "evaluation"
         },
         "BANKING77": {
-          "coverage": 0.5041,
-          "precision": 0.9899,
-          "threshold": 0.971222,
-          "pass_rate": 0.9795,
+          "coverage": 0.369,
+          "precision": 0.9903,
+          "threshold": 0.986952,
+          "pass_rate": 0.9895,
           "reliability_bins": 9,
           "tradeoff_points": 101,
           "mode": "evaluation"
@@ -116,9 +116,9 @@
           "mode": "evaluation"
         }
       },
-      "source_revision": "34544ed",
-      "api_revision": "52e7d87",
-      "timestamp": "2026-10-29T09:38:21.680Z",
+      "source_revision": "bae2b3f",
+      "api_revision": "d3deb29",
+      "timestamp": "2026-10-29T10:29:25.411Z",
       "active_selection_refresh": true,
       "data_table": true,
       "retry_recovered": true,
@@ -131,6 +131,5 @@
     }
   ],
   "console_errors": 0,
-  "console_warnings": 0,
-  "known_limit": "Published evaluations only. No live answer learning or handoff is claimed."
+  "console_warnings": 0
 }
