@@ -1,0 +1,55 @@
+docs/results/s4/curve-mtop-least-s0.csv
+  s_1f3964e6251ccb::t_ea35cabd8557c9 2-22
+docs/results/s4/curve-mtop-least-s1.csv
+  s_1f3964e6251ccb::t_03caec43f0a36c 2-22
+docs/results/s4/curve-mtop-least-s2.csv
+  s_1f3964e6251ccb::t_f72b732b16ca32 2-22
+docs/results/s4/curve-mtop-least-s3.csv
+  s_1f3964e6251ccb::t_e024894819c697 2-22
+docs/results/s4/curve-mtop-least-s4.csv
+  s_1f3964e6251ccb::t_fed322f1ab06c4 2-22
+docs/results/s4/curve-mtop-margin-s0.csv
+  s_931864dc636ea3::t_6278dd2923cf9d 2-22
+docs/results/s4/curve-mtop-margin-s1.csv
+  s_931864dc636ea3::t_ae841a6618d66b 2-22
+docs/results/s4/curve-mtop-margin-s2.csv
+  s_931864dc636ea3::t_14c6d50733d76e 2-8,10-22
+docs/results/s4/curve-mtop-margin-s3.csv
+  s_931864dc636ea3::t_a0d987c8a96414 2-22
+docs/results/s4/curve-mtop-margin-s4.csv
+  s_1f3964e6251ccb::t_d07d42c57a7387 2-22
+docs/results/s4/curve-mtop-random-s0.csv
+  s_931864dc636ea3::t_eda8682aa7e987 2-22
+docs/results/s4/curve-mtop-random-s1.csv
+  s_931864dc636ea3::t_eb0ebc2b67743e 2-22
+docs/results/s4/curve-mtop-random-s2.csv
+  s_931864dc636ea3::t_4b193d98f469cb 2-22
+docs/results/s4/curve-mtop-random-s3.csv
+  s_931864dc636ea3::t_ef9aa4085179a5 2-22
+docs/results/s4/curve-mtop-random-s4.csv
+  s_931864dc636ea3::t_792cc7e94460d1 2-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fa08b4138c3c256fa9404c1a367ad4bdc6193de5",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
