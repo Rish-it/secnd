@@ -1,0 +1,21 @@
+docs/results/s5/augmentation-ipsa.json
+  s_931864dc636ea3::t_9ee55a00b61585 1-93
+docs/results/s5/augmentation-mtop.json
+  s_931864dc636ea3::t_25a2f98fe93fa5 1-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "594bebc869b98cf7f3cf6396039e18611025584f",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
