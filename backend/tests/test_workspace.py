@@ -142,7 +142,7 @@ def test_failed_retrain_keeps_label_for_rebuild(service):
 
 def test_one_class_answer_waits_for_second_class_without_losing_rows(service):
     calib = pd.DataFrame([dict(id="calib2", text="held", merchant_key="held", label="a")])
-    service.create("cold", ["a", "b"], calib)
+    service.create("cold", ["a", "b"], calib, featurizer="char_tfidf")
     service.store.put_items("cold", [dict(id=str(i), text="x", merchant_key="") for i in range(2)])
     service.answer("cold", "0", "a", "first")
     service.drain()
@@ -249,3 +249,30 @@ def test_real_loop_promotions_are_readable_through_models_api(tmp_path):
         assert sum(v["current"] for v in response.json()["items"]) == 1
         assert len(store.labels("default")) == 101
         assert len(store.predictions("default")) == 2
+
+
+def test_workspace_default_and_logged_fallback(tmp_path, caplog, monkeypatch):
+    from backend import workspace
+
+    monkeypatch.setenv("SECND_FEATURIZER", "pt-minilm")
+    calls = []
+    monkeypatch.setattr(workspace, "fetch", lambda name, data_dir: calls.append((name, data_dir)))
+    service = WorkspaceService(Store(tmp_path / "db.sqlite3"), tmp_path)
+    calib = pd.DataFrame([dict(id="held", text="held", label="a")])
+    try:
+        service.create("ren", ["a", "b"], calib)
+        assert service.store.workspace("ren")["featurizer"] == "pt-minilm"
+        assert calls == [("pt-minilm", tmp_path)]
+
+        def fail(*args):
+            raise ValueError("Missing snapshot")
+
+        monkeypatch.setattr(workspace, "fetch", fail)
+        service.create("fallback", ["a", "b"], calib)
+        assert service.store.workspace("fallback")["featurizer"] == "minilm"
+        assert "fetch/verification failed (ValueError); falling back to minilm" in caplog.text
+        monkeypatch.setenv("SECND_FEATURIZER", "char_tfidf")
+        service.create("explicit", ["a", "b"], calib)
+        assert service.store.workspace("explicit")["featurizer"] == "char_tfidf"
+    finally:
+        service.close()

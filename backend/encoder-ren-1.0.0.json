@@ -1,0 +1,16 @@
+{
+  "repo": "Secnd-AI/ren",
+  "tag": "v1.0.0",
+  "revision": "5560f25414195f1d1224a6ae7efd19c6b7646d3f",
+  "sha256": {
+    "1_Pooling/config.json": "4fef0a7e8c8ee36e74c0fad89bab60ade72324442d43f559ea219bb7c2580710",
+    "README.md": "2090b1e3fa03563bb2d7ac2d36358e7e3ce5d85ceccb1de7b4e402b22b09ade8",
+    "config.json": "75c9c717ca2619e024d1d850e838f9f1e9099bcf3d3fc222ed58981de8a30825",
+    "config_sentence_transformers.json": "b15d0543c5343c577cb4f4845344eb64bf4663a9fafec3a233a20e3e4fc1f80e",
+    "model.safetensors": "f76f276dc59040cf7c3fe1ac74d884b70fed3c60fe2eaa3738adb1f7ae35c089",
+    "modules.json": "fa7d796a215e1b2416773062891923b191fc5a4849bc44e322997433c90f459c",
+    "sentence_bert_config.json": "3084164002c0bca01b0259c5327123803fce32e660a57feb93184ffead186fc8",
+    "tokenizer.json": "851ca67100d372ca3ae031a6abd168f53489eebfd7d89523f35c5c9b4d372c3c",
+    "tokenizer_config.json": "4817907ff3846ed899a62cccad0193c21d0792130c6139d8362187153eeff283"
+  }
+}

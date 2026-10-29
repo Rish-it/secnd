@@ -9,6 +9,8 @@ from pathlib import Path
 import pandas as pd
 from pydantic import TypeAdapter
 
+from backend.config import Settings
+from backend.encoders import fetch
 from backend.registry import Registry
 from backend.schemas import Decision, WorkspaceId
 from backend.store import Store
@@ -32,12 +34,22 @@ class WorkspaceService:
         # carmy: one process; use a durable worker queue before running multiple API processes.
         self._executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="workspace-answer")
 
-    def create(self, workspace, labels, calib: pd.DataFrame, *, featurizer="minilm", seed=0):
+    def create(self, workspace, labels, calib: pd.DataFrame, *, featurizer=None, seed=0):
         TypeAdapter(WorkspaceId).validate_python(workspace)
         if len(set(labels)) < 2 or len(labels) != len(set(labels)):
             raise ValueError("A workspace needs at least two distinct labels.")
         if calib.empty or not set(calib.label).issubset(labels):
             raise ValueError("Calibration rows must use the workspace labels.")
+        featurizer = featurizer or Settings().featurizer
+        if featurizer == "pt-minilm":
+            try:
+                fetch(featurizer, self.data_dir)
+            except Exception as error:
+                logger.warning(
+                    "Pinned pt-minilm fetch/verification failed (%s); falling back to minilm.",
+                    type(error).__name__,
+                )
+                featurizer = "minilm"
         # pandas normalises timestamps and missing numeric values to portable JSON values.
         self.store.create_workspace(
             workspace,
