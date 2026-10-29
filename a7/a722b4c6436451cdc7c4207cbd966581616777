@@ -1,0 +1,23 @@
+backend/tests/fixtures/meta/README.md
+  s_f4216e91105995::t_0ddc5c8847554e 1-11
+backend/tests/fixtures/meta/messenger-text.json
+  s_f4216e91105995::t_7d491ce548be0c 1-24
+backend/tests/fixtures/meta/whatsapp-text.json
+  s_f4216e91105995::t_14e2a51100edcd 1-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a7a722b4c6436451cdc7c4207cbd966581616777",
+  "prompts": {},
+  "sessions": {
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
