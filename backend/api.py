@@ -1,6 +1,6 @@
 import sqlite3
 from contextlib import asynccontextmanager
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import (
     APIRouter,
@@ -19,12 +19,13 @@ from fastapi.exception_handlers import http_exception_handler, request_validatio
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend import store
 from backend.config import Settings
 from backend.data import MAX_CSV_BYTES, CSVPreview, preview_csv
+from backend.evidence import Evidence
 from backend.schemas import (
     Answer,
     AnswerResult,
@@ -51,6 +52,7 @@ class Health(BaseModel):
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     config = settings or Settings()
+    evidence = Evidence(config.data_dir, config.evaluation_dir)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -108,7 +110,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     contract = APIRouter(
         prefix="/api/v1/workspaces/{ws}",
         tags=["Workspace contract fixtures"],
-        responses={422: {"model": Error}, 413: {"model": Error}, 404: {"model": Error}},
+        responses={status: {"model": Error} for status in (422, 413, 404, 503)},
         dependencies=[Depends(fixture_mode)],
     )
     contract_note = (
@@ -188,21 +190,55 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             item_id=body.item_id, coverage=0, model_version="fixture-v0", retrain="fixture"
         )
 
-    @contract.get("/metrics", response_model=MetricsResult, description=contract_note)
-    def metrics(ws: WorkspaceId):
-        return MetricsResult(card=card(), history=[])
+    @contract.get(
+        "/metrics",
+        response_model=MetricsResult,
+        description="Published evaluation card and curves, separate from workspace learning.",
+    )
+    def metrics(
+        ws: WorkspaceId, response: Response, dataset: Literal["mtop", "banking77", "ipsa"] = "mtop"
+    ):
+        try:
+            measured, curves = evidence.evaluation(dataset)
+        except FileNotFoundError as error:
+            raise HTTPException(404, "Published evaluation was not found.") from error
+        except (ValidationError, ValueError) as error:
+            raise HTTPException(503, "Published evaluation is invalid or incomplete.") from error
+        response.headers["X-Secnd-Mode"] = "evaluation"
+        return MetricsResult(card=measured, curves=curves, dataset=dataset, history=[])
 
-    @contract.get("/models", response_model=Page[ModelVersion], description=contract_note)
-    def models(ws: WorkspaceId):
-        return Page[ModelVersion](
-            items=[ModelVersion(model_version="fixture-v0", current=True, card=card())]
-        )
+    @contract.get(
+        "/models",
+        response_model=Page[ModelVersion],
+        description="Workspace registry versions and their measured cards; empty before training.",
+    )
+    def models(ws: WorkspaceId, response: Response):
+        try:
+            items = evidence.models(ws)
+        except (ValueError, FileNotFoundError) as error:
+            raise HTTPException(503, "Model cards are invalid or incomplete.") from error
+        response.headers["X-Secnd-Mode"] = "live"
+        return Page[ModelVersion](items=items)
 
-    @contract.post("/models/{v}:rollback", response_model=ModelVersion, description=contract_note)
-    def rollback(ws: WorkspaceId, v: str):
-        if v != "fixture-v0":
-            raise HTTPException(status_code=404, detail="Model version was not found.")
-        return ModelVersion(model_version=v, current=True, card=card())
+    @contract.post(
+        "/models/{v}:promote",
+        response_model=ModelVersion,
+        description="Select an existing registry version using the atomic current pointer.",
+    )
+    @contract.post(
+        "/models/{v}:rollback",
+        response_model=ModelVersion,
+        description="Restore an existing registry version using the atomic current pointer.",
+    )
+    def rollback(ws: WorkspaceId, v: str, response: Response):
+        try:
+            result = evidence.promote(ws, v)
+        except KeyError as error:
+            raise HTTPException(404, "Model version was not found.") from error
+        except (ValueError, FileNotFoundError) as error:
+            raise HTTPException(503, "Model card is invalid or incomplete.") from error
+        response.headers["X-Secnd-Mode"] = "live"
+        return result
 
     @contract.post("/chat", response_model=ChatResult, description=contract_note)
     def chat(ws: WorkspaceId, body: ChatRequest):
