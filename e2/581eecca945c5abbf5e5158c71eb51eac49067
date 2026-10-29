@@ -1,0 +1,38 @@
+backend/escalate.py
+  s_99a14fdaab2d15::t_33a10274033e0e 1-264
+  s_99a14fdaab2d15::t_f9a562cf56c585 265-322
+backend/handoff.py
+  s_99a14fdaab2d15::t_3d41c28410794f 29,34
+backend/muse.py
+  s_99a14fdaab2d15::t_a5949f7a444cb2 447-498
+docs/results/s2/incontext-ic-ettin-150m-s6000-near-clean.json
+  s_99a14fdaab2d15::t_58f65e8fe2c27a 7,11-12,19-21,24,31-32,35,41-42,45,51-52,55,61-62,65,73-74,77,83-84,87,93-94,97,103-104,107,114-116,119,125-126,129,135-136,139,145-146,149,158-164,168-170,173,178-180,183,188-195,198-205,210-212,215,220-222,225,230-237,240-247,252-254,257,262-264,267,272-279,282-289
+docs/results/s2/muse-teacher-mtop.json
+  s_99a14fdaab2d15::t_8a1696f27cc994 1-26
+docs/results/s2/incontext-ic-ettin-32m-s6000-near-clean.json
+  s_f1bfb74ed18315::t_89d32980c39323 7,11-12,20-21,24,31-32,35,41-42,45,51-52,55,61-62,65,73-74,77,83-84,87,93-94,97,103-104,107,114-116,119,125-126,129,135-136,139,145-146,149,158-159,162,168-170,173,178-180,183,188-190,193,198-200,203,210-212,215,220-222,225,230-232,235,240-242,245,252-254,257,262-264,267,272-274,277,282-284,287
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e2581eecca945c5abbf5e5158c71eb51eac49067",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_f1bfb74ed18315": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a188ee-7e58-7b42-b0ed-040fb490b47a",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
