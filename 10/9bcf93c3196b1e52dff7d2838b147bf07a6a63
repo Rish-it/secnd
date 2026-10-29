@@ -1,0 +1,63 @@
+backend/finetune.py
+  s_99a14fdaab2d15::t_b2bbdd6bf1f5c5 96-97,99
+backend/modal_bench.py
+  s_99a14fdaab2d15::t_543a0f7f453492 44,51-55,57-58,62-65,77
+docs/results/s2/pretune-pt-minilm-s10000.json
+  s_f4216e91105995::t_9418d46d91440c 1-9
+docs/results/s2/pretune-pt-mpnet-s10000.json
+  s_fdd70b19755bd7::t_f4d52122aad04a 1-9
+docs/results/s2/pretune-pt-mpnet.json
+  s_fdd70b19755bd7::t_bc30fc707db676 1-9
+docs/results/s3/card-mtop-pt-minilm-s10000+lr-b2000.json
+  s_99a14fdaab2d15::t_b886c937d09f92 1-174
+docs/results/s3/card-mtop-pt-mpnet+lr-b2000.json
+  s_99a14fdaab2d15::t_79bb3cebeea890 1-174
+docs/results/s3/card-mtop-pt-mpnet-s10000+lr-b2000.json
+  s_fdd70b19755bd7::t_7251b123881324 1-174
+docs/results/s3/curves-mtop-pt-minilm-s10000+lr-b2000.json
+  s_99a14fdaab2d15::t_638ddfd929f727 1-556
+docs/results/s3/curves-mtop-pt-mpnet+lr-b2000.json
+  s_99a14fdaab2d15::t_f21308a92ecc21 1-556
+docs/results/s3/curves-mtop-pt-mpnet-s10000+lr-b2000.json
+  s_fdd70b19755bd7::t_0558dd817eafc3 1-556
+docs/results/s3/robustness-mtop-pt-minilm-s10000+lr-b2000.csv
+  s_99a14fdaab2d15::t_6ead4d981ecbc3 1-2001
+docs/results/s3/robustness-mtop-pt-minilm-s10000+lr-b2000.json
+  s_99a14fdaab2d15::t_8e03ea17728786 1-10
+docs/results/s3/robustness-mtop-pt-mpnet+lr-b2000.csv
+  s_99a14fdaab2d15::t_8a03c1d4444bd7 1-2001
+docs/results/s3/robustness-mtop-pt-mpnet+lr-b2000.json
+  s_99a14fdaab2d15::t_d8095685556a77 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "109bcf93c3196b1e52dff7d2838b147bf07a6a63",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_fdd70b19755bd7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
