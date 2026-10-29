@@ -24,11 +24,17 @@ def _frame(n=240, seed=0):
 def test_prefix_memory_never_sees_the_rows_own_label():
     train = _frame(6).assign(merchant_key=["a", "b", "a", "", "a", "b"])
     index = {label: i for i, label in enumerate(sorted(train["label"].unique()))}
-    block = model.memory_block(train, train, index, prefix=True).toarray()
+    block, memory = model.memory_block(train, index)
+    block = block.toarray()
     assert block[[0, 1, 3]].sum() == 0  # first sightings and the empty key
     assert block[2, index[train.label[0]]] == 1
     assert block[4, index[train.label[2]]] == 1
     assert block[5, index[train.label[1]]] == 1
+    assert memory == {"a": index[train.label[4]], "b": index[train.label[5]]}
+    unseen = train.drop(columns="label").assign(merchant_key=["b", "c", "", "a", "a", "b"])
+    block, _ = model.memory_block(unseen, index, memory)
+    assert block.toarray().argmax(axis=1)[[0, 3]].tolist() == [memory["b"], memory["a"]]
+    assert block[[1, 2]].sum() == 0
 
 
 @pytest.mark.parametrize("classifier", model.CLASSIFIERS)

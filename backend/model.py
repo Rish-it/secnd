@@ -23,34 +23,29 @@ TUNE_ROWS = 5000
 LR = {"tol": 1e-3, "max_iter": 300}  # same test accuracy as the defaults on ipsa, 20x faster
 
 
-def memory_block(train: pd.DataFrame, frame: pd.DataFrame, index: dict, prefix: bool):
-    """One-hot of each row's payee's latest training label.
+def memory_block(frame: pd.DataFrame, index: dict, memory: dict | None = None):
+    """One-hot of each row's payee's latest known label, and the memory after `frame`.
 
-    With `prefix`, `frame` is `train` itself and each row only sees rows before it in (date, id)
-    order, so a training row never sees its own label.
+    Without `memory`, `frame` is the training set: rows are read in (date, id) order and each row
+    only sees rows before it, so a training row never sees its own label.
     """
+    learn = memory is None
+    memory = {} if learn else memory
+    frame = frame.reset_index(drop=True)
+    if learn:
+        frame = frame.sort_values(["date", "id"], na_position="first")
+    labels = frame["label"].map(index) if learn else pd.Series(-1, index=frame.index)
     rows, cols = [], []
-    if prefix:
-        memory = {}
-        ordered = frame.reset_index(drop=True).sort_values(["date", "id"], na_position="first")
-        for row, key, label in zip(
-            ordered.index, ordered["merchant_key"], ordered["label"], strict=True
-        ):
-            if key in memory:
-                rows.append(row)
-                cols.append(memory[key])
-            if key:
-                memory[key] = index[label]
-    else:
-        known = train[train["merchant_key"] != ""].sort_values(["date", "id"])
-        memory = known.groupby("merchant_key")["label"].last().map(index).to_dict()
-        for row, key in enumerate(frame["merchant_key"]):
-            if key in memory:
-                rows.append(row)
-                cols.append(memory[key])
-    return sparse.csr_matrix(
+    for row, key, label in zip(frame.index, frame["merchant_key"], labels, strict=True):
+        if key in memory:
+            rows.append(row)
+            cols.append(memory[key])
+        if learn and key:
+            memory[key] = label
+    block = sparse.csr_matrix(
         (np.ones(len(rows), np.float32), (rows, cols)), shape=(len(frame), len(index))
     )
+    return block, memory
 
 
 def tune_c(x, y, seed: int) -> float:
@@ -91,14 +86,14 @@ class Model(Baseline):
         )
         self.id = f"{featurizer}+{classifier}"
 
-    def _x(self, frame, prefix=False):
-        memory = memory_block(self.train, frame, self.index, prefix)
-        x = sparse.hstack([featurize(frame, self.featurizer, self.cache_dir), memory], format="csr")
-        return x if prefix else x[:, self.columns]
+    def _x(self, frame, memory=None):
+        block, memory = memory_block(frame, self.index, memory)
+        x = sparse.hstack([featurize(frame, self.featurizer, self.cache_dir), block], format="csr")
+        return x, memory
 
     def fit(self, train):
-        self.train = train
-        x, y = self._x(train, prefix=True), self.encode(train)
+        x, self.memory = self._x(train)
+        y = self.encode(train)
         # Hashed columns no training row uses carry no weight; dropping them makes LR fast.
         self.columns = np.unique(x.indices)
         x = x[:, self.columns]
@@ -117,5 +112,6 @@ class Model(Baseline):
 
     def predict_proba(self, frame):
         p = np.zeros((len(frame), len(self.labels)))
-        p[:, self.model.classes_] = self.model.predict_proba(self._x(frame))
+        x, _ = self._x(frame, self.memory)
+        p[:, self.model.classes_] = self.model.predict_proba(x[:, self.columns])
         return p
