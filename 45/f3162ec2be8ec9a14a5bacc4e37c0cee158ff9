@@ -1,0 +1,24 @@
+backend/tests/test_red_team.py
+  s_3e40618a94275e::t_cf0b0c46905dea 1-52
+backend/red_team.py
+  s_3e40618a94275e::t_cf0b0c46905dea 1-302
+backend/modal_red_team.py
+  s_3e40618a94275e::t_659b01d949fb11 3,36-37
+  s_3e40618a94275e::t_cf0b0c46905dea 1-2,4-35,38-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "45f3162ec2be8ec9a14a5bacc4e37c0cee158ff9",
+  "prompts": {},
+  "sessions": {
+    "s_3e40618a94275e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18916-7a5b-7ff2-bd5b-6019c2ec55ca",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
