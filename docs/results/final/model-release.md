@@ -40,3 +40,9 @@ Use the installed `huggingface_hub` client; its local API signatures and the
 [official upload guide](https://huggingface.co/docs/huggingface_hub/guides/upload)
 were checked on Oct 29, 2026. No model files or Hub repository are published as
 part of this draft.
+
+The committed BANKING77 reference at 2,000 labels and seed 0 answers **36.9%**
+automatically at **99.03%** test precision ([card](../s3/card-banking77-minilm+lr-b2000.json));
+the claim holds in **98.95%** of 2,000 re-splits
+([robustness run](../s3/robustness-banking77-minilm+lr-b2000.json)).
+These are reference measurements, not results for an unpublished release bundle.

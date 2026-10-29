@@ -54,8 +54,11 @@ round-trip output from the final bundle.**
 The published MTOP reference at 2,000 labels and seed 0 answers 31.68% of the fixed
 test set automatically at 99.62% precision. The claim holds in 99.05% of 2,000
 re-splits. [Measured card](https://github.com/Rish-it/secnd/blob/secnd-bootstrap/docs/results/s3/card-mtop-minilm%2Blr-b2000.json).
-The current BANKING77 fixed test is below 99%; IPSA has zero automatic coverage
-at that budget. Do not substitute one dataset's result for another's.
+At the same label budget, BANKING77 answers 36.9% automatically at 99.03%
+fixed-test precision ([card](https://github.com/Rish-it/secnd/blob/secnd-bootstrap/docs/results/s3/card-banking77-minilm%2Blr-b2000.json)).
+The claim holds in 98.95% of 2,000 re-splits
+([robustness run](https://github.com/Rish-it/secnd/blob/secnd-bootstrap/docs/results/s3/robustness-banking77-minilm%2Blr-b2000.json)).
+IPSA has zero automatic coverage at that budget. Do not substitute one dataset's result for another's.
 
 **RELEASE_TODO:** replace this reference with results tied to the exact artifact
 being uploaded, and attach the full card. Include calibration lower bound,
