@@ -1,0 +1,21 @@
+docs/results/s3r/README.md
+  s_2ebaf109a8770b::t_83b9a7fe1c9222 1-48
+docs/results/s3r/red-team.json
+  s_2ebaf109a8770b::t_a131d055588399 1-44855
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d1f73197cafd9792586df5b4e9e9e32debc6ec25",
+  "prompts": {},
+  "sessions": {
+    "s_2ebaf109a8770b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a18916-7a5b-7ff2-bd5b-6019c2ec55ca",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
