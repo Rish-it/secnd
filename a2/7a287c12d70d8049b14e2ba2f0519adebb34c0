@@ -1,0 +1,27 @@
+docs/results/s4/curve-mtop-pt-minilm-random-s0.csv
+  s_99a14fdaab2d15::t_f11fea09024027 1-22
+docs/results/s4/curve-mtop-pt-minilm-random-s1.csv
+  s_99a14fdaab2d15::t_1e13f087c84569 1-22
+docs/results/s4/curve-mtop-pt-minilm-random-s2.csv
+  s_99a14fdaab2d15::t_053da22b4f0a51 1-22
+docs/results/s4/curve-mtop-pt-minilm-random-s3.csv
+  s_99a14fdaab2d15::t_f06284c3e57d0c 1-22
+docs/results/s4/curve-mtop-pt-minilm-random-s4.csv
+  s_99a14fdaab2d15::t_c1cbe10d187c7c 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a27a287c12d70d8049b14e2ba2f0519adebb34c0",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
