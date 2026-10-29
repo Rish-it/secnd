@@ -41,22 +41,28 @@ def bench(dataset: str) -> str:
 
 
 @app.function(gpu="A10G", volumes={"/vol": volume}, timeout=2 * 3600)
-def pretune(encoder: str) -> str:
+def pretune(encoder: str, steps: int = 3000) -> str:
     """Tune `encoder` on TOPv2 (MTOP texts removed) and keep it on the volume."""
     import torch
 
     assert torch.cuda.is_available(), "no CUDA device: refusing to tune on CPU"
     run = Path("/vol/run")
     run.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["python", "-m", "backend.finetune", "--pretune", encoder], cwd=run, check=True)
+    subprocess.run(
+        ["python", "-m", "backend.finetune", "--pretune", encoder, "--steps", str(steps)],
+        cwd=run,
+        check=True,
+    )
     volume.commit()
-    return (run / f"docs/results/s2/pretune-pt-{encoder}.json").read_text()
+    out = f"pt-{encoder}" if steps == 3000 else f"pt-{encoder}-s{steps}"
+    return (run / f"docs/results/s2/pretune-{out}.json").read_text()
 
 
 @app.local_entrypoint()
-def tuned(encoder: str = "minilm"):
-    """Tune remotely, then fetch the encoder: score it locally with `backend.eval` (needs git)."""
-    (ROOT / f"docs/results/s2/pretune-pt-{encoder}.json").write_text(pretune.remote(encoder))
+def tuned(encoder: str = "minilm", steps: int = 3000):
+    """Tune remotely, then fetch the encoder: score it locally on MPS with `backend.eval`."""
+    out = f"pt-{encoder}" if steps == 3000 else f"pt-{encoder}-s{steps}"
+    (ROOT / f"docs/results/s2/pretune-{out}.json").write_text(pretune.remote(encoder, steps))
     folder = ROOT / ".data/encoders"
     folder.mkdir(parents=True, exist_ok=True)
     subprocess.run(
@@ -68,7 +74,7 @@ def tuned(encoder: str = "minilm"):
             "get",
             "--force",
             "secnd-bench",
-            f"/data/encoders/pt-{encoder}",
+            f"/data/encoders/{out}",
             str(folder),
         ],
         check=True,

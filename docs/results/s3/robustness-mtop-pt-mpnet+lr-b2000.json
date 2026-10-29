@@ -1,0 +1,10 @@
+{
+  "dataset": "mtop",
+  "model": "pt-mpnet+lr",
+  "budget": 2000,
+  "splits": 2000,
+  "pass_rate": 0.9935,
+  "mean_coverage": 0.2374542367399741,
+  "worst_1pct_precision": 0.989962748975822,
+  "pool_rows": 6184
+}

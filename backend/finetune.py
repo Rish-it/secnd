@@ -13,18 +13,12 @@ import numpy as np
 import pandas as pd
 import torch
 
-from backend.features import EMBEDDERS
+from backend.features import EMBEDDERS, device
 
 STEPS = 1000
 CLASSES_PER_BATCH, ROWS_PER_CLASS = 16, 4
 TEMPERATURE = 0.05
 LEARNING_RATE = 2e-5
-
-
-def device() -> str:
-    if torch.cuda.is_available():
-        return "cuda"
-    return "mps" if torch.backends.mps.is_available() else "cpu"
 
 
 def tune(name: str, texts: list[str], y: np.ndarray, seed: int = 0, steps: int = STEPS):
@@ -67,8 +61,8 @@ def tune(name: str, texts: list[str], y: np.ndarray, seed: int = 0, steps: int =
 
 
 def release(model):
-    """Serve the tuned encoder on CPU and hand its GPU memory back; a grid tunes dozens in a row."""
-    model = model.to("cpu").eval()
+    """Keep the tuned encoder on its device to embed, and hand the optimizer's memory back."""
+    model = model.eval()
     if torch.backends.mps.is_available():
         torch.mps.empty_cache()
     if torch.cuda.is_available():
@@ -99,9 +93,10 @@ def pretune(name: str, steps: int = PRETUNE_STEPS) -> dict:
     top = top[keep]
     y = pd.factorize(top["label"])[0]
     model = tune(name, top["text"].fillna("").tolist(), y, seed=0, steps=steps)
-    model.save(str(data_dir / "encoders" / f"pt-{name}"))
+    out = f"pt-{name}" if steps == PRETUNE_STEPS else f"pt-{name}-s{steps}"
+    model.save(str(data_dir / "encoders" / out))
     return {
-        "encoder": f"pt-{name}",
+        "encoder": out,
         "base": EMBEDDERS[name][0],
         "rows": int(keep.sum()),
         "dropped_mtop_overlap": int((~keep).sum()),

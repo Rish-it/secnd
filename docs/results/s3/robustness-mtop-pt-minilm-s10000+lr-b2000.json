@@ -1,0 +1,10 @@
+{
+  "dataset": "mtop",
+  "model": "pt-minilm-s10000+lr",
+  "budget": 2000,
+  "splits": 2000,
+  "pass_rate": 0.994,
+  "mean_coverage": 0.46411368046571794,
+  "worst_1pct_precision": 0.9901560546542681,
+  "pool_rows": 6184
+}
