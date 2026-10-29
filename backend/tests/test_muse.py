@@ -155,6 +155,26 @@ def test_budget_total_limit_and_corrupt_ledger_fail_closed(tmp_path):
         pytest.fail("Run must be rejected")
 
 
+def test_in_flight_requests_reserve_budget_until_they_finish(tmp_path):
+    unit = Usage(prompt_tokens=4_000_000, completion_tokens=0)
+    with BudgetRun(
+        settings(),
+        task="concurrent",
+        rows=1,
+        measured_tokens=unit,
+        ledger_path=tmp_path / "spend.csv",
+    ) as run:
+        with run.reserve(unit):
+            with run.reserve(unit):
+                with pytest.raises(MuseError, match="next request"):
+                    with run.reserve(unit):
+                        pytest.fail("Three in-flight requests would cost $15")
+        with run.reserve(unit):
+            run.record(unit)
+        assert run.cost_usd == Decimal(5)
+        run.check(unit)
+
+
 @contextmanager
 def client_for(tmp_path, handler):
     with (

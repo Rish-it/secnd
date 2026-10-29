@@ -7,10 +7,12 @@ import json
 import re
 import time
 from collections.abc import Callable, Mapping
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from datetime import date as Date
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
+from threading import RLock
 from typing import Annotated, Literal
 
 import httpx
@@ -59,6 +61,10 @@ class MuseError(RuntimeError):
     pass
 
 
+class MuseOutputError(MuseError):
+    pass
+
+
 def usage_cost(usage: Usage) -> Decimal:
     # Reasoning is already part of completion_tokens; cached input is charged conservatively.
     return (
@@ -89,6 +95,8 @@ class BudgetRun:
         self.previous_spend = Decimal(0)
         self.estimated_usage = False
         self._file = None
+        self._lock = RLock()
+        self._pending_cost = Decimal(0)
 
     def __enter__(self):
         if self.estimate > self.budget:
@@ -119,23 +127,36 @@ class BudgetRun:
         return self
 
     def check(self, usage: Usage):
-        if self._file is None:
-            raise MuseError("A paid request needs an active budget run.")
-        projected = self.cost_usd + usage_cost(usage)
-        if projected > self.budget or self.previous_spend + projected > Decimal(30):
-            raise MuseError("The next request would exceed the spending limit.")
+        with self._lock:
+            if self._file is None:
+                raise MuseError("A paid request needs an active budget run.")
+            projected = self.cost_usd + self._pending_cost + usage_cost(usage)
+            if projected > self.budget or self.previous_spend + projected > Decimal(30):
+                raise MuseError("The next request would exceed the spending limit.")
+
+    @contextmanager
+    def reserve(self, usage: Usage):
+        with self._lock:
+            self.check(usage)
+            self._pending_cost += usage_cost(usage)
+        try:
+            yield
+        finally:
+            with self._lock:
+                self._pending_cost -= usage_cost(usage)
 
     def record(self, usage: Usage, *, estimated: bool = False):
-        if self._file is None:
-            raise MuseError("Cannot record spend outside an active run.")
-        self.usage = Usage(
-            **{
-                field: getattr(self.usage, field) + value
-                for field, value in usage.model_dump().items()
-            }
-        )
-        self.cost_usd += usage_cost(usage)
-        self.estimated_usage |= estimated
+        with self._lock:
+            if self._file is None:
+                raise MuseError("Cannot record spend outside an active run.")
+            self.usage = Usage(
+                **{
+                    field: getattr(self.usage, field) + value
+                    for field, value in usage.model_dump().items()
+                }
+            )
+            self.cost_usd += usage_cost(usage)
+            self.estimated_usage |= estimated
 
     def __exit__(self, error_type, error, traceback):
         try:
@@ -288,22 +309,24 @@ class MuseClient:
         )
         started = time.perf_counter()
         for attempt in range(3):
-            self.run.check(reservation)
-            try:
-                response = self.http.post("chat/completions", json=payload)
-            except httpx.TransportError:
-                self.run.record(reservation, estimated=True)
-                if attempt == 2:
-                    raise MuseError("Provider request failed after three attempts.") from None
-            else:
-                if response.status_code == 200:
-                    break
-                self.run.record(reservation, estimated=True)
-                if response.status_code not in (429, 500, 502, 503, 504) or attempt == 2:
-                    raise MuseError(
-                        f"Provider returned HTTP {response.status_code}; details withheld."
-                    )
+            with self.run.reserve(reservation):
+                try:
+                    response = self.http.post("chat/completions", json=payload)
+                except httpx.TransportError:
+                    self.run.record(reservation, estimated=True)
+                    if attempt == 2:
+                        raise MuseError("Provider request failed after three attempts.") from None
+                else:
+                    if response.status_code == 200:
+                        return self._completion(response, reservation, started)
+                    self.run.record(reservation, estimated=True)
+                    if response.status_code not in (429, 500, 502, 503, 504) or attempt == 2:
+                        raise MuseError(
+                            f"Provider returned HTTP {response.status_code}; details withheld."
+                        )
             time.sleep(0.25 * 2**attempt)
+
+    def _completion(self, response, reservation, started):
         try:
             data = response.json()
             usage = parse_usage(data)
@@ -314,7 +337,7 @@ class MuseClient:
         try:
             choice = data["choices"][0]
             if choice.get("finish_reason") == "length":
-                raise MuseError(
+                raise MuseOutputError(
                     "Provider response reached its token limit; refusing partial output."
                 )
             return Completion(
@@ -324,7 +347,9 @@ class MuseClient:
                 latency_ms=(time.perf_counter() - started) * 1000,
             )
         except (KeyError, IndexError, TypeError, ValueError, AttributeError):
-            raise MuseError("Provider returned an invalid completion; details withheld.") from None
+            raise MuseOutputError(
+                "Provider returned an invalid completion; details withheld."
+            ) from None
 
     def zero_shot(self, items: list[MuseItem], labels: list[str]) -> list[LabelResult]:
         if (
@@ -382,7 +407,7 @@ class MuseClient:
                 ):
                     raise ValueError("Invalid label distribution")
             except (KeyError, TypeError, ValueError):
-                raise MuseError(
+                raise MuseOutputError(
                     "Provider returned an invalid label distribution; details withheld."
                 ) from None
             results.append(result)
