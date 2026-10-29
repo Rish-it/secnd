@@ -10,7 +10,7 @@ from decimal import Decimal
 from backend.config import Settings
 from backend.data import load_dataset, split_manifest
 from backend.muse import MuseClient, MuseError
-from backend.muse_baseline import RESULTS, collect, digest, sample, summarize, write_json
+from backend.muse_baseline import RESULTS, collect, digest, item, sample, summarize, write_json
 from backend.providers import ledger_path, provider_settings
 
 TASK = "muse-baseline-provider"
@@ -54,6 +54,12 @@ def run(provider, *, limit=500):
     original = json.loads((RESULTS / "muse-sample.json").read_text())
     if test["id"].tolist() != original["row_ids"]:
         raise ValueError("Comparison must use the original 500 test rows.")
+    if (
+        digest([item(row).model_dump(mode="json") for _, row in test.iterrows()])
+        != original["input_hash"]
+        or sorted(frame["label"].unique()) != original["labels"]
+    ):
+        raise ValueError("Comparison input or allowed labels changed.")
     manifest = split_manifest("ipsa", frame, split)
     if (
         digest(manifest["sources"]) != original["data_hash"]

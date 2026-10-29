@@ -159,3 +159,33 @@ def test_provider_comparison_keeps_identical_inputs_and_reconciles_both_runs():
         compared["default_provider"]
         == max(compared["providers"], key=lambda r: r["accuracy"])["provider"]
     )
+
+
+def test_provider_rerun_rejects_changed_inputs_before_any_paid_call(tmp_path, monkeypatch):
+    import inspect
+
+    from backend import provider_comparison
+    from backend.muse import MuseClient
+
+    data = frame()
+    split, test = sample(data, rows=3)
+    manifest = split_manifest("ipsa", data, split)
+    plan = {
+        "row_ids": test["id"].tolist(),
+        "labels": sorted(data["label"].unique()),
+        "data_hash": digest(manifest["sources"]),
+        "split_hash": manifest["hash"],
+        "input_hash": "changed-inputs",
+        "protocol_hash": digest(inspect.getsource(MuseClient.zero_shot)),
+    }
+    (tmp_path / "muse-sample.json").write_text(json.dumps(plan))
+    monkeypatch.setattr(provider_comparison, "RESULTS", tmp_path)
+    monkeypatch.setattr(provider_comparison, "load_dataset", lambda *args: data)
+    monkeypatch.setattr(provider_comparison, "sample", lambda *args: (split, test))
+    monkeypatch.setattr(
+        provider_comparison,
+        "collect",
+        lambda *args, **kwargs: pytest.fail("Paid collector must not be reached"),
+    )
+    with pytest.raises(ValueError, match="input"):
+        provider_comparison.run("meta", limit=1)
