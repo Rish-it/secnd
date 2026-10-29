@@ -1,0 +1,23 @@
+backend/api.py
+  s_1f3964e6251ccb::t_3c28da86862885 5,28,46,54-56,61-68,121,169-207,228-233,237,240-256
+backend/tests/test_workspace.py
+  s_1f3964e6251ccb::t_141596038f5047 155-199
+docs/api/openapi.json
+  s_1f3964e6251ccb::t_2b1288fda34fec 1101,1157-1166,1186-1195,1251-1260,1280-1289,1345-1354,1374-1383,1457-1466,1486-1495,1541-1550,1570-1579,1625-1634,1654-1663,1718-1727,1747-1756,1767,1816-1825,1845-1854,1928-1937,1957-1966
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "08d5e5eb687c75079c0ef2cbbd4ef9b42caa959b",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
