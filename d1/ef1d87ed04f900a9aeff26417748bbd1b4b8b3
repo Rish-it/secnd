@@ -1,0 +1,29 @@
+docs/results/s3/card-mtop-pt-bge+lr-b2000.json
+  s_99a14fdaab2d15::t_b74d6cc2704db0 1-174
+docs/results/s3/card-mtop-pt-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_4fc70125679c5a 1-174
+docs/results/s3/curves-mtop-pt-bge+lr-b2000.json
+  s_99a14fdaab2d15::t_1a95cec8e666c9 1-556
+docs/results/s3/curves-mtop-pt-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_f01cccb6f59986 1-556
+docs/results/s3/robustness-mtop-pt-minilm+lr-b2000.csv
+  s_99a14fdaab2d15::t_5dac15317e5be1 1-2001
+docs/results/s3/robustness-mtop-pt-minilm+lr-b2000.json
+  s_99a14fdaab2d15::t_fe2b4332959d6e 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d1ef1d87ed04f900a9aeff26417748bbd1b4b8b3",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
