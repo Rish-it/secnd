@@ -1,0 +1,23 @@
+backend/tests/test_eval.py
+  s_931864dc636ea3::t_9aab9c33fedb93 1-4,6,31-96
+  s_931864dc636ea3::t_50828dd5c55317 97-103
+backend/eval.py
+  s_931864dc636ea3::t_45fe6a2a8656d5 7,30,45-52,68,85-92,94-106,108-111,113-125,210
+  s_931864dc636ea3::t_b98ce5a93103b5 211-215
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ab210cf386213d45cb3567be5e731c4bb5089fec",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
