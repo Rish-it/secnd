@@ -1,0 +1,25 @@
+backend/tests/test_incontext.py
+  s_99a14fdaab2d15::t_ddc6ae08ea4cdc 1-37
+  s_99a14fdaab2d15::t_e1adf04a16ca2e 38-39
+backend/incontext.py
+  s_99a14fdaab2d15::t_3bff5b5a6226c5 1-285
+  s_99a14fdaab2d15::t_84afa39b05e642 286-491
+backend/modal_bench.py
+  s_99a14fdaab2d15::t_7c5d3bae408dae 61-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "af920f44fe260fe5dacacc5dc39ca975b639d48a",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
