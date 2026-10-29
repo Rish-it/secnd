@@ -1,0 +1,21 @@
+docs/results/s5/muse-distribution-pilot-predictions.jsonl
+  s_1f3964e6251ccb::t_9398cec1ce479b 1-148
+docs/results/s5/muse-distribution-pilot-sample.json
+  s_1f3964e6251ccb::t_6c8330b4ca2585 1-578
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3e4e8916be777f49aae80ec0eb1981de4e0c205c",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
