@@ -233,12 +233,15 @@ request shape; schema-constrained output applies only to paraphrases.
 
 | Dataset | Unique training texts | Paraphrases | Successful-batch cost | p50 batch latency |
 | --- | ---: | ---: | ---: | ---: |
-| BANKING77 | 2,300 | 4,600 | $1.390641 | 4,069 ms |
-| MTOP | 2,393 | 4,786 | $1.370108 | 3,793 ms |
+| BANKING77 | 2,303 | 4,606 | $1.759293 | 4,182 ms |
+| MTOP | 2,391 | 4,782 | $1.492620 | 3,830 ms |
 | IPSA | 615 | 1,230 | $0.465591 | 6,028 ms |
 
-Total: **5,308 texts / 10,616 paraphrases**. Full augmentation spend was
-**$3.59346625**, including malformed batches, bounded repairs and paid in-flight
+Current training selections after the stable split fix: **5,309 texts / 10,618 paraphrases**.
+The top-up added 577 BANKING77 texts and 195 MTOP texts for **$0.50487775**.
+The local cache preserves all earlier entries: **6,080 texts / 12,160 paraphrases**;
+consumers must join only their own current training hashes. Full augmentation spend is
+**$4.09834400**, including malformed batches, bounded repairs and paid in-flight
 responses that did not become cache entries after a failure. The successful-batch
 figures in the table omit those attempts; the ledger retains them. Blank IPSA
 texts were skipped (164 selections across the ten training subsets). The cache
