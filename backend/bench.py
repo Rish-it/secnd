@@ -175,16 +175,18 @@ def main():
         OUT.mkdir(parents=True, exist_ok=True)
         speed().to_csv(OUT / "speed.csv", index=False)
         return
-    if args.gpu:
-        results = run(args.dataset, GPU["budgets"], list(GPU["seeds"]), GPU_FEATURIZERS, ("lr",))
-    else:
-        grid = QUICK if args.quick else {"budgets": BUDGETS, "seeds": SEEDS}
-        results = run(args.dataset, grid["budgets"], list(grid["seeds"]))
     name = (
         f"bakeoff-{args.dataset}" + ("-quick" if args.quick else "") + ("-gpu" if args.gpu else "")
     )
     OUT.mkdir(parents=True, exist_ok=True)
-    results.to_csv(OUT / f"{name}.csv", index=False)
+    out = OUT / f"{name}.csv"
+    if args.gpu:
+        results = run(
+            args.dataset, GPU["budgets"], list(GPU["seeds"]), GPU_FEATURIZERS, ("lr",), out
+        )
+    else:
+        grid = QUICK if args.quick else {"budgets": BUDGETS, "seeds": SEEDS}
+        results = run(args.dataset, grid["budgets"], list(grid["seeds"]), out=out)
     (OUT / f"{name}.md").write_text(table(results))
     print(table(results))
 
