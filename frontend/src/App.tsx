@@ -3,6 +3,7 @@ import type { ChangeEvent } from "react";
 import "./App.css";
 import { api, percent } from "./api";
 import type { EvalCard, Preview } from "./api";
+import Companion from "./Companion";
 
 type View = "Teach" | "Companion" | "Metrics";
 type Connection = "connecting" | "online" | "offline";
@@ -63,6 +64,8 @@ function Icon({ kind }: { kind: View | "upload" | "arrow" }) {
 }
 
 export default function App() {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [, setMetricsRefresh] = useState(0);
   const [view, setView] = useState<View>("Teach");
   const [connection, setConnection] = useState<Connection>("connecting");
   const [retry, setRetry] = useState(0);
@@ -180,7 +183,7 @@ export default function App() {
               key={item}
               className={`nav-item ${view === item ? "active" : ""}`}
               aria-current={view === item ? "page" : undefined}
-              onClick={() => setView(item)}
+              onClick={() => item === "Companion" ? setPanelOpen(true) : setView(item)}
             >
               <Icon kind={item} />
               <span>{item}</span>
@@ -528,6 +531,7 @@ export default function App() {
           </footer>
         </main>
       </div>
+      <Companion open={panelOpen} onOpen={() => setPanelOpen(true)} onClose={() => setPanelOpen(false)} onAnswer={() => setMetricsRefresh(value => value + 1)} />
     </div>
   );
 }
