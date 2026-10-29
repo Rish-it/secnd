@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-10-29",
+  "mode": "fixture",
+  "source_revision": "e0e4b3b",
+  "checks": {
+    "example_csv_rows": 8,
+    "selected_target": "category",
+    "import_zero_coverage_state": true,
+    "fixture_answers_per_run": 10,
+    "answer_runs": 2,
+    "all_answer_requests_http_200": true,
+    "answers_marked_not_saved": true,
+    "question_remains_visible": true,
+    "coverage_after_answers": 0,
+    "decision_evidence_visible": true,
+    "one_tap_correction_checked": true,
+    "chat_reply_marked_preview": true,
+    "keyboard_enter_opens_panel": true,
+    "escape_closes_panel": true,
+    "focus_returns_to_launcher": true,
+    "mobile_viewport_width": 390,
+    "mobile_document_width": 390,
+    "mobile_panel_width": 390,
+    "horizontal_overflow": false,
+    "simulated_metrics_503_shows_error": true,
+    "retry_recovers_metrics": true,
+    "console_warnings_or_errors": 0
+  },
+  "live_learning_verified": false,
+  "limits": "Fixtures do not train, save answers, call a model, or move coverage. Live coverage, reliability bins, handoff measurements and rollback require the learning loop and live API."
+}
