@@ -1,0 +1,21 @@
+backend/tests/test_workspace.py
+  s_1f3964e6251ccb::t_a74171b6a7c5c0 2,17,24-25,27
+backend/workspace.py
+  s_1f3964e6251ccb::t_137d93d57b482a 5,15,17,30-33,43,45,51-56,76-109,112-114,144-152,161,171,179-181,194,196-198,200,208-209
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f12e671297b807917bc2452081b0b732d51be503",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
