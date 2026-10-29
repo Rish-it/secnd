@@ -1,0 +1,25 @@
+docs/results/s2/incontext-ic-ettin-150m-s6000-near.json
+  s_99a14fdaab2d15::t_847f501c7c7668 1-120
+docs/results/s2/incontext-ic-ettin-150m-s6000.json
+  s_99a14fdaab2d15::t_a5fbbba4d48b10 1-72
+docs/results/s2/incontext-ic-ettin-32m-s6000-near.json
+  s_99a14fdaab2d15::t_7bc040c9aa3c5e 1-120
+docs/results/s2/incontext-ic-ettin-68m-s6000.json
+  s_99a14fdaab2d15::t_bea24f23ea2e85 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "91ead18a92fb670d4424117147eec7edb9872f2c",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
