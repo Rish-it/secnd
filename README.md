@@ -1,53 +1,21 @@
-# Secnd
+# Secnd · Ren for Meta apps
 
-A companion that learns the decisions you make over and over. Teach it with past
-examples; the goal is to handle confident decisions and ask you about the rest.
+Ren is an independently released decision model built for Meta's platform.
+Its encoder learns from Meta's open assistant data; each workspace learns its own
+labels and corrections. Confident decisions are handled automatically. The rest
+become questions for a person, whose answers train the next classifier version.
 
-This is the foundation for the Meta AI hackathon project.
+The open encoder is [Secnd-AI/ren](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0):
+release **ren-1.0.0**, tag **v1.0.0**, pinned by immutable revision and
+[SHA-256 manifest](backend/encoder-ren-1.0.0.json). Serving runs on CPU.
 
-## What works today
-
-- FastAPI with persistent local SQLite storage and a database health check.
-- React and TypeScript workspace with Teach, Companion, and Metrics views.
-- CSV upload, validation, a five-row preview, and target-column selection.
-- Locked Python and JavaScript dependencies, automated checks, and one Docker image.
-
-Model training, calibrated predictions, the answer/retrain loop, and Muse Spark
-integration are next. Companion and Metrics show empty states until those exist.
-The example CSV is eight illustrative rows for trying the preview, not a benchmark.
-CSV previews are not saved; target selection currently stays in the browser.
-
-## Run locally
-
-Requirements: [uv](https://docs.astral.sh/uv/getting-started/installation/), Python
-3.12 (uv can install it), and Node.js 24 (`nvm use` reads `.nvmrc`).
-
-From the repository root:
-
-```sh
-uv sync --locked
-npm ci
-cp .env.example .env
-npm run dev
-```
-
-Open **http://localhost:3000**. API docs: **http://127.0.0.1:8000/docs**.
-`npm run dev` starts both processes and stops the other if one exits. To run them
-in separate terminals, use `npm run dev:api` and `npm run dev:web`.
-
-Vite proxies `/api` to FastAPI. Production serves the built frontend and API
-from FastAPI on the same port.
-
-## Check and build
-
-```sh
-npm run check
-```
-
-This runs Python lint/format checks, API tests, frontend lint, TypeScript checks,
-and a production frontend build. GitHub Actions runs the same checks on pushes
-and pull requests. `uv.lock` and `package-lock.json` are the dependency sources
-of truth; use `uv lock` or `npm install` intentionally when changing dependencies.
+On the fixed English MTOP split at 2,000 workspace labels, the released encoder
+and calibrated head measured **42.42% automatic coverage at 99.93% test precision**.
+The associated 2,000 re-splits passed **99.45%** of the time. These are recorded
+benchmark results, separate from an uploaded workspace's calibration card.
+[Card](docs/results/s3/card-mtop-pt-minilm+lr-b2000.json) ·
+[re-splits](docs/results/s3/robustness-mtop-pt-minilm+lr-b2000.json) ·
+[model and limits](docs/model.md).
 
 ## Run one container
 
@@ -55,43 +23,122 @@ of truth; use `uv lock` or `npm install` intentionally when changing dependencie
 docker compose up --build
 ```
 
-Open **http://localhost:8000**. The `secnd-data` volume keeps SQLite and future
-embedding/model caches across restarts. The container runs as an unprivileged
-user. PyTorch uses CPU wheels on Linux; no GPU or CUDA is required.
+Open **http://localhost:8000**. The build downloads and verifies the pinned public
+encoder. Runtime can copy it into the persistent data volume and infer offline.
+The `secnd-data` volume keeps labels, predictions, models and embedding caches.
 
-## Configuration
+Teach imports labelled CSVs, freezes a calibration holdout and fits a first model.
+Companion shows automatic decisions, uncertain questions and random spot-checks.
+Answers persist before background retraining. Metrics shows local version history,
+rollback and `guarded` when automatic answers are paused. Published evaluations
+and the recorded teacher handoff remain separate from workspace measurements.
+Chat currently remains a preview.
 
-Copy `.env.example` to `.env` for local overrides. Local defaults work without
-an API key. Configuration is read by the backend; never put provider keys in
-frontend environment variables.
+## CSV to a live decision
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `SECND_DATA_DIR` | `.data` | SQLite and future model/cache files |
-| `SECND_FRONTEND_DIST` | `frontend/dist` | Built frontend served when present |
-| `SECND_MUSE_API_KEY` | empty | Reserved for the Muse client |
-| `SECND_MUSE_BASE_URL` | empty | Reserved; confirm the official endpoint before integrating |
-| `SECND_MUSE_MODEL` | empty | Reserved; confirm the available model before integrating |
+This generates 200 deliberately noisy illustrative rows, not a benchmark:
 
-The bootstrap makes no provider calls and does not download embedding model
-weights. The sentence-transformers and scikit-learn dependencies are installed
-so the model pipeline can be implemented next.
+```sh
+python3 - <<'PY' > /tmp/ren-demo.csv
+import csv, sys
+writer = csv.writer(sys.stdout)
+writer.writerow(['item_id', 'text', 'amount', 'category'])
+for i in range(200):
+    label = 'Travel' if i % 2 else 'Food'
+    text = 'flight ticket journey' if i % 2 else 'pizza dinner restaurant'
+    tag = chr(97 + i // 26) + chr(97 + i % 26)
+    if i % 17 == 0:
+        label = 'Food' if label == 'Travel' else 'Travel'
+    writer.writerow([f'past-{i}', f'{text} {tag} number {i}', i % 7, label])
+PY
+API=http://127.0.0.1:8000/api/v1/workspaces/default
+curl --fail-with-body -sS "$API/decisions:import" \
+  -F 'file=@/tmp/ren-demo.csv;type=text/csv' -F target_column=category
+curl --fail-with-body -sS "$API/predict" -H 'Content-Type: application/json' \
+  -d '{"items":[{"item_id":"next","text":"Train fare","amount":25}]}'
+curl --fail-with-body -sS "$API/queue"
+```
 
-## API available now
+A small import can promote a classifier with zero certified coverage. In that
+state every item goes to a person. Importing again into the same workspace returns
+409 and preserves its labels and holdout; choose a new workspace for another task.
 
-| Endpoint | Behavior |
-| --- | --- |
-| `GET /api/health` | Checks SQLite; returns 503 if storage is unavailable |
-| `POST /api/preview` | Multipart `file`; UTF-8 CSV, at most 5 MiB and 100 unique columns; row count and five preview rows |
+```sh
+curl --fail-with-body -sS "$API/answers" -H 'Content-Type: application/json' \
+  -H 'Idempotency-Key: demo-answer-1' -d '{"item_id":"next","label":"Travel"}'
+curl --fail-with-body -sS "$API/metrics"
+curl --fail-with-body -sS "$API/models"
+```
 
-The decision/training endpoints in the plan are not implemented yet.
+[API contract and errors](docs/api/README.md).
 
-## Next milestone
+## Meta messages and the learning loop
 
-Choose a licensed transaction dataset with 5,000+ rows, descriptions, amounts,
-and 10–30 categories. Implement fixed seed/stream/calibration/test splits,
-cached `all-MiniLM-L6-v2` CPU embeddings, and logistic regression. Then print
-version 0 metrics before connecting the UI to training.
+The [WhatsApp Business Cloud API and Messenger integration](docs/integrations/meta.md)
+verifies the GET handshake and raw-body HMAC-SHA256 signatures, deduplicates message
+IDs across restarts, then routes supported text through the workspace's Loop.
+Uncertain messages enter the same human queue. Replies are dry-run by default;
+real WhatsApp sends require both a token and `SECND_WHATSAPP_SEND_ENABLED=true`.
+Messenger outbound replies remain previews. Compose forwards these settings from
+`.env`; no secret enters frontend code or image layers.
 
-The evaluation must distinguish held-out calibration from the final test set.
-Coverage at the precision target and the learning curve remain the core demo.
+The [cold-start protocol and curve](docs/results/s5/README.md#reproduce-the-cold-start-handoff)
+uses Meta teacher labels at weight 0.3, followed by simulated human answers at weight
+1. Fixed calibration and test rows never train the model. The teacher stays outside
+the automatic decision path. The graph counts completed decisions, with pending
+questions reported separately. It is an offline simulation, not customer behavior.
+
+To watch a CPU simulation locally after installing dependencies:
+
+```sh
+uv run python -m backend.watch --dataset mtop --featurizer pt-minilm
+```
+
+The terminal shows coverage, held-out precision against the 99% target, accuracy,
+label counts, promoted/refused candidates, reasons, guard state and recent answers.
+
+## Develop and check
+
+Python 3.12, [uv](https://docs.astral.sh/uv/) and Node.js 24:
+
+```sh
+uv sync --locked
+npm ci
+cp .env.example .env
+npm run dev
+npm run check
+```
+
+Development UI: **http://localhost:3000**. API docs: **http://127.0.0.1:8000/docs**.
+Vite proxies `/api` to FastAPI. Production serves the built frontend and API from
+one process. `uv.lock` and `package-lock.json` pin dependencies.
+
+Configuration stays in the backend. `SECND_DATA_DIR` defaults to `.data` locally;
+`SECND_FEATURIZER` defaults to `pt-minilm`, with a logged base-encoder fallback on
+fetch/verification failure. Encoder repo/revision overrides must match the committed
+manifest. `.env.example` lists messaging settings; teacher calls use Meta provider
+settings locally and require an explicit paid flag with a $10 task cap across resumes.
+
+## What the gate means
+
+Temperature calibration and threshold selection use a fixed held-out calibration
+set. Automatic coverage requires the one-sided Clopper–Pearson lower bound to pass
+the selection level; insufficient evidence means zero coverage. A regression gate
+can refuse a candidate. Bad random spot-checks can pause automatic answers through
+`guarded`. A new promotion resets the live guard. A target is not a universal
+precision guarantee on new traffic.
+
+The service supports one API process. Answers and model artifacts persist;
+spot-check counters reset on restart. Rollback restores the saved classifier head
+and calibration while retaining current workspace label memory. English only.
+Benchmark splits are the project's fixed group splits, not official-score comparisons.
+
+## Data and weights
+
+TOPv2 and MTOP are Meta open assistant datasets; encoder tuning removes normalized
+MTOP text overlap before training on TOPv2. See the [training report](docs/results/s2/pretune-pt-minilm.json)
+and the published [weight card](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0).
+Other evaluations use UK IPSA expenses (OGL v3.0), BANKING77 (CC-BY-4.0) and the
+synthetic US bank set (MIT). Sources and fixed split manifests live in
+[model documentation](docs/model.md) and [evaluation results](docs/results/).
+Keep local data, secrets, model files and caches out of Git.
