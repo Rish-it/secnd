@@ -1,0 +1,47 @@
+docs/results/s4/curve-mtop-least-s0.csv
+  s_99a14fdaab2d15::t_342c4875af6547 1-22
+docs/results/s4/curve-mtop-least-s1.csv
+  s_99a14fdaab2d15::t_c726bd89d864ff 1-22
+docs/results/s4/curve-mtop-least-s2.csv
+  s_99a14fdaab2d15::t_913065125e865e 1-22
+docs/results/s4/curve-mtop-least-s3.csv
+  s_99a14fdaab2d15::t_42f6454c5f5747 1-22
+docs/results/s4/curve-mtop-least-s4.csv
+  s_99a14fdaab2d15::t_3f8fe853e24b0d 1-22
+docs/results/s4/curve-mtop-margin-s0.csv
+  s_99a14fdaab2d15::t_fc71cd35e54baa 1-22
+docs/results/s4/curve-mtop-margin-s1.csv
+  s_99a14fdaab2d15::t_65eb05f9aeacb8 1-22
+docs/results/s4/curve-mtop-margin-s2.csv
+  s_99a14fdaab2d15::t_b54fec4f62247a 1-22
+docs/results/s4/curve-mtop-margin-s3.csv
+  s_99a14fdaab2d15::t_fba049996e9984 1-22
+docs/results/s4/curve-mtop-margin-s4.csv
+  s_99a14fdaab2d15::t_9d9aa2e8944c3b 1-22
+docs/results/s4/curve-mtop-random-s0.csv
+  s_99a14fdaab2d15::t_21073deb69bbc2 1-22
+docs/results/s4/curve-mtop-random-s1.csv
+  s_99a14fdaab2d15::t_e169f925a43246 1-22
+docs/results/s4/curve-mtop-random-s2.csv
+  s_99a14fdaab2d15::t_4457c303683590 1-22
+docs/results/s4/curve-mtop-random-s3.csv
+  s_99a14fdaab2d15::t_9747efd282056e 1-22
+docs/results/s4/curve-mtop-random-s4.csv
+  s_99a14fdaab2d15::t_ae320ae2e32908 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2eccef3cee72ba223764ba703c5b9e18dfe4f4e1",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
