@@ -73,3 +73,11 @@ No post-inference edits or exclusions. Report this small, author-written sample
 separately from the primary 500-row attack suite. Re-run paired original messages
 and re-encode changed messages for nearest-history retrieval. The same three
 full-history shot conditions and unchanged calibration rule apply.
+
+## CPU comparison extension (before latency results)
+
+Also run `ic-ettin-32m-s6000-near` on the identical CPU allocation and request
+sample with the same warmups, FP32, four threads and three shot counts. Report
+these as separate processes, including CPU identity; cloud scheduling can assign
+different hosts. This supplies the requested smaller-model alternative without
+using GPU timing to infer CPU speed.
