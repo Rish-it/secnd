@@ -49,7 +49,9 @@ gpu_image = image.run_commands(
 def attacks(natural: bool = False):
     from backend.reader_audit import run
 
-    return persist(run(Path("/vol/data"), natural=natural), "paraphrases" if natural else "attacks")
+    return persist(
+        run(Path("/vol/data"), natural=natural), "paraphrase-results" if natural else "attacks"
+    )
 
 
 @app.local_entrypoint()
@@ -65,7 +67,7 @@ def main(
     name = (
         ("cpu" if "150m" in model_name else "cpu-32m")
         if latency
-        else ("paraphrases" if natural else "attacks")
+        else ("paraphrase-results" if natural else "attacks")
     )
     path = ROOT / "docs/results/s3r" / f"{name}.json"
     path.write_text(json.dumps(report, indent=2) + "\n")

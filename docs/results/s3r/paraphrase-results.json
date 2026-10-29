@@ -1,0 +1,2523 @@
+{
+  "model": "ic-ettin-150m-s6000-near",
+  "device": "cuda",
+  "load_seconds": 3.1052563510000013,
+  "split_sha256": "1cac4f23ac65a27f03abeaf794d57e33e4d81e4724b2cb52cddab491d0ae5c7e",
+  "checkpoint_sha256": {
+    "encoder/config.json": "bc59aa5a54aa20199c23b744fb989428a91eaf88349366ec459d3a0dd3b84299",
+    "encoder/model.safetensors": "74979ac6a04a2469805065fa2cc02b1172c188ee84bbb06142f835780e2fc918",
+    "encoder/tokenizer.json": "3b67e6b106786d2bd769675fd65b8b2f85a99bc045346afbdd7871d77f84b1c5",
+    "encoder/tokenizer_config.json": "fb54f027372062b2ca52282efb04d178a8b57167a00cd8f4e816515823a2c016",
+    "scorer.pt": "9cdaec36bde1a60bdb1c4ba89535ae0dc33eb2e59260fe45c777a92895ba018b"
+  },
+  "torch": "2.15.0+cu132",
+  "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.41",
+  "threads": 4,
+  "results": {
+    "0": {
+      "temperature": 1.5126325179938809,
+      "threshold": 0.9839596152305603,
+      "attacks": {
+        "baseline": {
+          "accepted": 12,
+          "errors": 0,
+          "coverage": 0.24,
+          "precision": 1.0,
+          "precision_minus_99": 0.010000000000000009,
+          "interval95": [
+            0.7353515306029488,
+            1.0
+          ],
+          "records": [
+            {
+              "source": 2598,
+              "prediction": 103,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 430
+            },
+            {
+              "source": 755,
+              "prediction": 9,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 430
+            },
+            {
+              "source": 1862,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 434
+            },
+            {
+              "source": 3958,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 2898,
+              "prediction": 87,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 434
+            },
+            {
+              "source": 2516,
+              "prediction": 26,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 435
+            },
+            {
+              "source": 2237,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 435
+            },
+            {
+              "source": 1289,
+              "prediction": 73,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 435
+            },
+            {
+              "source": 2172,
+              "prediction": 33,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 435
+            },
+            {
+              "source": 864,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 434
+            },
+            {
+              "source": 3909,
+              "prediction": 50,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 430
+            },
+            {
+              "source": 4384,
+              "prediction": 90,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 434
+            },
+            {
+              "source": 1443,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 2703,
+              "prediction": 109,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 444
+            },
+            {
+              "source": 4357,
+              "prediction": 52,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 443
+            },
+            {
+              "source": 997,
+              "prediction": 87,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 429
+            },
+            {
+              "source": 3732,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 433
+            },
+            {
+              "source": 77,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 434
+            },
+            {
+              "source": 2854,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 1783,
+              "prediction": 62,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 433
+            },
+            {
+              "source": 3539,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 429
+            },
+            {
+              "source": 2856,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 846,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 439
+            },
+            {
+              "source": 2371,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 1865,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 433
+            },
+            {
+              "source": 1116,
+              "prediction": 51,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 436
+            },
+            {
+              "source": 1403,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 442
+            },
+            {
+              "source": 325,
+              "prediction": 8,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 439
+            },
+            {
+              "source": 1488,
+              "prediction": 52,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 434
+            },
+            {
+              "source": 1945,
+              "prediction": 59,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 4069,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 433
+            },
+            {
+              "source": 3190,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 435
+            },
+            {
+              "source": 3351,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 431
+            },
+            {
+              "source": 2750,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 441
+            },
+            {
+              "source": 2513,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 434
+            },
+            {
+              "source": 3424,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 440
+            },
+            {
+              "source": 3934,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 438
+            },
+            {
+              "source": 2309,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 438
+            },
+            {
+              "source": 4166,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 429
+            },
+            {
+              "source": 1675,
+              "prediction": 13,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 430
+            },
+            {
+              "source": 514,
+              "prediction": 5,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 440
+            },
+            {
+              "source": 3582,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 442
+            },
+            {
+              "source": 4157,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 354,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 436
+            },
+            {
+              "source": 988,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 435
+            },
+            {
+              "source": 517,
+              "prediction": 48,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 437
+            },
+            {
+              "source": 3578,
+              "prediction": 96,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 430
+            },
+            {
+              "source": 3726,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 436
+            },
+            {
+              "source": 2105,
+              "prediction": 6,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 432
+            },
+            {
+              "source": 46,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 433
+            }
+          ]
+        },
+        "natural": {
+          "accepted": 11,
+          "errors": 0,
+          "coverage": 0.22,
+          "precision": 1.0,
+          "precision_minus_99": 0.010000000000000009,
+          "interval95": [
+            0.7150858470818455,
+            1.0
+          ],
+          "records": [
+            {
+              "source": 2598,
+              "prediction": 103,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 437
+            },
+            {
+              "source": 755,
+              "prediction": 9,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 432
+            },
+            {
+              "source": 1862,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 3958,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 436
+            },
+            {
+              "source": 2898,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 2516,
+              "prediction": 26,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 437
+            },
+            {
+              "source": 2237,
+              "prediction": 5,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 1289,
+              "prediction": 73,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 439
+            },
+            {
+              "source": 2172,
+              "prediction": 33,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 434
+            },
+            {
+              "source": 864,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 437
+            },
+            {
+              "source": 3909,
+              "prediction": 50,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 432
+            },
+            {
+              "source": 4384,
+              "prediction": 90,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 437
+            },
+            {
+              "source": 1443,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 2703,
+              "prediction": 109,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 446
+            },
+            {
+              "source": 4357,
+              "prediction": 108,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 441
+            },
+            {
+              "source": 997,
+              "prediction": 87,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 431
+            },
+            {
+              "source": 3732,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 436
+            },
+            {
+              "source": 77,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 436
+            },
+            {
+              "source": 2854,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 437
+            },
+            {
+              "source": 1783,
+              "prediction": 62,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 3539,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 433
+            },
+            {
+              "source": 2856,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 438
+            },
+            {
+              "source": 846,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 439
+            },
+            {
+              "source": 2371,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 436
+            },
+            {
+              "source": 1865,
+              "prediction": 28,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 433
+            },
+            {
+              "source": 1116,
+              "prediction": 51,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 436
+            },
+            {
+              "source": 1403,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 440
+            },
+            {
+              "source": 325,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 437
+            },
+            {
+              "source": 1488,
+              "prediction": 52,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 434
+            },
+            {
+              "source": 1945,
+              "prediction": 59,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 4069,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 433
+            },
+            {
+              "source": 3190,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 439
+            },
+            {
+              "source": 3351,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 436
+            },
+            {
+              "source": 2750,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 440
+            },
+            {
+              "source": 2513,
+              "prediction": 95,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 437
+            },
+            {
+              "source": 3424,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 443
+            },
+            {
+              "source": 3934,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 440
+            },
+            {
+              "source": 2309,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 439
+            },
+            {
+              "source": 4166,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 434
+            },
+            {
+              "source": 1675,
+              "prediction": 13,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 434
+            },
+            {
+              "source": 514,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 438
+            },
+            {
+              "source": 3582,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 441
+            },
+            {
+              "source": 4157,
+              "prediction": 95,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 354,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 439
+            },
+            {
+              "source": 988,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 435
+            },
+            {
+              "source": 517,
+              "prediction": 48,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 441
+            },
+            {
+              "source": 3578,
+              "prediction": 96,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 431
+            },
+            {
+              "source": 3726,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 438
+            },
+            {
+              "source": 2105,
+              "prediction": 6,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 432
+            },
+            {
+              "source": 46,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 438
+            }
+          ],
+          "prediction_flips": 5,
+          "acceptance_flips": 3
+        }
+      }
+    },
+    "8": {
+      "temperature": 1.2507915091289008,
+      "threshold": 0.9956310987472534,
+      "attacks": {
+        "baseline": {
+          "accepted": 17,
+          "errors": 0,
+          "coverage": 0.34,
+          "precision": 1.0,
+          "precision_minus_99": 0.010000000000000009,
+          "interval95": [
+            0.8049356770309067,
+            1.0
+          ],
+          "records": [
+            {
+              "source": 2598,
+              "prediction": 106,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 499
+            },
+            {
+              "source": 755,
+              "prediction": 9,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 500
+            },
+            {
+              "source": 1862,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 539
+            },
+            {
+              "source": 3958,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 521
+            },
+            {
+              "source": 2898,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 528
+            },
+            {
+              "source": 2516,
+              "prediction": 26,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 539
+            },
+            {
+              "source": 2237,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 533
+            },
+            {
+              "source": 1289,
+              "prediction": 73,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 523
+            },
+            {
+              "source": 2172,
+              "prediction": 33,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 542
+            },
+            {
+              "source": 864,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 525
+            },
+            {
+              "source": 3909,
+              "prediction": 50,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 504
+            },
+            {
+              "source": 4384,
+              "prediction": 90,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 540
+            },
+            {
+              "source": 1443,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 504
+            },
+            {
+              "source": 2703,
+              "prediction": 109,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 566
+            },
+            {
+              "source": 4357,
+              "prediction": 52,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 522
+            },
+            {
+              "source": 997,
+              "prediction": 6,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 501
+            },
+            {
+              "source": 3732,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 530
+            },
+            {
+              "source": 77,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 523
+            },
+            {
+              "source": 2854,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 509
+            },
+            {
+              "source": 1783,
+              "prediction": 62,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 516
+            },
+            {
+              "source": 3539,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 499
+            },
+            {
+              "source": 2856,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 538
+            },
+            {
+              "source": 846,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 554
+            },
+            {
+              "source": 2371,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 512
+            },
+            {
+              "source": 1865,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 506
+            },
+            {
+              "source": 1116,
+              "prediction": 40,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 541
+            },
+            {
+              "source": 1403,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 563
+            },
+            {
+              "source": 325,
+              "prediction": 8,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 537
+            },
+            {
+              "source": 1488,
+              "prediction": 52,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 542
+            },
+            {
+              "source": 1945,
+              "prediction": 59,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 511
+            },
+            {
+              "source": 4069,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 523
+            },
+            {
+              "source": 3190,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 511
+            },
+            {
+              "source": 3351,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 518
+            },
+            {
+              "source": 2750,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 541
+            },
+            {
+              "source": 2513,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 541
+            },
+            {
+              "source": 3424,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 539
+            },
+            {
+              "source": 3934,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 562
+            },
+            {
+              "source": 2309,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 565
+            },
+            {
+              "source": 4166,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 499
+            },
+            {
+              "source": 1675,
+              "prediction": 71,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 523
+            },
+            {
+              "source": 514,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 562
+            },
+            {
+              "source": 3582,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 529
+            },
+            {
+              "source": 4157,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 511
+            },
+            {
+              "source": 354,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 553
+            },
+            {
+              "source": 988,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 529
+            },
+            {
+              "source": 517,
+              "prediction": 48,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 540
+            },
+            {
+              "source": 3578,
+              "prediction": 96,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 493
+            },
+            {
+              "source": 3726,
+              "prediction": 51,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 527
+            },
+            {
+              "source": 2105,
+              "prediction": 106,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 518
+            },
+            {
+              "source": 46,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 518
+            }
+          ]
+        },
+        "natural": {
+          "accepted": 13,
+          "errors": 0,
+          "coverage": 0.26,
+          "precision": 1.0,
+          "precision_minus_99": 0.010000000000000009,
+          "interval95": [
+            0.752947361999529,
+            1.0
+          ],
+          "records": [
+            {
+              "source": 2598,
+              "prediction": 103,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 550
+            },
+            {
+              "source": 755,
+              "prediction": 9,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 523
+            },
+            {
+              "source": 1862,
+              "prediction": 28,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 541
+            },
+            {
+              "source": 3958,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 536
+            },
+            {
+              "source": 2898,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 521
+            },
+            {
+              "source": 2516,
+              "prediction": 26,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 536
+            },
+            {
+              "source": 2237,
+              "prediction": 5,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 535
+            },
+            {
+              "source": 1289,
+              "prediction": 73,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 523
+            },
+            {
+              "source": 2172,
+              "prediction": 33,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 540
+            },
+            {
+              "source": 864,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 525
+            },
+            {
+              "source": 3909,
+              "prediction": 28,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 519
+            },
+            {
+              "source": 4384,
+              "prediction": 90,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 548
+            },
+            {
+              "source": 1443,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 510
+            },
+            {
+              "source": 2703,
+              "prediction": 109,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 567
+            },
+            {
+              "source": 4357,
+              "prediction": 52,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 519
+            },
+            {
+              "source": 997,
+              "prediction": 87,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 505
+            },
+            {
+              "source": 3732,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 533
+            },
+            {
+              "source": 77,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 537
+            },
+            {
+              "source": 2854,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 531
+            },
+            {
+              "source": 1783,
+              "prediction": 62,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 524
+            },
+            {
+              "source": 3539,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 512
+            },
+            {
+              "source": 2856,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 548
+            },
+            {
+              "source": 846,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 541
+            },
+            {
+              "source": 2371,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 531
+            },
+            {
+              "source": 1865,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 506
+            },
+            {
+              "source": 1116,
+              "prediction": 40,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 541
+            },
+            {
+              "source": 1403,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 545
+            },
+            {
+              "source": 325,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 549
+            },
+            {
+              "source": 1488,
+              "prediction": 52,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 544
+            },
+            {
+              "source": 1945,
+              "prediction": 59,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 502
+            },
+            {
+              "source": 4069,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 524
+            },
+            {
+              "source": 3190,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 512
+            },
+            {
+              "source": 3351,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 526
+            },
+            {
+              "source": 2750,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 545
+            },
+            {
+              "source": 2513,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 544
+            },
+            {
+              "source": 3424,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 533
+            },
+            {
+              "source": 3934,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 586
+            },
+            {
+              "source": 2309,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 564
+            },
+            {
+              "source": 4166,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 508
+            },
+            {
+              "source": 1675,
+              "prediction": 13,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 516
+            },
+            {
+              "source": 514,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 552
+            },
+            {
+              "source": 3582,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 529
+            },
+            {
+              "source": 4157,
+              "prediction": 95,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 518
+            },
+            {
+              "source": 354,
+              "prediction": 8,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 555
+            },
+            {
+              "source": 988,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 534
+            },
+            {
+              "source": 517,
+              "prediction": 48,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 546
+            },
+            {
+              "source": 3578,
+              "prediction": 96,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 493
+            },
+            {
+              "source": 3726,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 527
+            },
+            {
+              "source": 2105,
+              "prediction": 6,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 513
+            },
+            {
+              "source": 46,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 523
+            }
+          ],
+          "prediction_flips": 7,
+          "acceptance_flips": 6
+        }
+      }
+    },
+    "32": {
+      "temperature": 1.1942907554015711,
+      "threshold": 0.9970827698707581,
+      "attacks": {
+        "baseline": {
+          "accepted": 14,
+          "errors": 0,
+          "coverage": 0.28,
+          "precision": 1.0,
+          "precision_minus_99": 0.010000000000000009,
+          "interval95": [
+            0.7683642383498834,
+            1.0
+          ],
+          "records": [
+            {
+              "source": 2598,
+              "prediction": 106,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 723
+            },
+            {
+              "source": 755,
+              "prediction": 9,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 762
+            },
+            {
+              "source": 1862,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 850
+            },
+            {
+              "source": 3958,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 774
+            },
+            {
+              "source": 2898,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 835
+            },
+            {
+              "source": 2516,
+              "prediction": 26,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 830
+            },
+            {
+              "source": 2237,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 831
+            },
+            {
+              "source": 1289,
+              "prediction": 73,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 816
+            },
+            {
+              "source": 2172,
+              "prediction": 33,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 857
+            },
+            {
+              "source": 864,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 809
+            },
+            {
+              "source": 3909,
+              "prediction": 50,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 749
+            },
+            {
+              "source": 4384,
+              "prediction": 90,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 855
+            },
+            {
+              "source": 1443,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 784
+            },
+            {
+              "source": 2703,
+              "prediction": 109,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 931
+            },
+            {
+              "source": 4357,
+              "prediction": 52,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 816
+            },
+            {
+              "source": 997,
+              "prediction": 87,
+              "correct": false,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 788
+            },
+            {
+              "source": 3732,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 803
+            },
+            {
+              "source": 77,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 801
+            },
+            {
+              "source": 2854,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 754
+            },
+            {
+              "source": 1783,
+              "prediction": 62,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 793
+            },
+            {
+              "source": 3539,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 738
+            },
+            {
+              "source": 2856,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 853
+            },
+            {
+              "source": 846,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 849
+            },
+            {
+              "source": 2371,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 795
+            },
+            {
+              "source": 1865,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 740
+            },
+            {
+              "source": 1116,
+              "prediction": 40,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 840
+            },
+            {
+              "source": 1403,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 904
+            },
+            {
+              "source": 325,
+              "prediction": 8,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 866
+            },
+            {
+              "source": 1488,
+              "prediction": 52,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 875
+            },
+            {
+              "source": 1945,
+              "prediction": 59,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 780
+            },
+            {
+              "source": 4069,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 749
+            },
+            {
+              "source": 3190,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 779
+            },
+            {
+              "source": 3351,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 765
+            },
+            {
+              "source": 2750,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 919
+            },
+            {
+              "source": 2513,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 796
+            },
+            {
+              "source": 3424,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 842
+            },
+            {
+              "source": 3934,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 868
+            },
+            {
+              "source": 2309,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 884
+            },
+            {
+              "source": 4166,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 720
+            },
+            {
+              "source": 1675,
+              "prediction": 71,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 747
+            },
+            {
+              "source": 514,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 873
+            },
+            {
+              "source": 3582,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 811
+            },
+            {
+              "source": 4157,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 752
+            },
+            {
+              "source": 354,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 924
+            },
+            {
+              "source": 988,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 852
+            },
+            {
+              "source": 517,
+              "prediction": 48,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 870
+            },
+            {
+              "source": 3578,
+              "prediction": 96,
+              "correct": true,
+              "accepted": true,
+              "unchanged": true,
+              "tokens": 700
+            },
+            {
+              "source": 3726,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 813
+            },
+            {
+              "source": 2105,
+              "prediction": 106,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 768
+            },
+            {
+              "source": 46,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": true,
+              "tokens": 787
+            }
+          ]
+        },
+        "natural": {
+          "accepted": 12,
+          "errors": 0,
+          "coverage": 0.24,
+          "precision": 1.0,
+          "precision_minus_99": 0.010000000000000009,
+          "interval95": [
+            0.7353515306029488,
+            1.0
+          ],
+          "records": [
+            {
+              "source": 2598,
+              "prediction": 103,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 794
+            },
+            {
+              "source": 755,
+              "prediction": 9,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 760
+            },
+            {
+              "source": 1862,
+              "prediction": 28,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 894
+            },
+            {
+              "source": 3958,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 825
+            },
+            {
+              "source": 2898,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 818
+            },
+            {
+              "source": 2516,
+              "prediction": 26,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 831
+            },
+            {
+              "source": 2237,
+              "prediction": 5,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 858
+            },
+            {
+              "source": 1289,
+              "prediction": 73,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 805
+            },
+            {
+              "source": 2172,
+              "prediction": 33,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 873
+            },
+            {
+              "source": 864,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 788
+            },
+            {
+              "source": 3909,
+              "prediction": 28,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 770
+            },
+            {
+              "source": 4384,
+              "prediction": 90,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 857
+            },
+            {
+              "source": 1443,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 795
+            },
+            {
+              "source": 2703,
+              "prediction": 109,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 957
+            },
+            {
+              "source": 4357,
+              "prediction": 63,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 817
+            },
+            {
+              "source": 997,
+              "prediction": 87,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 813
+            },
+            {
+              "source": 3732,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 814
+            },
+            {
+              "source": 77,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 855
+            },
+            {
+              "source": 2854,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 757
+            },
+            {
+              "source": 1783,
+              "prediction": 62,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 828
+            },
+            {
+              "source": 3539,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 746
+            },
+            {
+              "source": 2856,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 864
+            },
+            {
+              "source": 846,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 848
+            },
+            {
+              "source": 2371,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 810
+            },
+            {
+              "source": 1865,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 794
+            },
+            {
+              "source": 1116,
+              "prediction": 40,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 838
+            },
+            {
+              "source": 1403,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 858
+            },
+            {
+              "source": 325,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 923
+            },
+            {
+              "source": 1488,
+              "prediction": 52,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 878
+            },
+            {
+              "source": 1945,
+              "prediction": 59,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 743
+            },
+            {
+              "source": 4069,
+              "prediction": 23,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 755
+            },
+            {
+              "source": 3190,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 781
+            },
+            {
+              "source": 3351,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 794
+            },
+            {
+              "source": 2750,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 887
+            },
+            {
+              "source": 2513,
+              "prediction": 95,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 810
+            },
+            {
+              "source": 3424,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 827
+            },
+            {
+              "source": 3934,
+              "prediction": 87,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 932
+            },
+            {
+              "source": 2309,
+              "prediction": 62,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 884
+            },
+            {
+              "source": 4166,
+              "prediction": 6,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 734
+            },
+            {
+              "source": 1675,
+              "prediction": 13,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 744
+            },
+            {
+              "source": 514,
+              "prediction": 5,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 838
+            },
+            {
+              "source": 3582,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 815
+            },
+            {
+              "source": 4157,
+              "prediction": 95,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 763
+            },
+            {
+              "source": 354,
+              "prediction": 8,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 892
+            },
+            {
+              "source": 988,
+              "prediction": 56,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 872
+            },
+            {
+              "source": 517,
+              "prediction": 48,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 870
+            },
+            {
+              "source": 3578,
+              "prediction": 96,
+              "correct": true,
+              "accepted": true,
+              "unchanged": false,
+              "tokens": 726
+            },
+            {
+              "source": 3726,
+              "prediction": 51,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 815
+            },
+            {
+              "source": 2105,
+              "prediction": 6,
+              "correct": false,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 748
+            },
+            {
+              "source": 46,
+              "prediction": 36,
+              "correct": true,
+              "accepted": false,
+              "unchanged": false,
+              "tokens": 808
+            }
+          ],
+          "prediction_flips": 8,
+          "acceptance_flips": 2
+        }
+      }
+    }
+  },
+  "cpu": "model name\t: unknown",
+  "protocol_sha256": "51d8cde4127c14aef43a99a9f2680e5b7a7ee77a4f0478b0f8f4daa7ab8f5b2d",
+  "runner_sha256": "db6e4a4deb0b61e0c5aae595987adbccc2d030f10ee0b2ba8c9adca4263b80e8"
+}

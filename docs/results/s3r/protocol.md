@@ -67,7 +67,7 @@ it. Max-length hits are reported as an upper bound on actual truncations.
 
 Evaluate the first 50 primary source rows using the frozen rewrites in
 `paraphrases.json`, SHA-256 `acf30e35d78c2b742674f994ef6065cecdad539db39762403587005232d7424e`.
-They were written from the source texts without inspecting reader outcomes or
+They were written from the source texts without inspecting per-source predictions or
 gold intent labels. Preserve entities, requested actions and source ambiguity.
 No post-inference edits or exclusions. Report this small, assistant-authored sample
 separately from the primary 500-row attack suite. Re-run paired original messages
@@ -87,3 +87,8 @@ using GPU timing to infer CPU speed.
 The natural rewrites were authored by Codex, not by a human annotator or an
 independent reviewer. This wording correction changes no source IDs, rewrites,
 thresholds, exclusions or measurements. The frozen manifest hash above is unchanged.
+
+The supplement was registered after the primary suite had started, when aggregate
+zero-shot counts were visible. Per-source predictions and gold labels were not
+inspected when authoring rewrites. The primary protocol preceded the primary run;
+the supplement preceded its own run. This clarification changes no experiments.

@@ -35,8 +35,20 @@ head still certify zero coverage. These are measured point estimates on the fixe
 split, not guarantees under distribution shift. The split change follows earlier
 experiments; an untouched external evaluation would provide stronger evidence.
 
-[S3R's preregistered attacks](results/s3r/protocol.md) probe that limitation.
-CPU serving measurements are tracked separately from GPU evaluation.
+[S3R's registered audit](results/s3r/README.md) tested 500 paired MTOP messages.
+When the correct intent was removed from the options, the unchanged gate accepted
+4, 9 and 9 wrong answers at 0, 8 and 32 examples: **0% accepted precision** in
+that condition. Other registered attacks measured at least 99% on this sample,
+with confidence intervals too wide to establish a 99% lower bound. This supports
+an explicit option-set and distribution limit on the claim.
+
+On a four-CPU Modal allocation, the 150M reader measured p50/p95 of **325/347 ms**
+with no examples, **401/451 ms** with eight, and **610/677 ms** with 32; process
+peak RSS was **2.42 GiB**, including the retrieval index and initialization.
+All pass the requested one-second reader p95 budget. Timings cover single-request
+CPU FP32 tokenization through softmax, excluding retrieval and API overhead;
+[raw measurements and the 32M comparison](results/s3r/README.md#cpu-serving-single-requests-113-options)
+record scope and limits.
 
 ## Why
 
