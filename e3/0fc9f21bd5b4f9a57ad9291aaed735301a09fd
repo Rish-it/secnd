@@ -1,0 +1,21 @@
+backend/config.py
+  s_931864dc636ea3::t_84de7c79b286ec 17-22
+.env.example
+  s_931864dc636ea3::t_1602e608f26a5f 10-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e30fc9f21bd5b4f9a57ad9291aaed735301a09fd",
+  "prompts": {},
+  "sessions": {
+    "s_931864dc636ea3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
