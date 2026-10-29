@@ -1,0 +1,136 @@
+{
+  "runs": [
+    {
+      "datasets": {
+        "MTOP": {
+          "coverage": 0.3168,
+          "precision": 0.9962,
+          "threshold": 0.992915,
+          "pass_rate": 0.9905,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "BANKING77": {
+          "coverage": 0.5041,
+          "precision": 0.9899,
+          "threshold": 0.971222,
+          "pass_rate": 0.9795,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "IPSA": {
+          "coverage": 0,
+          "precision": null,
+          "threshold": null,
+          "pass_rate": 0.984,
+          "reliability_bins": 10,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        }
+      },
+      "source_revision": "34544ed",
+      "api_revision": "52e7d87",
+      "timestamp": "2026-10-29T09:37:40.713Z",
+      "active_selection_refresh": true,
+      "data_table": true,
+      "retry_recovered": true,
+      "registry_failure_isolated": true,
+      "learning_and_handoff_empty": true,
+      "width": {
+        "document": 1200,
+        "viewport": 1200
+      }
+    },
+    {
+      "datasets": {
+        "MTOP": {
+          "coverage": 0.3168,
+          "precision": 0.9962,
+          "threshold": 0.992915,
+          "pass_rate": 0.9905,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "BANKING77": {
+          "coverage": 0.5041,
+          "precision": 0.9899,
+          "threshold": 0.971222,
+          "pass_rate": 0.9795,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "IPSA": {
+          "coverage": 0,
+          "precision": null,
+          "threshold": null,
+          "pass_rate": 0.984,
+          "reliability_bins": 10,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        }
+      },
+      "source_revision": "34544ed",
+      "api_revision": "52e7d87",
+      "timestamp": "2026-10-29T09:37:50.699Z",
+      "active_selection_refresh": true,
+      "data_table": true,
+      "retry_recovered": true,
+      "registry_failure_isolated": true,
+      "learning_and_handoff_empty": true,
+      "width": {
+        "document": 1200,
+        "viewport": 1200
+      }
+    },
+    {
+      "datasets": {
+        "MTOP": {
+          "coverage": 0.3168,
+          "precision": 0.9962,
+          "threshold": 0.992915,
+          "pass_rate": 0.9905,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "BANKING77": {
+          "coverage": 0.5041,
+          "precision": 0.9899,
+          "threshold": 0.971222,
+          "pass_rate": 0.9795,
+          "reliability_bins": 9,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        },
+        "IPSA": {
+          "coverage": 0,
+          "precision": null,
+          "threshold": null,
+          "pass_rate": 0.984,
+          "reliability_bins": 10,
+          "tradeoff_points": 101,
+          "mode": "evaluation"
+        }
+      },
+      "source_revision": "34544ed",
+      "api_revision": "52e7d87",
+      "timestamp": "2026-10-29T09:38:21.680Z",
+      "active_selection_refresh": true,
+      "data_table": true,
+      "retry_recovered": true,
+      "registry_failure_isolated": true,
+      "learning_and_handoff_empty": true,
+      "width": {
+        "document": 390,
+        "viewport": 390
+      }
+    }
+  ],
+  "console_errors": 0,
+  "console_warnings": 0,
+  "known_limit": "Published evaluations only. No live answer learning or handoff is claimed."
+}
