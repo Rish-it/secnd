@@ -21,3 +21,8 @@ def test_tuning_pulls_same_label_rows_together():
     before = _margin(finetune.tune("minilm", texts, y, steps=0), texts, y)
     after = _margin(finetune.tune("minilm", texts, y, steps=30), texts, y)
     assert after > before + 0.1
+
+
+def test_tuned_encoder_is_returned_on_cpu():
+    model = finetune.tune("minilm", ["a b", "a c", "d e", "d f"], np.array([0, 0, 1, 1]), steps=1)
+    assert str(model.device) == "cpu"

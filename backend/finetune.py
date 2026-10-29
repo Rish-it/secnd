@@ -34,7 +34,7 @@ def tune(name: str, texts: list[str], y: np.ndarray, seed: int = 0, steps: int =
     by_class = {c: np.flatnonzero(y == c) for c in np.unique(y)}
     anchors = [c for c, rows in by_class.items() if len(rows) >= 2]
     if not anchors:
-        return model.eval()
+        return release(model)
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
     model.train()
     for _ in range(steps):
@@ -57,4 +57,15 @@ def tune(name: str, texts: list[str], y: np.ndarray, seed: int = 0, steps: int =
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    return model.eval()
+    del optimizer  # its moment buffers live on the GPU too
+    return release(model)
+
+
+def release(model):
+    """Serve the tuned encoder on CPU and hand its GPU memory back; a grid tunes dozens in a row."""
+    model = model.to("cpu").eval()
+    if torch.backends.mps.is_available():
+        torch.mps.empty_cache()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    return model
