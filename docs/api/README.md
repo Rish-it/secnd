@@ -4,11 +4,14 @@ The versioned API is under `/api/v1/workspaces/{ws}`; use `default` locally.
 The [OpenAPI contract](openapi.json) defines every request and response.
 `/api/health` and `/api/preview` retain their existing behavior.
 
-**The versioned routes currently return contract fixtures.** Each successful
-response includes `X-Secnd-Mode: fixture`. Uploads are validated but not saved;
-predictions are illustrative; answers do not train a model. Metrics are `null`
-when unmeasured, and the example evaluation card has zero certified coverage.
-The feed's example automatic decision demonstrates the schema, not a result.
+**Import, predict, feed, queue, answers and chat still return contract fixtures**
+with `X-Secnd-Mode: fixture`. Uploads are validated but not saved, predictions
+are illustrative and answers do not train a model.
+
+**Metrics are published evaluations**, with `X-Secnd-Mode: evaluation`: a real
+held-out card and curves for MTOP (default), BANKING77 or IPSA. They are not
+workspace learning results. Model-version reads and pointer changes use the
+workspace registry and return `X-Secnd-Mode: live`; a new workspace has no versions.
 
 ## Try the contract
 
@@ -39,8 +42,9 @@ curl --fail-with-body -sS "$API/metrics"
 | `GET /feed` | Optional `cursor`, `limit` (1–100) | `Page<Decision>`, automatic items |
 | `GET /queue` | Optional `cursor`, `limit` (1–100) | `Page<Decision>`, uncertain items |
 | `POST /answers` | `{item_id, label}`, required `Idempotency-Key` header | `AnswerResult` |
-| `GET /metrics` | None | Card and coverage/precision history |
+| `GET /metrics` | Optional `dataset=mtop\|banking77\|ipsa` | Published card and reliability/coverage–precision curves; empty learning history |
 | `GET /models` | None | `Page<ModelVersion>` |
+| `POST /models/{v}:promote` | None | Select an existing registry version atomically |
 | `POST /models/{v}:rollback` | None | `ModelVersion`; 404 for an unknown version |
 | `POST /chat` | `{question}` | `ChatResult` |
 
@@ -52,7 +56,7 @@ can carry the remaining mass. `reasons` has `neighbours` and `merchant_memory`.
 A null threshold means automatic decisions have not been certified.
 
 Pages have `items` and a nullable `next_cursor`; null means there is no next page.
-The fixture lists each contain one item. The fixture answer reports
+The fixture feed and queue each contain one item; the registry list starts empty. The fixture answer reports
 `retrain: fixture`; the live contract also permits `retrain: queued` with the
 current version and coverage. The fixture checks for an idempotency header but
 does not persist or replay answers.
@@ -85,3 +89,32 @@ Postgres replaces the SQLite store behind the same storage calls.
 A worker queue replaces the per-workspace retraining dispatcher.
 SDKs can be generated from the committed OpenAPI schema.
 Live model and chat handlers replace the fixtures while preserving these types.
+
+## Published metrics and versions
+
+```sh
+curl --fail-with-body -sS "$API/metrics?dataset=mtop"
+curl --fail-with-body -sS "$API/metrics?dataset=banking77"
+curl --fail-with-body -sS "$API/metrics?dataset=ipsa"
+curl --fail-with-body -sS "$API/models"
+curl --fail-with-body -sS -X POST "$API/models/ren-1.0:promote"
+curl --fail-with-body -sS -X POST "$API/models/ren-1.0:rollback"
+```
+
+The last two requests require that version to exist in this workspace. Missing
+versions and missing evaluation files return 404. Invalid or incomplete cards
+or curves return 503; the current pointer is unchanged when validation fails.
+The card's version must match the selected registry version. Pointer changes
+select an existing artifact; they do not retrain it or certify a new candidate.
+
+Published evaluations come from `docs/results/s3/card-*.json` and matching
+`curves-*.json`, included in the image. `SECND_EVALUATION_DIR` overrides their
+directory. `MetricsResult.dataset` identifies the benchmark and `curves` holds
+reliability bins (`confidence`, `accuracy`, `count`) and trade-off points
+(`threshold`, `coverage`, `precision`). A missing threshold on IPSA means no
+automatic answers are certified. An empty `history` means no workspace learning
+curve has been measured; the API does not substitute the trade-off curve.
+
+Registry cards must validate as `EvalCard`, including measured `coverage`.
+Cards written with only a threshold are unavailable until the training path
+supplies a complete card. No coverage number is inferred from that threshold.
