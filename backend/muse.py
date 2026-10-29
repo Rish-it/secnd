@@ -65,10 +65,23 @@ class MuseOutputError(MuseError):
     pass
 
 
-def usage_cost(usage: Usage) -> Decimal:
+class MuseUnavailable(MuseError):
+    pass
+
+
+# USD per million tokens, checked 2026-10-29; cached input stays conservatively full-priced.
+PRICES = {
+    "meta": (Decimal("1.25"), Decimal("4.25")),
+    "baseten": (Decimal("1.25"), Decimal("4.25")),
+    "nebius": (Decimal("1.25"), Decimal("4.25")),
+}
+TOTAL_CAPS = {"meta": Decimal(30), "baseten": Decimal(30), "nebius": Decimal(25)}
+
+
+def usage_cost(usage: Usage, provider: str = "baseten") -> Decimal:
     # Reasoning is already part of completion_tokens; cached input is charged conservatively.
     return (
-        usage.prompt_tokens * Decimal("1.25") + usage.completion_tokens * Decimal("4.25")
+        usage.prompt_tokens * PRICES[provider][0] + usage.completion_tokens * PRICES[provider][1]
     ) / Decimal(1_000_000)
 
 
@@ -83,12 +96,15 @@ class BudgetRun:
         rows: int,
         measured_tokens: Usage,
         ledger_path: Path = SPEND_PATH,
+        provider: str = "baseten",
     ):
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}", task) or rows < 1:
             raise ValueError("A run needs a safe task name and a positive row count.")
         self.task = task
+        self.provider = provider
+        self.total_cap = TOTAL_CAPS[provider]
         self.budget = settings.muse_budget_usd
-        self.estimate = rows * usage_cost(measured_tokens)
+        self.estimate = rows * usage_cost(measured_tokens, self.provider)
         self.ledger_path = ledger_path
         self.usage = Usage(prompt_tokens=0, completion_tokens=0)
         self.cost_usd = Decimal(0)
@@ -114,8 +130,10 @@ class BudgetRun:
                 if not cost.is_finite() or cost < 0:
                     raise MuseError("Spend ledger has an invalid cost.")
                 self.previous_spend += cost
-            if self.previous_spend + self.estimate > Decimal(30):
-                raise MuseError("Estimated run cost exceeds the $30 total spending limit.")
+            if self.previous_spend + self.estimate > self.total_cap:
+                raise MuseError(
+                    f"Estimated run cost exceeds the ${self.total_cap} total spending limit."
+                )
         except (InvalidOperation, KeyError, TypeError):
             self._file.close()
             self._file = None
@@ -130,20 +148,20 @@ class BudgetRun:
         with self._lock:
             if self._file is None:
                 raise MuseError("A paid request needs an active budget run.")
-            projected = self.cost_usd + self._pending_cost + usage_cost(usage)
-            if projected > self.budget or self.previous_spend + projected > Decimal(30):
+            projected = self.cost_usd + self._pending_cost + usage_cost(usage, self.provider)
+            if projected > self.budget or self.previous_spend + projected > self.total_cap:
                 raise MuseError("The next request would exceed the spending limit.")
 
     @contextmanager
     def reserve(self, usage: Usage):
         with self._lock:
             self.check(usage)
-            self._pending_cost += usage_cost(usage)
+            self._pending_cost += usage_cost(usage, self.provider)
         try:
             yield
         finally:
             with self._lock:
-                self._pending_cost -= usage_cost(usage)
+                self._pending_cost -= usage_cost(usage, self.provider)
 
     def record(self, usage: Usage, *, estimated: bool = False):
         with self._lock:
@@ -155,7 +173,7 @@ class BudgetRun:
                     for field, value in usage.model_dump().items()
                 }
             )
-            self.cost_usd += usage_cost(usage)
+            self.cost_usd += usage_cost(usage, self.provider)
             self.estimated_usage |= estimated
 
     def __exit__(self, error_type, error, traceback):
@@ -311,16 +329,22 @@ class MuseClient:
             with self.run.reserve(reservation):
                 try:
                     response = self.http.post("chat/completions", json=payload)
-                except httpx.TransportError:
+                except httpx.TransportError as error:
                     self.run.record(reservation, estimated=True)
+                    if not isinstance(error, httpx.TimeoutException):
+                        raise MuseError("Provider connection failed; details withheld.") from None
                     if attempt == 2:
-                        raise MuseError("Provider request failed after three attempts.") from None
+                        raise MuseUnavailable(
+                            "Provider request failed after three attempts."
+                        ) from None
                 else:
                     if response.status_code == 200:
                         return self._completion(response, reservation, started)
                     self.run.record(reservation, estimated=True)
-                    if response.status_code not in (429, 500, 502, 503, 504) or attempt == 2:
-                        raise MuseError(
+                    retryable = response.status_code == 429 or response.status_code >= 500
+                    if not retryable or attempt == 2:
+                        error = MuseUnavailable if retryable else MuseError
+                        raise error(
                             f"Provider returned HTTP {response.status_code}; details withheld."
                         )
             time.sleep(0.25 * 2**attempt)
