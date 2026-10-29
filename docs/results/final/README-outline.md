@@ -33,8 +33,8 @@ demo is verified; replace future-tense behavior only after it works.
    only after an approved upload. Include hashes, ordered labels, fixed encoder
    revision, runtime memory and measured card. Until then say “release pending”.
 9. **Limits.** English only; one workspace process; uncertain traffic goes to
-   people; IPSA abstains; BANKING77's fixed test misses the target on the current
-   published split. No 99% guarantee for arbitrary future traffic. Link
+   people; IPSA abstains; the [BANKING77 card](../s3/card-banking77-minilm+lr-b2000.json)
+   records 36.9% coverage at 99.03% precision, with a [98.95% re-split pass rate](../s3/robustness-banking77-minilm+lr-b2000.json). No 99% guarantee for arbitrary future traffic. Link
    [the model document](../../model.md).
 10. **Build period and credits.** Review the new-work statement and release
     commit. Credit IPSA/OGL v3, BANKING77/CC BY 4.0, MTOP/CC BY-SA 4.0 and the
