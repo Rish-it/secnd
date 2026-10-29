@@ -1,0 +1,39 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "100000000000001",
+      "changes": [
+        {
+          "field": "messages",
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "15550000000",
+              "phone_number_id": "100000000000002"
+            },
+            "contacts": [
+              {
+                "profile": {
+                  "name": "Example Sender"
+                },
+                "wa_id": "15550000001"
+              }
+            ],
+            "messages": [
+              {
+                "from": "15550000001",
+                "id": "wamid.example-message-1",
+                "timestamp": "1749416383",
+                "type": "text",
+                "text": {
+                  "body": "Turn on the kitchen lights"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
