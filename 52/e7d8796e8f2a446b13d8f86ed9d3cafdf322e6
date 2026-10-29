@@ -1,0 +1,21 @@
+.dockerignore
+  s_1f3964e6251ccb::t_9f3bbd202686a9 18-23
+Dockerfile
+  s_1f3964e6251ccb::t_94a699fed273f6 25-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "52e7d8796e8f2a446b13d8f86ed9d3cafdf322e6",
+  "prompts": {},
+  "sessions": {
+    "s_1f3964e6251ccb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a183e2-1869-7b21-b9de-e638eaa0187f",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
