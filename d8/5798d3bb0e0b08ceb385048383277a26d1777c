@@ -1,0 +1,23 @@
+backend/features.py
+  s_99a14fdaab2d15::t_b6a70221950cad 42-50,57
+backend/finetune.py
+  s_99a14fdaab2d15::t_df121cd8afb2d0 16,64-65
+backend/tests/test_finetune.py
+  s_99a14fdaab2d15::t_081c1e91cab8f9 26,28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d85798d3bb0e0b08ceb385048383277a26d1777c",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
