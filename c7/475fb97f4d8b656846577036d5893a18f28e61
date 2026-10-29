@@ -1,0 +1,21 @@
+docs/results/s8/latency-reader.json
+  s_2ebaf109a8770b::t_f39843b573fe76 1-3967
+docs/results/s8/latency-reader.md
+  s_2ebaf109a8770b::t_adf579760eb06f 1-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c7475fb97f4d8b656846577036d5893a18f28e61",
+  "prompts": {},
+  "sessions": {
+    "s_2ebaf109a8770b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a18916-7a5b-7ff2-bd5b-6019c2ec55ca",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
