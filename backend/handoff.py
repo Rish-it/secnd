@@ -26,12 +26,12 @@ TASK = "s5-mtop-cold-start"
 CAP = Decimal("10")
 
 
-def task_spend(ledger: Path) -> Decimal:
+def task_spend(ledger: Path, task: str = TASK) -> Decimal:
     if not ledger.exists():
         return Decimal(0)
     with ledger.open() as source:
         return sum(
-            (Decimal(r["cost_usd"]) for r in csv.DictReader(source) if r["task"] == TASK),
+            (Decimal(r["cost_usd"]) for r in csv.DictReader(source) if r["task"] == task),
             Decimal(0),
         )
 

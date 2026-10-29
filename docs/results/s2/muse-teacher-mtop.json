@@ -1,0 +1,26 @@
+{
+  "model": "ic-ettin-150m-s6000-near",
+  "history": 200,
+  "muse_model": "meta-models/muse-spark-open-1026",
+  "teacher_accuracy_on_history": 0.91,
+  "reader-8": {
+    "accuracy": 0.8472,
+    "ece_test": 0.0353,
+    "temperature": 1.453,
+    "certified_coverage_test": 0.3019,
+    "precision_auto_test": 0.9977,
+    "cert_rows": 2000,
+    "cert_accepted": 572,
+    "cert_cp_lower": 0.9948
+  },
+  "head": {
+    "accuracy": 0.6692,
+    "ece_test": 0.0472,
+    "temperature": 0.566,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 2000,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  }
+}
