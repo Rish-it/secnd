@@ -1,0 +1,21 @@
+docs/results/s2/typed-ensemble-5.json
+  s_99a14fdaab2d15::t_3b23d9517c6b7e 1-38
+docs/results/s2/typed-ensemble-plan.md
+  s_99a14fdaab2d15::t_a3a222869bb4a0 13-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3343293b46bbc7d69152432e3bfcc04e01df2ee6",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
