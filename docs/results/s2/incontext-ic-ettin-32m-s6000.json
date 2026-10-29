@@ -1,0 +1,72 @@
+{
+  "steps": 6000,
+  "final_loss": 0.2549963885510806,
+  "train_seconds": 531,
+  "model": "ic-ettin-32m-s6000",
+  "base": "jhu-clsp/ettin-encoder-32m",
+  "parameters": 32032129,
+  "device": "cuda",
+  "train_sets": {
+    "topv2": 151266,
+    "clinc150": 15191,
+    "massive_en": 11406,
+    "snips": 13080,
+    "atis": 4978,
+    "go_emotions": 36306,
+    "bitext_support": 24182
+  },
+  "results": {
+    "banking77": {
+      "0-shot": {
+        "accuracy": 0.4958,
+        "ece_test": 0.0475,
+        "temperature": 1.82,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "8-shot": {
+        "accuracy": 0.4955,
+        "ece_test": 0.0455,
+        "temperature": 1.81,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "32-shot": {
+        "accuracy": 0.4955,
+        "ece_test": 0.0339,
+        "temperature": 1.793,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      }
+    },
+    "mtop": {
+      "0-shot": {
+        "accuracy": 0.6687,
+        "ece_test": 0.0703,
+        "temperature": 1.717,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "8-shot": {
+        "accuracy": 0.6651,
+        "ece_test": 0.0754,
+        "temperature": 1.749,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "32-shot": {
+        "accuracy": 0.668,
+        "ece_test": 0.0723,
+        "temperature": 1.749,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      }
+    }
+  }
+}

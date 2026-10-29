@@ -1,0 +1,120 @@
+{
+  "steps": 6000,
+  "final_loss": 0.21601756340125575,
+  "train_seconds": 2472,
+  "model": "ic-ettin-150m-s6000-near",
+  "base": "jhu-clsp/ettin-encoder-150m",
+  "parameters": 149607169,
+  "device": "cuda",
+  "train_sets": {
+    "topv2": 151266,
+    "clinc150": 15191,
+    "massive_en": 11406,
+    "snips": 13080,
+    "atis": 4978,
+    "go_emotions": 36306,
+    "bitext_support": 24182
+  },
+  "results": {
+    "banking77": {
+      "0-shot": {
+        "accuracy": 0.6143,
+        "ece_test": 0.04,
+        "temperature": 1.929,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "8-random": {
+        "accuracy": 0.6156,
+        "ece_test": 0.0497,
+        "temperature": 1.845,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "8-nearest": {
+        "accuracy": 0.8646,
+        "ece_test": 0.0256,
+        "temperature": 1.472,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "32-nearest": {
+        "accuracy": 0.8539,
+        "ece_test": 0.0488,
+        "temperature": 1.406,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "vote-8": {
+        "accuracy": 0.9156,
+        "ece_test": 0.0187,
+        "temperature": 1.068,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8854,
+        "ece_test": 0.0342,
+        "temperature": 0.724,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      }
+    },
+    "mtop": {
+      "0-shot": {
+        "accuracy": 0.8098,
+        "ece_test": 0.046,
+        "temperature": 1.515,
+        "certified_coverage_test": 0.2544,
+        "precision_auto_test": 0.9982,
+        "calib_cp_lower": 0.9942
+      },
+      "8-random": {
+        "accuracy": 0.8144,
+        "ece_test": 0.0439,
+        "temperature": 1.482,
+        "certified_coverage_test": 0.2271,
+        "precision_auto_test": 0.994,
+        "calib_cp_lower": 0.9936
+      },
+      "8-nearest": {
+        "accuracy": 0.93,
+        "ece_test": 0.0187,
+        "temperature": 1.275,
+        "certified_coverage_test": 0.2225,
+        "precision_auto_test": 1.0,
+        "calib_cp_lower": 0.9935
+      },
+      "32-nearest": {
+        "accuracy": 0.9337,
+        "ece_test": 0.0111,
+        "temperature": 1.249,
+        "certified_coverage_test": 0.6566,
+        "precision_auto_test": 0.9986,
+        "calib_cp_lower": 0.9936
+      },
+      "vote-8": {
+        "accuracy": 0.8653,
+        "ece_test": 0.0465,
+        "temperature": 0.992,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "calib_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8541,
+        "ece_test": 0.0266,
+        "temperature": 0.742,
+        "certified_coverage_test": 0.2572,
+        "precision_auto_test": 0.9965,
+        "calib_cp_lower": 0.9947
+      }
+    }
+  }
+}
