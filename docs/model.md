@@ -1,8 +1,12 @@
-# The Secnd decision model
+# Ren: a decision model built for Meta apps
 
 ## Why
 
-Filled in as each part ships.
+Ren is an independently released decision model built for Meta's platform. It
+starts with an encoder tuned on Meta's open assistant data, then learns a
+workspace's own labels and corrections. The calibrated classifier decides when
+to answer and when to ask a person. Optional Meta teacher models supply cold-start
+labels; they stay outside the automatic decision path.
 
 ## Where
 
@@ -55,6 +59,63 @@ organisation's own labels, so probabilities over every class sum to 1 and there 
 number of labels. A payee's latest known label enters as an input the classifier learns to weigh,
 not as an override. Only the linear head retrains when a new label arrives; the encoder stays fixed
 between batch re-tunes.
+
+### Meta-tuned encoder: release ren-1.0.0
+
+The [open encoder weights](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0)
+are release **ren-1.0.0**, tag **v1.0.0**, immutable revision
+`5560f25414195f1d1224a6ae7efd19c6b7646d3f`. The
+[committed manifest](../backend/encoder-ren-1.0.0.json) pins every downloaded
+file by SHA-256. Workspaces use `pt-minilm` by default, serve on CPU, and log a
+fallback to the base MiniLM encoder when fetching or verifying the release fails.
+The image includes the verified release for use with an offline data volume.
+
+This release fine-tuned `all-MiniLM-L6-v2` with supervised contrastive learning
+on **157,405 TOPv2 requests across 69 intents**, for **3,000 steps**.
+**23,137 requests** whose normalized text overlaps MTOP were removed before
+training ([training report](results/s2/pretune-pt-minilm.json)). TOPv2 supplies
+the encoder's prior; a workspace's labels still train its own linear head.
+This release does not claim training on every Meta dataset or language.
+
+On the project's fixed English MTOP group split, with 2,000 workspace labels
+and seed 0, the tuned encoder plus calibrated head measured **42.42% automatic
+coverage at 99.93% test precision**, **88.09% accuracy**, ECE **0.0156**, and a
+**99.37% calibration lower bound** ([card](results/s3/card-mtop-pt-minilm+lr-b2000.json)).
+The corresponding 2,000 re-splits passed **99.45%** of the time
+([robustness report](results/s3/robustness-mtop-pt-minilm+lr-b2000.json)). This is
+the project's split, not an official MTOP test-score comparison. These results
+are distinct from the base-encoder results below.
+
+### Learning from answers
+
+A workspace keeps a fixed calibration set, a sequence of training labels and a
+current classifier version. Seed labels, human answers and random spot-check
+answers have weight **1**. Optional teacher cold-start labels have weight **0.3**;
+self-reported teacher confidence is not a calibrated probability and does not
+change that fixed weight. Calibration and test items never join training.
+
+Each human answer enters the durable label history before a background worker
+calls `Loop.on_answer`. The head refits on cached frozen-encoder features,
+recalibrates on the same holdout and goes through the release gate. Refusals
+keep the current version. An all-human version can be promoted with a null
+threshold; promotion alone does not certify any automatic traffic. The gate also
+refuses a loss of more than one percentage point of certified calibration
+coverage against the current unguarded model.
+
+The loop asks a person to audit a random **5%** of otherwise automatic decisions.
+When the one-sided **95%** lower bound on the spot-check error rate exceeds **1%**,
+`guarded` pauses all automatic answers until a new version is promoted. Workspace
+versions such as `ren-1.0` identify the local head and calibration; the pinned
+encoder release `ren-1.0.0` is a separate artifact.
+
+The [five committed MTOP learning curves](results/s4/) for `pt-minilm`, random
+queries and 20 rounds end at mean automatic coverage **33.9%**, ranging from
+**0.0% to 61.0%** across seeds. Spot-check counts vary, so final label counts vary.
+These are offline simulations using the stream's true labels as human answers,
+not observed customer behavior. They use fixed seed/calibration/test partitions;
+coverage need not rise on every round. The curves do not include teacher
+cold-start labels. Runtime spot-check state currently lives in memory and resets
+on restart; the durable answer history survives.
 
 **How it was chosen** ([bake-off](results/s2/)): 4 text featurizers (hashed character n-grams,
 potion-base-8M static embeddings, all-MiniLM-L6-v2, and n-grams stacked with potion) times 3
