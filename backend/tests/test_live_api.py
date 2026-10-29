@@ -30,7 +30,8 @@ def csv_rows(n=200):
 
 
 @pytest.fixture
-def live(tmp_path):
+def live(tmp_path, monkeypatch):
+    monkeypatch.setenv("SECND_FEATURIZER", "char_tfidf")
     service = WorkspaceService(Store(tmp_path / "db.sqlite3"), tmp_path, cpu_loop)
     settings = Settings(data_dir=tmp_path, frontend_dist=tmp_path / "none", _env_file=None)
     with TestClient(create_app(settings, workspace_service=service)) as client:
@@ -153,6 +154,7 @@ def test_rollback_changes_the_next_real_prediction_without_retraining(live):
     service.drain()
     versions_before = client.get(API + "/models").json()["items"]
     assert len(versions_before) >= 2
+    service._loops["default"].checks = [0, 20]
     response = client.post(API + f"/models/{original}:rollback")
     assert response.status_code == 200
     result = client.post(
@@ -161,6 +163,7 @@ def test_rollback_changes_the_next_real_prediction_without_retraining(live):
     )
     assert result.status_code == 200
     assert result.json()[0]["model_version"] == original
+    assert client.get(API + "/metrics").json()["guarded"] is False
     assert len(client.get(API + "/models").json()["items"]) == len(versions_before)
 
 
@@ -184,3 +187,33 @@ def test_registry_reads_share_the_retrain_lock(live):
         assert not completed.wait(0.05)
     reader.join(5)
     assert completed.is_set()
+
+
+def test_workspace_metrics_track_versions_and_show_live_guard(live):
+    client, service = live
+    assert upload(client).status_code == 200
+    before = client.get(API + "/metrics")
+    assert before.status_code == 200
+    assert before.headers["X-Secnd-Mode"] == "live"
+    assert before.json()["dataset"] is None
+    assert len(before.json()["history"]) == 1
+    assert before.json()["guarded"] is False
+    assert before.json()["labels"] == len(service.store.labels("default"))
+    assert before.json()["history"][0]["model_version"] == service.card("default").model_version
+    client.post(API + "/predict", json={"items": [{"item_id": "next", "text": "meal"}]})
+    answered = client.post(
+        API + "/answers",
+        json={"item_id": "next", "label": "Food"},
+        headers={"Idempotency-Key": "metrics-answer"},
+    )
+    assert answered.status_code == 200
+    service.drain()
+    after = client.get(API + "/metrics").json()
+    assert len(after["history"]) == len(client.get(API + "/models").json()["items"])
+    assert after["labels"] == before.json()["labels"] + 1
+    assert after["history"][0] == before.json()["history"][0]
+    service._loops["default"].checks = [0, 20]
+    assert client.get(API + "/metrics").json()["guarded"] is True
+    benchmark = client.get(API + "/metrics?dataset=mtop")
+    assert benchmark.headers["X-Secnd-Mode"] == "evaluation"
+    assert benchmark.json()["history"] == []

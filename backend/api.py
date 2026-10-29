@@ -293,11 +293,18 @@ def create_app(
     @contract.get(
         "/metrics",
         response_model=MetricsResult,
-        description="Published evaluation card and curves, separate from workspace learning.",
+        description="Workspace calibration history and live guard; optional dataset selects a "
+        "published test evaluation.",
     )
     def metrics(
-        ws: WorkspaceId, response: Response, dataset: Literal["mtop", "banking77", "ipsa"] = "mtop"
+        ws: WorkspaceId,
+        response: Response,
+        dataset: Literal["mtop", "banking77", "ipsa"] | None = None,
     ):
+        if dataset is None and (service := stored_workspace(ws)):
+            workspace_mode(ws, response, service)
+            return MetricsResult(**service.metrics(ws))
+        dataset = dataset or "mtop"
         try:
             measured, curves = evidence.evaluation(dataset)
         except FileNotFoundError as error:

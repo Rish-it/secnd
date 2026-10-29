@@ -5,6 +5,7 @@ import logging
 import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor, wait
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -112,6 +113,28 @@ class WorkspaceService:
     def page(self, workspace, kind, cursor=None, limit=20):
         return self.store.decision_page(workspace, kind, cursor, limit)
 
+    def metrics(self, workspace):
+        with self._lock(workspace):
+            registry = Registry(self.data_dir, workspace)
+            history = []
+            for version in registry.versions():
+                card = EvalCard.model_validate(registry.card(version))
+                saved = (registry.root / version / "card.json").stat().st_mtime
+                history.append(
+                    {
+                        "timestamp": datetime.fromtimestamp(saved, UTC),
+                        "model_version": version,
+                        "coverage": card.coverage,
+                        "precision": card.precision,
+                    }
+                )
+            return {
+                "card": self.card(workspace),
+                "history": history,
+                "guarded": bool(getattr(self._loops.get(workspace), "guarded", False)),
+                "labels": len(self.store.labels(workspace)),
+            }
+
     def _lock(self, workspace):
         TypeAdapter(WorkspaceId).validate_python(workspace)
         with self._guard:
@@ -148,6 +171,7 @@ class WorkspaceService:
             candidate = registry.load(version)
             loop.current = {**candidate, "version": version}
             loop.c = candidate["model"].C
+            loop.pending, loop.checks = {}, [0, 0]
             self._sync_models(workspace)
 
     def _runtime(self, workspace, *, before=None):

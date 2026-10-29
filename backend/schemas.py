@@ -181,6 +181,8 @@ class MetricsResult(BaseModel):
     curves: EvalCurves = Field(default_factory=EvalCurves)
     card: EvalCard
     history: list[HistoryPoint]
+    guarded: bool = False
+    labels: Annotated[int, Field(ge=0)] = 0
 
 
 class ModelVersion(BaseModel):
