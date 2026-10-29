@@ -1,0 +1,23 @@
+backend/tests/test_evidence.py
+  s_f4216e91105995::t_baa151d60f9185 19-21,60-61
+backend/evidence.py
+  s_f4216e91105995::t_baa151d60f9185 18-19
+backend/tests/test_api.py
+  s_f4216e91105995::t_b610c2a1ed23f6 151-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dbaa3ee8ec519d510ee1fffa58b798cc50bb10b5",
+  "prompts": {},
+  "sessions": {
+    "s_f4216e91105995": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a187bc-1516-7260-8e2a-b6a8a43cdd66",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
