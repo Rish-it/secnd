@@ -60,7 +60,7 @@ Attack inference uses the same CUDA BF16 autocast and calibration batch size 32
 as the supplied evaluation; CPU measurements use FP32. An initial GPU process
 was interrupted before any attack outcome was observed to enforce this match.
 No thresholds are adjusted to attack outcomes. The wrapper paraphrase is limited;
-a separately registered set of human-written test-message rewrites will supplement
+a separately registered set of assistant-authored test-message rewrites will supplement
 it. Max-length hits are reported as an upper bound on actual truncations.
 
 ## Supplement: natural paraphrases (registered before their inference)
@@ -69,7 +69,7 @@ Evaluate the first 50 primary source rows using the frozen rewrites in
 `paraphrases.json`, SHA-256 `acf30e35d78c2b742674f994ef6065cecdad539db39762403587005232d7424e`.
 They were written from the source texts without inspecting reader outcomes or
 gold intent labels. Preserve entities, requested actions and source ambiguity.
-No post-inference edits or exclusions. Report this small, author-written sample
+No post-inference edits or exclusions. Report this small, assistant-authored sample
 separately from the primary 500-row attack suite. Re-run paired original messages
 and re-encode changed messages for nearest-history retrieval. The same three
 full-history shot conditions and unchanged calibration rule apply.
@@ -81,3 +81,9 @@ sample with the same warmups, FP32, four threads and three shot counts. Report
 these as separate processes, including CPU identity; cloud scheduling can assign
 different hosts. This supplies the requested smaller-model alternative without
 using GPU timing to infer CPU speed.
+
+## Authorship clarification
+
+The natural rewrites were authored by Codex, not by a human annotator or an
+independent reviewer. This wording correction changes no source IDs, rewrites,
+thresholds, exclusions or measurements. The frozen manifest hash above is unchanged.
