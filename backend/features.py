@@ -1,6 +1,7 @@
 """Turn a loaded frame into a sparse feature matrix: text features plus a numeric block."""
 
 import hashlib
+import os
 from pathlib import Path
 
 import numpy as np
@@ -52,7 +53,9 @@ def embed(name: str, texts: pd.Series, cache_dir: Path | None = None) -> np.ndar
         cache.update(zip(missing, _encode(name, [first[key] for key in missing]), strict=True))
         if path:
             path.parent.mkdir(parents=True, exist_ok=True)
-            np.savez(path, keys=np.array(list(cache)), vectors=np.stack(list(cache.values())))
+            staged = path.with_suffix(".tmp.npz")
+            np.savez(staged, keys=np.array(list(cache)), vectors=np.stack(list(cache.values())))
+            os.replace(staged, path)  # readers in other processes never see a half-written file
     return np.stack([cache[key] for key in keys]).astype(np.float32)
 
 
