@@ -21,7 +21,8 @@ It does not output the key, response text or reasoning text.
 `SECND_MUSE_BUDGET_USD` limits a run to $10 by default. Before starting, callers
 provide a row count and measured input/output tokens per row; an estimate over
 the limit is rejected before any HTTP request. The client also checks each
-request against remaining funds. The shared ledger caps total spend at $30.
+request against remaining funds, including reservations for concurrent calls.
+The shared ledger caps total spend at $30.
 
 Each run appends its token totals and full-list cost to [spend.csv](spend.csv),
 including partial runs that fail. An exclusive file lock serializes paid runs
@@ -52,10 +53,8 @@ Checked October 29, 2026:
   million input tokens, $0.15 cached input and $4.25 output. Usage estimates use
   the full input price conservatively, without assuming a cache discount.
 
-Any probabilities requested in generated JSON are self-reported estimates,
-not token likelihoods or calibrated classifier probabilities. Baseline NLL and
-ECE remain unmeasured unless a suitable probability source becomes available.
-No baseline accuracy, speed or coverage result is available here yet.
+Generated confidence is a self-reported estimate, not a token likelihood or a
+calibrated classifier probability. Baseline NLL and ECE stay null.
 
 ## Client calls
 
@@ -72,10 +71,10 @@ HTTP and validation dependencies are sufficient; no additional SDK is needed.
 
 `MuseItem` contains `item_id`, `text`, optional `amount` and optional ISO `date`.
 Empty descriptions are supported when the source only has numeric/date fields.
-Label results include the full requested label distribution, the winning
-confidence, `confidence_source: self_reported`, successful-response usage and
-elapsed milliseconds. Out-of-set labels, missing classes, non-finite values,
-invalid probability sums and partial responses are rejected. Costs for retries
+Label results include the selected label, confidence,
+`confidence_source: self_reported`, successful-response usage and elapsed
+milliseconds. Out-of-set labels, non-finite or out-of-range confidence, and
+partial responses are rejected. Costs for retries
 are included in the run ledger; per-result usage describes the successful call.
 
 Each request has a five-second connection timeout and a 30-second HTTP timeout.
@@ -92,5 +91,32 @@ the current workspace. No SQL or arbitrary function names are accepted.
 Chat stops after four completion rounds; tool replies are capped at 32 KiB.
 
 Before using the client, measure tokens on a representative small sample. Then
-provide those measurements and the planned row count to `BudgetRun`. Neither
-the labeling baseline nor the learning-loop weighting is connected yet.
+provide those measurements and the planned row count to `BudgetRun`.
+
+## Fixed-test comparison
+
+```sh
+uv run python -m backend.muse_baseline --limit 5
+uv run python -m backend.muse_baseline
+```
+
+The first command checks a small sample; the second resumes the same 500 IPSA
+test rows, sampled with seed 0. The model sees only the description, amount,
+date and 62 allowed labels. No examples or held-out answers enter its prompt.
+Eight requests run concurrently; latency includes HTTP time and retries.
+Each completed trial is checkpointed. Invalid outputs count as incorrect and
+are never retried for a better answer. Transport and budget failures stop the
+run; completed checkpoints are reused on restart. Sample, input, protocol,
+source-data and split hashes prevent mixing experiments.
+
+The same rows are evaluated with the reference text classifier at 200 and
+5,000 training labels, using only seed/stream rows. Its latency is measured one
+item at a time, including text transformation. Its hosted cost is unmeasured.
+The calibrated model comparison and learning-loop weighting need their fitted
+artifacts before they can be measured.
+
+Exploratory distribution-output trials are preserved separately. Their spend
+counts against the experiment's $10 ceiling across restarts. Final inference
+costs use the compact protocol's ledger entries; total experiment spend also
+includes the exploratory calls. Cached input is charged at the full list
+price throughout, so these are conservative token costs rather than invoices.
