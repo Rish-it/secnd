@@ -1,49 +1,138 @@
 {
-  "provenance": {
-    "dataset": "banking77",
-    "model": "tfidf_lr",
-    "budget": 200,
-    "train_rows": 200,
-    "seed": 0,
-    "split_hash": "99a7451cd906ef7b193bcce77a470e9227bc593168795bf7e61db7caf902c591",
-    "git_sha": "8d9e33b"
+  "model_version": "banking77-tfidf_lr-b200-s0",
+  "accuracy": 0.3272,
+  "macro_f1": 0.284,
+  "nll": 3.9102,
+  "brier": 0.9697,
+  "ece": 0.2986,
+  "aurc": 0.4796,
+  "classwise_ece": {
+    "Refund_not_showing_up": 0.0003,
+    "activate_my_card": 0.0021,
+    "age_limit": 0.0057,
+    "apple_pay_or_google_pay": 0.0032,
+    "atm_support": 0.0017,
+    "automatic_top_up": 0.0041,
+    "balance_not_updated_after_bank_transfer": 0.0019,
+    "balance_not_updated_after_cheque_or_cash_deposit": 0.0035,
+    "beneficiary_not_allowed": 0.0013,
+    "cancel_transfer": 0.0047,
+    "card_about_to_expire": 0.0021,
+    "card_acceptance": 0.0031,
+    "card_arrival": 0.0012,
+    "card_delivery_estimate": 0.0016,
+    "card_linking": 0.0072,
+    "card_not_working": 0.0002,
+    "card_payment_fee_charged": 0.0046,
+    "card_payment_not_recognised": 0.0056,
+    "card_payment_wrong_exchange_rate": 0.0044,
+    "card_swallowed": 0.0016,
+    "cash_withdrawal_charge": 0.0074,
+    "cash_withdrawal_not_recognised": 0.0081,
+    "change_pin": 0.0026,
+    "compromised_card": 0.0024,
+    "contactless_not_working": 0.0001,
+    "country_support": 0.0032,
+    "declined_card_payment": 0.0003,
+    "declined_cash_withdrawal": 0.0007,
+    "declined_transfer": 0.0015,
+    "direct_debit_payment_not_recognised": 0.0018,
+    "disposable_card_limits": 0.0021,
+    "edit_personal_details": 0.0005,
+    "exchange_charge": 0.0027,
+    "exchange_rate": 0.0054,
+    "exchange_via_app": 0.0037,
+    "extra_charge_on_statement": 0.0168,
+    "failed_transfer": 0.0039,
+    "fiat_currency_support": 0.0047,
+    "get_disposable_virtual_card": 0.0029,
+    "get_physical_card": 0.0002,
+    "getting_spare_card": 0.0016,
+    "getting_virtual_card": 0.0068,
+    "lost_or_stolen_card": 0.0007,
+    "lost_or_stolen_phone": 0.0014,
+    "order_physical_card": 0.0027,
+    "passcode_forgotten": 0.0003,
+    "pending_card_payment": 0.0052,
+    "pending_cash_withdrawal": 0.0091,
+    "pending_top_up": 0.0083,
+    "pending_transfer": 0.0035,
+    "pin_blocked": 0.0028,
+    "receiving_money": 0.0014,
+    "request_refund": 0.0014,
+    "reverted_card_payment?": 0.0073,
+    "supported_cards_and_currencies": 0.0043,
+    "terminate_account": 0.0007,
+    "top_up_by_bank_transfer_charge": 0.0013,
+    "top_up_by_card_charge": 0.0004,
+    "top_up_by_cash_or_cheque": 0.0059,
+    "top_up_failed": 0.0043,
+    "top_up_limits": 0.0012,
+    "top_up_reverted": 0.0058,
+    "topping_up_by_card": 0.0007,
+    "transaction_charged_twice": 0.0056,
+    "transfer_fee_charged": 0.0021,
+    "transfer_into_account": 0.0052,
+    "transfer_not_received_by_recipient": 0.0015,
+    "transfer_timing": 0.0002,
+    "unable_to_verify_identity": 0.0053,
+    "verify_my_identity": 0.0011,
+    "verify_source_of_funds": 0.0029,
+    "verify_top_up": 0.0057,
+    "virtual_card_not_working": 0.0038,
+    "visa_or_mastercard": 0.0031,
+    "why_verify_identity": 0.0063,
+    "wrong_amount_of_cash_received": 0.0023,
+    "wrong_exchange_rate_for_cash_withdrawal": 0.005
   },
-  "quality": {
-    "accuracy": 0.3272,
-    "macro_f1": 0.284,
-    "nll": 3.9102,
-    "brier": 0.9697,
-    "ece": 0.2986,
-    "classwise_ece": 0.0034,
-    "aurc": 0.4796
+  "threshold": 0.99,
+  "coverage": 0.0,
+  "precision": null,
+  "cp_lower_bound": null,
+  "robustness_pass_rate": null,
+  "seen_merchant": {
+    "count": 0,
+    "accuracy": null
   },
-  "claim": {
-    "tau": 0.99,
-    "coverage": 0.0,
-    "precision_above": null,
-    "calib_auto": {
-      "n": 0,
-      "correct": 0
-    },
-    "calib_cp_lower": 0.0
-  },
-  "slices": {
-    "unseen_merchant": {
-      "rows": 1962,
-      "accuracy": 0.3272
-    }
+  "unseen_merchant": {
+    "count": 1962,
+    "accuracy": 0.3272
   },
   "worst_classes": {
-    "top_up_limits": 0.0,
-    "pending_top_up": 0.0,
-    "card_payment_not_recognised": 0.0,
-    "order_physical_card": 0.0,
-    "card_not_working": 0.0
+    "top_up_limits": {
+      "count": 22,
+      "accuracy": 0.0
+    },
+    "pending_top_up": {
+      "count": 36,
+      "accuracy": 0.0
+    },
+    "card_payment_not_recognised": {
+      "count": 31,
+      "accuracy": 0.0
+    },
+    "order_physical_card": {
+      "count": 25,
+      "accuracy": 0.0
+    },
+    "card_not_working": {
+      "count": 20,
+      "accuracy": 0.0
+    }
   },
-  "speed": {
-    "fit_seconds": 0.09,
-    "predict_ms_p50": 0.249,
-    "predict_ms_p99": 0.396,
-    "peak_rss_mb": 274.3
-  }
+  "featurize_ms": null,
+  "predict_ms": {
+    "p50": 0.226,
+    "p99": 0.344
+  },
+  "retrain_ms": null,
+  "peak_rss_bytes": 289816576,
+  "artifact_bytes": null,
+  "image_bytes": null,
+  "cost_per_1000_usd": null,
+  "data_hash": "156972db31eaffa6e0a85574d591faca057448981a56d1706569b345c6d0eec1",
+  "split_hash": "99a7451cd906ef7b193bcce77a470e9227bc593168795bf7e61db7caf902c591",
+  "featurizer_id": null,
+  "seed": 0,
+  "git_sha": "e2579c9"
 }
