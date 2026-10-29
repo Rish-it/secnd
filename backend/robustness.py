@@ -46,3 +46,45 @@ def robustness(y: np.ndarray, p: np.ndarray, splits: int = 2000, n_jobs: int = -
         "worst_1pct_precision": runs["precision"].quantile(0.01),
     }
     return runs, summary
+
+
+def main():
+    """`uv run python -m backend.robustness --dataset banking77 --budget 2000`."""
+    import argparse
+    import json
+    import warnings
+    from pathlib import Path
+
+    from backend.config import Settings
+    from backend.data import load_dataset, split_dataset
+    from backend.eval import training_rows
+    from backend.model import Model
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset", default="ipsa")
+    parser.add_argument("--budget", type=int, default=2000)
+    parser.add_argument("--model", default="minilm+lr")
+    parser.add_argument("--splits", type=int, default=2000)
+    args = parser.parse_args()
+    warnings.filterwarnings("ignore")
+    settings = Settings()
+    frame = load_dataset(args.dataset, settings.data_dir)
+    split = split_dataset(frame)
+    featurizer, classifier = args.model.split("+")
+    labels = sorted(frame["label"].unique())
+    model = Model(labels, featurizer, classifier, 0, settings.data_dir / "cache")
+    model.fit(training_rows(frame, split, args.budget, 0))
+    pool = frame[split.isin(["calib", "test"])]
+    runs, summary = robustness(model.encode(pool), model.predict_proba(pool), args.splits)
+    out = Path("docs/results/s3")
+    out.mkdir(parents=True, exist_ok=True)
+    name = f"robustness-{args.dataset}-{args.model}-b{args.budget}"
+    runs.to_csv(out / f"{name}.csv", index=False)
+    summary = {"dataset": args.dataset, "model": args.model, "budget": args.budget, **summary}
+    summary["pool_rows"] = len(pool)
+    (out / f"{name}.json").write_text(json.dumps(summary, indent=2, default=float) + "\n")
+    print(json.dumps(summary, indent=2, default=float))
+
+
+if __name__ == "__main__":
+    main()
