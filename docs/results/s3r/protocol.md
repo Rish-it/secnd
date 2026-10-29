@@ -44,3 +44,12 @@ The committed #29 card currently certifies zero rows in all these conditions.
 The handoff's 23–37% figure has no supporting artifact in this checkout. If a
 newer gate is supplied, register its identity and any protocol amendment before
 running it; do not silently replace this baseline.
+
+## Amendment 1 (before inference)
+
+The owner supplied pushed commit e2581ee on stage/s2f-mtop-calib. Use that
+held_out() implementation instead: seed-0 4,000-row MTOP calibration from official
+train, leaving 11,667 history rows; certification has 2,000 rows. All reader
+training excluded these MTOP train texts. The earlier 602-row result is superseded.
+Keep rule A unchanged, fit temperature and threshold only on the new calibration
+split. Full-history 0/8/32 conditions remain the registered primary audit.
