@@ -1,0 +1,23 @@
+backend/panel_votes.py
+  s_9245a16bb07969::t_4d598c099f2175 1-151
+backend/tests/test_panel_votes.py
+  s_9245a16bb07969::t_ab494c37c83dad 1-43
+docs/results/s3r/protocol.md
+  s_9245a16bb07969::t_068a4537af49d4 129-157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6b48df1c405ecbc104f26a3f607d666fe47bb7a9",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
