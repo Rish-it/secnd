@@ -1,0 +1,29 @@
+docs/results/s3r/attacks-floor-400m.json
+  s_6b0b1bb57c592c::t_c3a2046ceed9ff 1-84315
+docs/results/s8/latency-ic-ettin-400m-s6000-near.json
+  s_9245a16bb07969::t_c046a4d54db816 1-3950
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "21b1560c3116418ca07c9263b4852d2b209e1e67",
+  "prompts": {},
+  "sessions": {
+    "s_6b0b1bb57c592c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
