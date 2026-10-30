@@ -1,0 +1,44 @@
+docs/results/s2/teacher.md
+  s_99a14fdaab2d15::t_dd79db418d2575 66-67
+  s_99a14fdaab2d15::t_600c3913dd8907 1-51,53-62,64-65,68
+  s_99a14fdaab2d15::t_810147d9bbf715 52
+  s_99a14fdaab2d15::t_987d2071b7cc2e 63
+backend/escalate.py
+  s_99a14fdaab2d15::t_dff36c98f9c1bf 53,143-147
+backend/modal_bench.py
+  s_99a14fdaab2d15::t_695d4eb313c61e 156-202
+backend/teacher.py
+  s_99a14fdaab2d15::t_31a1e596a24a60 37,117-123,148,220-222,224-227
+docs/results/s2/incontext-ic-ettin-150m-s6000-near-none.json
+  s_99a14fdaab2d15::t_e03f303e69ece2 1-144
+docs/results/s2/teacher-banking77-3000.json
+  s_99a14fdaab2d15::t_834ad7cba40128 1-68
+docs/results/s2/teacher-mtop-3000-w0.9.json
+  s_99a14fdaab2d15::t_17c07e827487ec 1-68
+docs/results/s2/teacher-pilot.json
+  s_99a14fdaab2d15::t_564686cd2ca047 1-74
+docs/results/s5/spend.csv
+  s_99a14fdaab2d15::t_a7d6b891a9c666 17-20
+docs/results/s2/teacher-banking77-examples10.json
+  s_99a14fdaab2d15::t_74e70f3eea2316 1-46
+docs/results/s2/teacher-mtop-examples10.json
+  s_99a14fdaab2d15::t_431b6df07de6d4 1-46
+docs/results/s5/spend-meta.csv
+  s_99a14fdaab2d15::t_1307f1cec01129 15-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bef73cf682c38703ee326e9dce893df1157bb3a7",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
