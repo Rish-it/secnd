@@ -1,0 +1,57 @@
+backend/workspace.py
+  s_d75a8bfdc0509a::t_70f32cf5a79c8d 41,103-104,108-109,123-125
+  s_d75a8bfdc0509a::t_e132e0c324e208 126-129,221-222,233-235,317-318
+backend/cold_start.py
+  s_d75a8bfdc0509a::t_0e025597a2fb3f 1-67,71-131,133-227,230-234,237-244,247-273,276-323
+  s_d75a8bfdc0509a::t_082ef548a33dde 68-70,132,228-229,235-236,245-246,274-275
+frontend/src/api.ts
+  s_d75a8bfdc0509a::t_0e025597a2fb3f 76-86,129-145,147-148,150,152-153
+  s_d75a8bfdc0509a::t_073d77a0f0ee6e 146,149,151,154-158,191
+README.md
+  s_d75a8bfdc0509a::t_082ef548a33dde 37-52
+frontend/src/App.tsx
+  s_d75a8bfdc0509a::t_0e025597a2fb3f 8,276
+  s_d75a8bfdc0509a::t_a7f9b493c88565 277-278
+frontend/src/Companion.tsx
+  s_d75a8bfdc0509a::t_29dceabf98267e 78-79
+  s_d75a8bfdc0509a::t_010c652b649d5f 80
+backend/reader_serving.py
+  s_d75a8bfdc0509a::t_0e025597a2fb3f 1-117
+frontend/src/ColdStart.tsx
+  s_d75a8bfdc0509a::t_29dceabf98267e 1-384
+backend/schemas.py
+  s_d75a8bfdc0509a::t_70f32cf5a79c8d 149-187
+docs/api/README.md
+  s_d75a8bfdc0509a::t_082ef548a33dde 76-111
+backend/api.py
+  s_d75a8bfdc0509a::t_70f32cf5a79c8d 27,33,39-40,43,65,80,207-213,216-218,227-233,237-239,245-274,299-300
+  s_d75a8bfdc0509a::t_0e025597a2fb3f 62-64,202-206,214-215,219-226,234-236,240-244
+backend/tests/cold_start_demo.py
+  s_d75a8bfdc0509a::t_df14ad54e6fc5c 1-73
+backend/tests/test_cold_start.py
+  s_d75a8bfdc0509a::t_3c1cc7472efa66 1-284
+docs/api/openapi.json
+  s_d75a8bfdc0509a::t_d8f1dc6700f6d4 50-51,66-84,199-295,783-805,905-933,1584-2045
+docs/results/s7/cold-start/README.md
+  s_d75a8bfdc0509a::t_5138a3072ca687 1-31
+docs/results/s7/cold-start/browser.json
+  s_d75a8bfdc0509a::t_57c63fef60f16e 1-30
+frontend/src/ColdStart.css
+  s_d75a8bfdc0509a::t_69d4228462ef95 1-171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9e39dfd8de428e1d6a8d7ad888869e4b1583933f",
+  "prompts": {},
+  "sessions": {
+    "s_d75a8bfdc0509a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1890a-afae-7d30-972c-76425591d4d6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
