@@ -1203,31 +1203,21 @@
             ],
             "title": "Accuracy"
           },
-          "confidence_only_coverage": {
+          "audited_calibration_labels": {
             "anyOf": [
               {
-                "maximum": 1.0,
-                "minimum": 0.0,
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Confidence Only Coverage"
+            "title": "Audited Calibration Labels"
           },
-          "confidence_only_precision": {
-            "anyOf": [
-              {
-                "maximum": 1.0,
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confidence Only Precision"
+          "calibration_audit": {
+            "const": "model",
+            "title": "Calibration Audit",
+            "type": "string"
           },
           "dataset": {
             "title": "Dataset",
@@ -1245,6 +1235,21 @@
             "title": "History Rows",
             "type": "integer"
           },
+          "policy_file": {
+            "title": "Policy File",
+            "type": "string"
+          },
+          "with_floor_accepted": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Accepted"
+          },
           "with_floor_coverage": {
             "anyOf": [
               {
@@ -1257,6 +1262,30 @@
               }
             ],
             "title": "With Floor Coverage"
+          },
+          "with_floor_errors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Errors"
+          },
+          "with_floor_low95": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Low95"
           },
           "with_floor_precision": {
             "anyOf": [
@@ -1280,13 +1309,17 @@
           "dataset",
           "history_rows",
           "accuracy",
-          "confidence_only_coverage",
-          "confidence_only_precision",
           "with_floor_coverage",
           "with_floor_precision",
           "with_floor_sample",
+          "with_floor_accepted",
+          "with_floor_errors",
+          "with_floor_low95",
+          "calibration_audit",
+          "audited_calibration_labels",
           "evaluation_file",
-          "floor_result_file"
+          "floor_result_file",
+          "policy_file"
         ],
         "title": "ReaderBenchmark",
         "type": "object"
@@ -1451,6 +1484,11 @@
               }
             ],
             "title": "Examples"
+          },
+          "guarded": {
+            "default": false,
+            "title": "Guarded",
+            "type": "boolean"
           },
           "history_rows": {
             "anyOf": [

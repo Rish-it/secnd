@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     featurizer: str = "pt-minilm"
     encoder_repo: str = "Secnd-AI/ren"
     encoder_revision: str = "5560f25414195f1d1224a6ae7efd19c6b7646d3f"
-    serving_backend: Literal["reader", "head"] = "reader"
+    serving_backend: Literal["reader", "head"] = "head"
     reader: ReaderOptions = Field(default_factory=ReaderOptions)
     workspace_backends: dict[str, Literal["reader", "head"]] = Field(default_factory=dict)
     workspace_readers: dict[str, ReaderOptions] = Field(default_factory=dict)

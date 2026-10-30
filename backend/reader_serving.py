@@ -82,6 +82,7 @@ class CPUReader:
         identity = [
             self.options.model_id,
             self.artifact.revision,
+            self.artifact.policy_file,
             self.options.examples,
             history_version(labels, history),
         ]

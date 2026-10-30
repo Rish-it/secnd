@@ -1,108 +1,134 @@
 # Ren serving configuration
 
-Ren is an independent decision model built for Meta's platform. The app defaults to
-`ic-ettin-150m-s6000-near` on CPU with eight nearest history examples. The optional
-`ic-ettin-400m-s6000-near` reader uses an explicitly configured CUDA device. There
-is no quantization or automatic model/device fallback.
+Ren is an independent decision model built for Meta's platform. Code and Compose
+default to `head`, the existing encoder and calibrated workspace classifier. A
+clean clone starts without experimental reader weights. A workspace with its own
+registered model keeps that model's calibrated gate unless its configuration
+explicitly selects a reader.
 
 ## Select a reader
 
 Settings reads these values from `.env` or the process environment:
 
 ```dotenv
-SECND_SERVING_BACKEND=reader
+SECND_SERVING_BACKEND=head
 SECND_READER='{"model_id":"ic-ettin-150m-s6000-near","device":"cpu","examples":8}'
 SECND_WORKSPACE_BACKENDS='{}'
 SECND_WORKSPACE_READERS='{}'
 ```
 
-For the GPU option, replace `SECND_READER` with:
+`SECND_WORKSPACE_BACKENDS` is the explicit per-workspace selection. An entry in
+`SECND_WORKSPACE_READERS` also selects a reader, unless the backend map explicitly
+says `head`. For a demo workspace:
 
 ```dotenv
-SECND_READER='{"model_id":"ic-ettin-400m-s6000-near","device":"cuda","examples":8}'
+SECND_WORKSPACE_BACKENDS='{"demo":"reader"}'
+SECND_WORKSPACE_READERS='{"demo":{"model_id":"ic-ettin-150m-s6000-near","device":"cpu","examples":8}}'
 ```
 
-A workspace can select its backend and override the reader independently:
+The optional GPU selection is:
 
 ```dotenv
-SECND_WORKSPACE_BACKENDS='{"legacy":"head","messages":"reader"}'
-SECND_WORKSPACE_READERS='{"messages":{"model_id":"ic-ettin-150m-s6000-near","device":"cpu","examples":8}}'
+SECND_WORKSPACE_READERS='{"demo":{"model_id":"ic-ettin-400m-s6000-near","device":"cuda","examples":8}}'
 ```
 
-`head` selects the existing workspace encoder and calibrated classifier. Set
-`SECND_SERVING_BACKEND=head` to select it globally. Configuration changes require
-an API restart. An explicit reader `revision` must match the immutable checkpoint
-fingerprint in [the manifest](../backend/reader-manifest.json); omitting it selects
-that pinned fingerprint. Revisions cover all checkpoint files, including scorer,
-encoder and tokenizer. Startup verifies every file hash before loading.
+A global `SECND_SERVING_BACKEND=reader` supplies a reader for workspaces without a
+registered model. It preserves existing registered workspace models. An explicit
+per-workspace reader selection can override a registered head. Label-only
+onboarding remains an explicit reader flow, with human-reviewed suggestions.
+Configuration changes require an API restart.
 
-Install the chosen checkpoint under
-`SECND_DATA_DIR/encoders/<model_id>/`, including `encoder/` and `scorer.pt`, and
-preinstall the pinned MiniLM retrieval model in the local Hugging Face cache.
-Checkpoints and caches stay outside Git. Reader loading is local only. Missing
-files, a mismatched revision, missing retrieval files or an unavailable configured
-CUDA/BF16 device stop startup with a clear error. A configured reader never becomes
-the head or a different reader when loading fails.
+An explicit reader `revision` must match the checkpoint fingerprint in
+[the manifest](../backend/reader-manifest.json); omitting it selects that pinned
+fingerprint. Startup verifies encoder, scorer and tokenizer hashes. Install the
+chosen checkpoint under `SECND_DATA_DIR/encoders/<model_id>/`, including `encoder/`
+and `scorer.pt`, and preinstall the pinned MiniLM retrieval model in the local
+Hugging Face cache. Checkpoints and caches stay outside Git.
 
-The production image packages the frozen policy files, but does not redistribute
-the experimental reader weights or the MiniLM retrieval cache. Supply those through
-the data volume/cache mounts before using the default reader. The existing released
-encoder is packaged for the explicitly selected head mode:
+The image packages the frozen policies, but does not redistribute experimental
+reader weights or the MiniLM retrieval cache. Supply those through data/cache
+mounts before opting into a reader. Explicit reader configuration eagerly loads
+its model: missing files, a mismatched revision, missing retrieval files or an
+unavailable configured CUDA/BF16 device stop startup. There is no quantization or
+automatic model/device fallback. Default head startup needs none of these optional
+reader files:
 
 ```sh
-SECND_SERVING_BACKEND=head docker compose up --build
+docker compose up --build
 ```
 
-## Automatic answers and missing intents
+## Frozen policy and benchmark
 
-Previously, `CPUReader.predict()` was called only by label-only onboarding. It
-returned raw suggestions with `auto=False` and `threshold=None`: invented examples
-provided no independent workspace calibration. There was no automatic reader
-answer path. CSV workspaces used their calibrated classifier instead.
+Originally, `CPUReader.predict()` only served label-only onboarding, returning raw
+suggestions with `auto=False, threshold=None` because invented examples provided
+no independent calibration. Automatic reader answers were not wired.
 
-The API now dispatches reader workspaces through the configured reader. Each
-prediction loads its model/example-count operating point from the committed
-[150M results](results/s3r/attacks-floor.json) or
-[400M results](results/s3r/attacks-floor-400m.json). The values are never fitted or
-adjusted while serving. Temperature scales the probabilities before comparison
-with the frozen confidence threshold.
+Explicit reader serving now loads model/example-count policies from unchanged
+copies of commit `ada0a0d`:
 
-Support is the **maximum MiniLM cosine similarity between the message and any
-history row with the predicted intent**, including rows outside the retrieved
-context. An automatic answer requires both confidence at or above its threshold
-and support at or above its floor. Missing temperature, threshold or floor, no
-history for the predicted intent, too few context examples, or capped input means
-human confirmation. In particular, the 400M operating points with zero and 32
-examples have null thresholds and floors and cannot answer automatically.
+- [150M audited policy](results/s3r/attacks-floor-audited.json)
+- [400M audited policy](results/s3r/attacks-floor-audited-400m.json)
+- [Full test with support floor](results/s3r/floor-full-test.json)
 
-These values were measured with **full MTOP history only**. They do not certify a
-smaller history, invented examples, a new label set or a different workspace. The
-app therefore checks the complete audited history fingerprint and label set before
-enabling reader automatic answers. An edit or new answer changes that history and
-requires human confirmation again. The fingerprint was derived from the same
-fixed split and checked against the split hash in the committed audit. Calibration
-rows never enter reader retrieval history.
+**Calibration labels were changed by a model audit, not a human audit.** Twelve
+MTOP calibration labels changed; history and test labels stayed unchanged. These
+artifacts supersede the earlier serving policies. No temperature, threshold or
+floor is fitted or adjusted during serving. All audited 400M example counts now
+have complete policies; missing/null values in any future policy still fail closed.
 
-[Amendment 2](https://github.com/Rish-it/secnd/blob/6f192e0/docs/results/s3r/protocol.md#amendment-2-support-floor-for-missing-intents-registered-before-its-inference)
-defines the floor. The added audit files are unchanged copies from commit
-`6f192e0`. The support audit's observed precision on its small sample is separate
-from the earlier confidence-only certification. The app displays both with their
-scope; neither is a universal guarantee for future traffic or an independent CPU
-precision certification.
+Temperature scales probabilities before the frozen threshold comparison. Support
+is the maximum MiniLM cosine similarity between the message and **every history
+row carrying the predicted intent**, including rows outside the retrieved context.
+Automatic eligibility requires both confidence and support to clear their frozen
+cutoffs, the full audited history, enough context examples and an uncapped input.
+No history for the predicted intent means no automatic answer.
 
-Confirmations/corrections persist through the existing answers API. Ordinary
-workspace answers continue through the existing background training mechanism and
-join subsequent reader history. Label-only answers join its editable history.
-Neither path asks a teacher for a decision. Outbound sends and account changes keep
-their existing explicit switches.
+The app's floored benchmark comes from all 4,386 unchanged MTOP test labels in
+`floor-full-test.json`, rather than the 500-row attack sample or confidence-only
+coverage. At eight examples, the 150M floored share is **10.85%**, observed precision
+**100%**, with recorded 95% lower bound **99.23%**; the 400M values are **13.89%**,
+**100%** and **99.40%**. These are the recorded GPU-derived evaluation conditions,
+not independent CPU certification or measurements of an arbitrary workspace.
+Confidence-only coverage figures do not describe the floored policy.
+
+Limits stay visible in the source results: the audited 150M eight-example policy
+accepted two wrong missing-intent answers out of 500, exceeding the one-error target.
+The 400M 32-example full-test precision lower bound is 98.86%. Frozen values are
+served unchanged and these misses remain reported.
+
+## Live checks and demo history
+
+Reader automatic eligibility uses the existing `SPOT_CHECK_RATE`. Selected checks
+have `auto=False, spot_check=True` and enter the human queue. Their answers persist
+with the spot-check source and update the reader guard using the existing
+one-sided 95% error-bound rule against the 99% target. The guard pauses subsequent
+reader automatic answers. Counts are scoped to the workspace and reader policy,
+retained across history changes, and reset on process restart like the head guard.
+Replaying an answer cannot count the same check twice.
+
+The frozen values cover **full MTOP history only**. They do not certify a smaller,
+invented or different workspace history. The complete audited history fingerprint
+and label set must match before reader automatic answers are enabled. Calibration
+rows never enter retrieval history.
+
+A person's answer changes that exact history and pauses reader automatic answers,
+even when it confirms the suggestion. Restarting the same persisted workspace does
+not restore its original history. For the demo, show automatic answers before
+confirming, or use a disposable copy. The local HTTP rehearsal below creates a new
+temporary workspace on every run; stopping and rerunning it restores a fresh demo
+without editing a real database.
+
+Ordinary workspace answers retain the existing background training path and join
+reader history when that workspace explicitly uses a reader. Label-only answers
+join its editable history. No teacher participates in a decision. Outbound sends
+and account changes retain their explicit switches.
 
 ## Inspect and verify
 
-`GET /api/v1/workspaces/{workspace}/serving` exposes the selected model, immutable
-revision, device, example count, frozen policy, scope status and separate published
-evaluation. Metrics shows this information at desktop and mobile widths. Local
-workspace cards retain null unmeasured values instead of borrowing benchmark
-accuracy or coverage.
+`GET /api/v1/workspaces/{workspace}/serving` exposes the active backend, reader
+identity, frozen policy, scope/guard status and published evidence. Metrics shows
+the full-test floored benchmark with its model-audit qualification. Workspace
+measurement fields stay separate.
 
 ```sh
 uv sync --locked
@@ -111,10 +137,10 @@ npm run check
 npm run test:reader
 ```
 
-The browser fixture uses local stand-ins and marks itself as a fixture. Reader unit
-and API tests replace model loading, retaining the actual policy, temperature,
-retrieval, support and routing code. GPU configuration is tested without allocating
-a GPU. CI uses mocked reader loading and explicitly selects `head` for its container
-smoke test; no reader weights or live provider access are required.
+Tests cover registered-head preservation, explicit reader selection, default
+startup, frozen policy loading, support gating, spot-check routing and guard
+feedback. Reader model loading uses stand-ins in CI; the browser fixture is marked.
+Docker CI runs the default command without a backend override. No checkpoint or
+GPU is needed for these tests.
 
-[Running CPU HTTP measurements and screenshots](results/c3-serving/README.md).
+[CPU HTTP rehearsal and screenshots](results/c3-serving/README.md).

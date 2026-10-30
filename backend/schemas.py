@@ -50,13 +50,17 @@ class ReaderBenchmark(BaseModel):
     dataset: str
     history_rows: int
     accuracy: Probability | None
-    confidence_only_coverage: Probability | None
-    confidence_only_precision: Probability | None
     with_floor_coverage: Probability | None
     with_floor_precision: Probability | None
     with_floor_sample: int
+    with_floor_accepted: int | None
+    with_floor_errors: int | None
+    with_floor_low95: Probability | None
+    calibration_audit: Literal["model"]
+    audited_calibration_labels: int | None
     evaluation_file: str
     floor_result_file: str
+    policy_file: str
 
 
 class ServingStatus(BaseModel):
@@ -71,6 +75,7 @@ class ServingStatus(BaseModel):
     support_floor: Probability | None = None
     policy_complete: bool | None = None
     scope_matches: bool | None = None
+    guarded: bool = False
     scope_note: str
     benchmark: ReaderBenchmark | None = None
 

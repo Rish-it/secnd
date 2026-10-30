@@ -7,8 +7,8 @@ become questions for a person, whose answers train the next classifier version.
 
 The open encoder is [Secnd-AI/ren](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0):
 release **ren-1.0.0**, tag **v1.0.0**, pinned by immutable revision and
-[SHA-256 manifest](backend/encoder-ren-1.0.0.json). The app now defaults to the 150M reader
-on CPU; the released encoder and classifier remain selectable.
+[SHA-256 manifest](backend/encoder-ren-1.0.0.json). The app defaults to the released encoder and workspace classifier.
+The 150M CPU reader and optional 400M GPU reader are explicitly configurable.
 [Serving configuration and required local reader files](docs/serving.md).
 
 On the fixed English MTOP split at 2,000 workspace labels, the released encoder
@@ -38,15 +38,16 @@ wrong answers when the correct intent is absent from its options.
 
 ## Run one container
 
-The released encoder/classifier can run immediately with an explicit selection:
+The default command starts with the released encoder and workspace classifier:
 
 ```sh
-SECND_SERVING_BACKEND=head docker compose up --build
+docker compose up --build
 ```
 
-For the default reader, first install the checkpoint and pinned MiniLM retrieval
-cache as described in [serving configuration](docs/serving.md), then run
-`docker compose up --build`. Missing configured files or devices stop startup.
+To opt into a reader, install its checkpoint and pinned MiniLM retrieval cache,
+then select it in [serving configuration](docs/serving.md). Existing registered
+workspaces keep their own calibrated gates unless explicitly selected for a reader.
+An explicitly configured reader fails startup if its files or device are unavailable.
 
 Open **http://localhost:8000**. The build downloads and verifies the pinned public
 encoder. Runtime can copy it into the persistent data volume and infer offline.
@@ -155,8 +156,7 @@ Development UI: **http://localhost:3000**. API docs: **http://127.0.0.1:8000/doc
 Vite proxies `/api` to FastAPI. Production serves the built frontend and API from
 one process. `uv.lock` and `package-lock.json` pin dependencies.
 
-The app defaults to the 150M CPU reader and requires its local checkpoint/cache at
-startup. Select `SECND_SERVING_BACKEND=head` to use the existing encoder/classifier.
+The app defaults to `SECND_SERVING_BACKEND=head`; reader checkpoints are optional.
 Reader choices, workspace overrides and frozen safety policy are documented in
 [serving configuration](docs/serving.md).
 

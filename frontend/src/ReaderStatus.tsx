@@ -16,6 +16,7 @@ type Status = {
   history_rows?: number;
   policy_complete?: boolean;
   scope_matches?: boolean;
+  guarded?: boolean;
   threshold?: number | null;
   temperature?: number | null;
   support_floor?: number | null;
@@ -24,11 +25,14 @@ type Status = {
     dataset: string;
     history_rows: number;
     accuracy: number | null;
-    confidence_only_coverage: number | null;
-    confidence_only_precision: number | null;
     with_floor_coverage: number | null;
     with_floor_precision: number | null;
     with_floor_sample: number;
+    with_floor_accepted: number | null;
+    with_floor_errors: number | null;
+    with_floor_low95: number | null;
+    audited_calibration_labels: number | null;
+    floor_result_file: string;
   };
 };
 
@@ -95,9 +99,11 @@ export default function ReaderStatus() {
       {status.backend === "reader" && (
         <>
           <p role="status">
-            {status.scope_matches && status.policy_complete
-              ? "Frozen confidence and support checks active."
-              : "Human confirmation required for this history."}
+            {status.guarded
+              ? "Automatic answers paused: spot-check guard active."
+              : status.scope_matches && status.policy_complete
+                ? "Frozen confidence and support checks active."
+                : "Human confirmation required for this history."}
           </p>
           <dl className="reader-gate">
             <div>
@@ -128,27 +134,36 @@ export default function ReaderStatus() {
               <dd>{percent(benchmark.accuracy, 1)}</dd>
             </div>
             <div>
-              <dt>Certified share before support check</dt>
-              <dd>{percent(benchmark.confidence_only_coverage, 1)}</dd>
-            </div>
-            <div>
-              <dt>Accepted test precision before support check</dt>
-              <dd>{percent(benchmark.confidence_only_precision, 2)}</dd>
-            </div>
-            <div>
               <dt>
-                Share with support check · {benchmark.with_floor_sample} audit
-                messages
+                Share with support floor ·{" "}
+                {benchmark.with_floor_sample.toLocaleString()} test messages
               </dt>
-              <dd>{percent(benchmark.with_floor_coverage, 1)}</dd>
+              <dd>{percent(benchmark.with_floor_coverage, 2)}</dd>
             </div>
             <div>
-              <dt>Observed audit precision with support check</dt>
+              <dt>Observed test precision with support floor</dt>
               <dd>{percent(benchmark.with_floor_precision, 1)}</dd>
+            </div>
+            <div>
+              <dt>95% precision lower bound with support floor</dt>
+              <dd>{percent(benchmark.with_floor_low95, 2)}</dd>
             </div>
           </dl>
           <p>
-            Recorded benchmark results. This audit sample does not establish a
+            Calibration labels were changed by a model audit, not a human audit
+            ({benchmark.audited_calibration_labels} changed labels). Test labels
+            are unchanged. {benchmark.with_floor_accepted} accepted answers,
+            {benchmark.with_floor_errors} errors with the support floor.
+          </p>
+          <p>
+            <a
+              href={`https://github.com/Rish-it/secnd/blob/stage/c3-serving/${benchmark.floor_result_file}`}
+            >
+              Full test results with support floor
+            </a>
+          </p>
+          <p>
+            Recorded benchmark results. These measurements do not establish a
             universal 99% guarantee. These numbers do not measure this workspace
             or a smaller history.
           </p>

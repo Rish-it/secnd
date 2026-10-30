@@ -29,7 +29,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="secnd-reader-browser-") as directory:
         settings = Settings(
             data_dir=Path(directory),
-            serving_backend="reader",
+            workspace_backends={"default": "reader", "gpu": "reader"},
             workspace_readers={
                 "gpu": ReaderOptions(model_id="ic-ettin-400m-s6000-near", device="cuda", examples=0)
             },

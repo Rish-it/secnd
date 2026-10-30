@@ -137,7 +137,7 @@ class WorkspaceService:
                 return dict(
                     card=self.card(workspace),
                     history=[],
-                    guarded=False,
+                    guarded=self.readers.guarded(workspace),
                     labels=len(self.readers.history(workspace)),
                 )
             registry = Registry(self.data_dir, workspace)
@@ -249,8 +249,8 @@ class WorkspaceService:
             with self._lock(workspace):
                 return self.cold_start.answer(workspace, item_id, label, idempotency_key)
         item = self.store.item(workspace, item_id)
+        previous = self.store.latest_prediction(workspace, item_id)
         if source is None:
-            previous = self.store.latest_prediction(workspace, item_id)
             source = "spot_check" if previous and previous.get("spot_check") else "answer"
         self._validate_training(workspace, pd.DataFrame([item]), [label])
         current = self.card(workspace)
@@ -268,6 +268,8 @@ class WorkspaceService:
             source,
         )
         if created:
+            if self.readers and source == "spot_check":
+                self.readers.on_answer(workspace, item_id, label, previous)
             with self.store.connect() as db:
                 position = db.execute(
                     """SELECT l.position FROM answers a JOIN labels l

@@ -3,9 +3,15 @@
 import json
 from threading import RLock
 
+import numpy as np
+
+from backend import metrics
+from backend.calibrate import TARGET
+from backend.loop import SPOT_CHECK_RATE
 from backend.reader_policy import MANIFEST
 from backend.reader_scope import scope_digest
 from backend.reader_serving import CPUReader
+from backend.registry import Registry
 from backend.schemas import EvalCard
 
 
@@ -13,10 +19,56 @@ class ReaderRuntime:
     def __init__(self, store, settings, factory=CPUReader):
         self.store, self.settings, self.factory = store, settings, factory
         self._readers, self._lock = {}, RLock()
+        self._checks = {}
         self.scope = json.loads(MANIFEST.read_text())["scope"]
 
     def enabled(self, workspace):
-        return self.settings.backend_for(workspace) == "reader"
+        if workspace in self.settings.workspace_backends:
+            return self.settings.workspace_backends[workspace] == "reader"
+        if workspace in self.settings.workspace_readers:
+            return True
+        # A registered workspace keeps its own calibrated head unless explicitly selected.
+        if Registry(self.settings.data_dir, workspace).current() is not None:
+            return False
+        return self.settings.serving_backend == "reader"
+
+    def _state(self, workspace):
+        reader = self.reader(workspace)
+        key = (workspace, reader.options.model_dump_json(), reader.artifact.policy_file)
+        with self._lock:
+            if key not in self._checks:
+                self._checks[key] = {
+                    "right": 0,
+                    "checked": 0,
+                    "answers": set(),
+                    "rng": np.random.default_rng(self.store.workspace(workspace).get("seed", 0)),
+                }
+            return self._checks[key]
+
+    def guarded(self, workspace):
+        state = self._state(workspace)
+        with self._lock:
+            right, checked = state["right"], state["checked"]
+        return metrics.clopper_pearson_lower(checked - right, checked) > 1 - TARGET
+
+    def on_answer(self, workspace, item_id, label, previous):
+        info = (previous or {}).get("reader")
+        if not info or not previous.get("spot_check"):
+            return
+        reader = self.reader(workspace)
+        if (info["model_id"], info["revision"], info["examples"]) != (
+            reader.options.model_id,
+            reader.artifact.revision,
+            reader.options.examples,
+        ):
+            return
+        state = self._state(workspace)
+        key = (item_id, previous["model_version"])
+        with self._lock:
+            if key not in state["answers"]:
+                state["answers"].add(key)
+                state["right"] += previous["label"] == label
+                state["checked"] += 1
 
     def reader(self, workspace):
         options = self.settings.reader_for(workspace)
@@ -58,8 +110,15 @@ class ReaderRuntime:
         labels = self.store.workspace(workspace)["labels"]
         history = self.history(workspace)
         rows = self.reader(workspace).predict(
-            labels, history, frame, allow_auto=self.scope_matches(labels, history)
+            labels,
+            history,
+            frame,
+            allow_auto=self.scope_matches(labels, history) and not self.guarded(workspace),
         )
+        state = self._state(workspace)
+        for row in rows:
+            if row["auto"] and state["rng"].random() < SPOT_CHECK_RATE:
+                row["auto"], row["spot_check"] = False, True
         self.store.record_predictions(
             workspace, json.loads(frame.to_json(orient="records", date_format="iso")), rows
         )
@@ -89,6 +148,7 @@ class ReaderRuntime:
             "support_floor": policy.floor,
             "policy_complete": policy.complete,
             "scope_matches": cold_history is None and self.scope_matches(config["labels"], history),
+            "guarded": self.guarded(workspace),
             "scope_note": "Automatic reader answers require the audited full MTOP history. "
             "Smaller, edited or invented histories require human confirmation.",
             "benchmark": reader.artifact.benchmark(reader.options),

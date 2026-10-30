@@ -113,7 +113,7 @@ def main():
             "SECND_READER": json.dumps(
                 {"model_id": "ic-ettin-150m-s6000-near", "device": "cpu", "examples": 8}
             ),
-            "SECND_WORKSPACE_BACKENDS": "{}",
+            "SECND_WORKSPACE_BACKENDS": json.dumps({"default": "reader"}),
             "SECND_WORKSPACE_READERS": "{}",
             "SECND_WHATSAPP_SEND_ENABLED": "false",
             "SECND_COLD_START_PAID": "false",
@@ -181,6 +181,7 @@ def main():
                                 "source": int(source),
                                 "http_ms": elapsed,
                                 "auto": decision["auto"],
+                                "spot_check": decision["spot_check"],
                                 "examples": decision["reader"]["examples"],
                             }
                         )
@@ -189,6 +190,11 @@ def main():
                     "measured_at": datetime.now(UTC).isoformat(),
                     "model_id": status["model_id"],
                     "revision": status["revision"],
+                    "policy_file": manifest["models"][status["model_id"]]["policy_file"],
+                    "policy_sha256": manifest["models"][status["model_id"]]["policy_sha256"],
+                    "threshold": status["threshold"],
+                    "support_floor": status["support_floor"],
+                    "temperature": status["temperature"],
                     "device": "cpu",
                     "examples": 8,
                     "platform": platform.platform(),

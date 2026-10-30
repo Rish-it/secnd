@@ -36,9 +36,6 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      # CI has no reader checkpoint. Exercise the explicitly selected legacy CPU path.
-      SECND_SERVING_BACKEND: head
     steps:
       - uses: actions/checkout@v4
       - name: Build and start the container

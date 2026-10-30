@@ -26,6 +26,7 @@ RUN SECND_DATA_DIR=/opt/secnd python -m backend.encoders
 COPY docs/results/s3/card-*.json docs/results/s3/
 COPY docs/results/s3/curves-*.json docs/results/s3/
 COPY docs/results/s3r/attacks-floor*.json docs/results/s3r/
+COPY docs/results/s3r/floor-full-test.json docs/results/s3r/
 COPY docs/results/s2/incontext-ic-ettin-150m-s6000-near-clean.json docs/results/s2/
 COPY docs/results/s2/incontext-ic-ettin-400m-s6000-near-clean.json docs/results/s2/
 COPY --from=frontend /build/frontend/dist frontend/dist

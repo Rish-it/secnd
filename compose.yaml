@@ -3,7 +3,7 @@ services:
     build: .
     environment:
       SECND_FEATURIZER: ${SECND_FEATURIZER:-pt-minilm}
-      SECND_SERVING_BACKEND: ${SECND_SERVING_BACKEND:-reader}
+      SECND_SERVING_BACKEND: ${SECND_SERVING_BACKEND:-head}
       SECND_READER: '${SECND_READER:-{"model_id":"ic-ettin-150m-s6000-near","device":"cpu","examples":8}}'
       SECND_WORKSPACE_BACKENDS: '${SECND_WORKSPACE_BACKENDS:-{}}'
       SECND_WORKSPACE_READERS: '${SECND_WORKSPACE_READERS:-{}}'

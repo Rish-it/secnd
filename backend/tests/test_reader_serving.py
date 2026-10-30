@@ -55,7 +55,7 @@ def stand_in(monkeypatch):
     monkeypatch.setattr(CPUReader, "_load", load)
 
 
-def history(cosine=0.81, *, carrying=True):
+def history(cosine=0.93, *, carrying=True):
     return [
         {"id": str(i), "text": f"history:{i}:{0.95 - i * 0.001}", "label": "b"} for i in range(8)
     ] + ([{"id": "support", "text": f"history:support:{cosine}", "label": "a"}] if carrying else [])
@@ -67,13 +67,13 @@ def predict(reader, rows, **kwargs):
     )[0]
 
 
-@pytest.mark.parametrize("cosine,expected", [(0.79, False), (0.81, True), (0.8, True)])
+@pytest.mark.parametrize("cosine,expected", [(0.91, False), (0.93, True), (0.92, True)])
 def test_support_floor_uses_all_rows_of_predicted_intent(stand_in, tmp_path, cosine, expected):
     reader = CPUReader(tmp_path)
     decision = predict(reader, history(cosine), allow_auto=True)
     assert decision["auto"] is expected
     assert decision["reader"]["support"] == pytest.approx(cosine)
-    assert decision["reader"]["support_floor"] == 0.80
+    assert decision["reader"]["support_floor"] == 0.92
     assert decision["prob"] > decision["threshold"]
     assert all(n["label"] == "b" for n in decision["reasons"]["neighbours"])
 
@@ -85,9 +85,9 @@ def test_no_history_for_predicted_intent_fails_closed(stand_in, tmp_path):
 
 def test_temperature_is_loaded_and_applied_before_threshold(stand_in, tmp_path):
     reader = CPUReader(tmp_path)
-    reader.model.logit = 6
+    reader.model.logit = 3.5
     decision = predict(reader, history(), allow_auto=True)
-    raw = torch.softmax(torch.tensor([[6.0, 0.0]]), -1).numpy()
+    raw = torch.softmax(torch.tensor([[3.5, 0.0]]), -1).numpy()
     assert decision["prob"] == pytest.approx(scale(raw, reader.policy.temperature)[0, 0])
     assert raw.max() >= reader.policy.threshold > decision["prob"]
     assert not decision["auto"]
@@ -117,14 +117,15 @@ def test_missing_or_invalid_results_fail_closed(value):
     assert not ReaderPolicy.from_result(value).accepts(1, 1)
 
 
-@pytest.mark.parametrize("examples", [0, 32])
-def test_real_400m_null_operating_points_fail_closed(stand_in, tmp_path, examples):
+@pytest.mark.parametrize("examples", [0, 8, 32])
+def test_real_400m_audited_operating_points_are_complete(stand_in, tmp_path, examples):
     reader = CPUReader(
         tmp_path, ReaderOptions(model_id="ic-ettin-400m-s6000-near", examples=examples)
     )
     decision = predict(reader, history(), allow_auto=True)
-    assert not reader.policy.complete and not decision["auto"]
-    assert decision["threshold"] is None
+    assert reader.policy.complete
+    assert decision["threshold"] == reader.policy.threshold
+    assert decision["auto"] is (examples != 32)
 
 
 def test_no_inherited_scope_and_too_few_examples_block(stand_in, tmp_path):
@@ -138,16 +139,16 @@ def test_reader_switch_loads_both_profiles_without_gpu_work(stand_in, tmp_path):
     small = CPUReader(tmp_path)
     large = CPUReader(tmp_path, ReaderOptions(model_id="ic-ettin-400m-s6000-near", device="cuda"))
     assert small.device == "cpu" and large.device == "cuda"
-    assert small.policy.floor == 0.8 and large.policy.floor == 0.85
+    assert small.policy.floor == 0.92 and large.policy.floor == 0.90
     assert small.policy.temperature != large.policy.temperature
     assert small.artifact.revision != large.artifact.revision
     assert small.version(["a", "b"], []) != large.version(["a", "b"], [])
 
 
 def test_configuration_defaults_and_workspace_overrides(monkeypatch):
-    monkeypatch.delenv("SECND_SERVING_BACKEND")
+    monkeypatch.delenv("SECND_SERVING_BACKEND", raising=False)
     defaults = Settings(_env_file=None)
-    assert defaults.serving_backend == "reader"
+    assert defaults.serving_backend == "head"
     assert defaults.reader == ReaderOptions()
     monkeypatch.setenv(
         "SECND_READER", json.dumps({"model_id": "ic-ettin-400m-s6000-near", "device": "cuda"})
@@ -202,7 +203,7 @@ def test_scope_checks_content_labels_duplicates_and_count():
 
 
 def test_http_routes_reader_persists_queue_and_learns_answers(stand_in, tmp_path):
-    settings = Settings(data_dir=tmp_path, serving_backend="reader", _env_file=None)
+    settings = Settings(data_dir=tmp_path, workspace_backends={"default": "reader"}, _env_file=None)
     svc = WorkspaceService(Store(settings.database_path), tmp_path, RecordingLoop)
     calib = pd.DataFrame([dict(id="heldout", text="private holdout", merchant_key="", label="a")])
     svc.create("default", ["a", "b"], calib, featurizer="char_tfidf")
@@ -277,3 +278,161 @@ def test_http_auto_answer_path_is_wired_for_authorized_history(stand_in, tmp_pat
         ).json()[0]
         assert legacy["reader"] is None
         assert client.get("/api/v1/workspaces/legacy/serving").json()["backend"] == "head"
+
+
+@pytest.mark.parametrize("global_backend", ["head", "reader"])
+def test_registered_workspace_keeps_its_calibrated_gate_by_default(
+    stand_in, tmp_path, global_backend
+):
+    from types import SimpleNamespace
+
+    from backend.registry import Registry
+
+    class CertifiedLoop(RecordingLoop):
+        def retrain(self):
+            artifact = {"model": SimpleNamespace(C=1), "temperature": 1, "tau": 0.8, "lower": 0.995}
+            version = self.models.save(
+                artifact, {"coverage": 1, "threshold": 0.8, "precision": 1, "cp_lower_bound": 0.995}
+            )
+            self.models.promote(version)
+            self.current = {**artifact, "version": version}
+
+        def route(self, frame):
+            return [
+                {**row, "auto": True, "threshold": self.current["tau"]}
+                for row in super().route(frame)
+            ]
+
+    settings = Settings(data_dir=tmp_path, serving_backend=global_backend, _env_file=None)
+    service = WorkspaceService(Store(settings.database_path), tmp_path, CertifiedLoop)
+    service.create(
+        "default",
+        ["a", "b"],
+        pd.DataFrame([dict(id="calib", text="holdout", label="a", merchant_key="")]),
+        featurizer="char_tfidf",
+    )
+    rows = [{**r, "merchant_key": ""} for r in history()]
+    service.store.put_items("default", rows)
+    for row in rows:
+        service.store.add_label("default", row["id"], row["label"])
+    service._runtime("default")
+    with TestClient(create_app(settings, workspace_service=service)) as client:
+        assert Registry(tmp_path, "default").current()
+        assert not service.readers.enabled("default")
+        result = client.post(
+            "/api/v1/workspaces/default/predict",
+            json={"items": [{"item_id": "next", "text": "message"}]},
+        ).json()[0]
+        assert result["auto"] and result["threshold"] == 0.8
+        assert result["reader"] is None
+        assert client.get("/api/v1/workspaces/default/serving").json()["backend"] == "head"
+        card = client.get("/api/v1/workspaces/default/metrics").json()["card"]
+        assert card["coverage"] == 1 and card["cp_lower_bound"] == 0.995
+        # A per-workspace selection is explicit and can override the registered model.
+        service.readers.settings.workspace_backends["default"] = "reader"
+        assert service.readers.enabled("default")
+
+
+def test_clean_clone_starts_in_head_mode_without_a_reader(tmp_path, monkeypatch):
+    monkeypatch.delenv("SECND_SERVING_BACKEND", raising=False)
+
+    def forbidden(*args):
+        pytest.fail("Default startup must not load a reader checkpoint")
+
+    settings = Settings(data_dir=tmp_path, _env_file=None)
+    with TestClient(create_app(settings, reader_factory=forbidden)) as client:
+        assert client.get("/api/health").status_code == 200
+
+
+def test_reader_spot_checks_use_existing_rate_and_queue_then_guard(stand_in, tmp_path):
+    from types import SimpleNamespace
+
+    from backend.loop import SPOT_CHECK_RATE
+    from backend.reader_runtime import SPOT_CHECK_RATE as reader_rate
+
+    assert reader_rate == SPOT_CHECK_RATE
+    settings = Settings(data_dir=tmp_path, workspace_backends={"default": "reader"}, _env_file=None)
+    service = WorkspaceService(Store(settings.database_path), tmp_path, RecordingLoop)
+    service.create(
+        "default",
+        ["a", "b"],
+        pd.DataFrame([dict(id="calib", text="heldout", label="a", merchant_key="")]),
+        featurizer="char_tfidf",
+    )
+    rows = [{**r, "merchant_key": ""} for r in history()]
+    service.store.put_items("default", rows)
+    for row in rows:
+        service.store.add_label("default", row["id"], row["label"])
+    with TestClient(create_app(settings, workspace_service=service)) as client:
+        runtime = service.readers
+        # Isolate spot-check guard behavior from the separate exact-history safety rule.
+        runtime.scope_matches = lambda *args: True
+        draws = iter([SPOT_CHECK_RATE - 0.001, SPOT_CHECK_RATE + 0.001])
+        runtime._state("default")["rng"] = SimpleNamespace(random=lambda: next(draws))
+        result = client.post(
+            "/api/v1/workspaces/default/predict",
+            json={
+                "items": [
+                    {"item_id": "checked", "text": "message"},
+                    {"item_id": "automatic", "text": "another message"},
+                ]
+            },
+        ).json()
+        assert result[0]["spot_check"] and not result[0]["auto"]
+        assert result[1]["auto"] and not result[1]["spot_check"]
+        queue = client.get("/api/v1/workspaces/default/queue").json()["items"]
+        assert [row["item_id"] for row in queue] == ["checked"]
+        headers = {"Idempotency-Key": "wrong-check"}
+        answer = client.post(
+            "/api/v1/workspaces/default/answers",
+            json={"item_id": "checked", "label": "b"},
+            headers=headers,
+        )
+        assert answer.status_code == 200
+        service.drain()
+        assert runtime.guarded("default")
+        assert service.store.labels("default")[-1]["source"] == "spot_check"
+        assert client.get("/api/v1/workspaces/default/metrics").json()["guarded"]
+        assert client.get("/api/v1/workspaces/default/serving").json()["guarded"]
+        # Idempotent replay cannot count the same check twice.
+        client.post(
+            "/api/v1/workspaces/default/answers",
+            json={"item_id": "checked", "label": "b"},
+            headers=headers,
+        )
+        assert runtime._state("default")["checked"] == 1
+        blocked = client.post(
+            "/api/v1/workspaces/default/predict",
+            json={"items": [{"item_id": "after-guard", "text": "message after guard"}]},
+        ).json()[0]
+        assert not blocked["auto"] and not blocked["spot_check"]
+
+
+def test_audited_manifest_and_floored_full_test_benchmark():
+    import hashlib
+    from pathlib import Path
+
+    from backend.reader_policy import MANIFEST
+
+    manifest = json.loads(MANIFEST.read_text())
+    assert manifest["source_commit"] == "ada0a0d"
+    for model, entry in manifest["models"].items():
+        expected = (
+            "attacks-floor-audited-400m.json" if "400m" in model else "attacks-floor-audited.json"
+        )
+        assert entry["policy_file"] == "docs/results/s3r/" + expected
+        raw = Path(entry["policy_file"]).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == entry["policy_sha256"]
+        for examples in (0, 8, 32):
+            options = ReaderOptions(model_id=model, examples=examples)
+            artifact = ReaderArtifact(options)
+            frozen = json.loads(raw)["results"][str(examples)]
+            assert artifact.policy == ReaderPolicy.from_result(frozen)
+            card = artifact.benchmark(options)
+            full = json.loads(Path(entry["floor_benchmark_file"]).read_text())[model][str(examples)]
+            assert card["with_floor_coverage"] == full["coverage"]
+            assert card["with_floor_precision"] == full["precision"]
+            assert card["with_floor_sample"] == full["test_rows"]
+            assert card["with_floor_low95"] == full["low95"]
+            assert card["floor_result_file"] == "docs/results/s3r/floor-full-test.json"
+            assert card["calibration_audit"] == "model"

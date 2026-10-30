@@ -76,6 +76,9 @@ class ReaderArtifact:
             self.hashes = entry["checkpoint_sha256"]
             self.result = verified_json(entry["policy_file"], entry["policy_sha256"])
             self.evaluation = verified_json(entry["evaluation_file"], entry["evaluation_sha256"])
+            self.floored = verified_json(
+                entry["floor_benchmark_file"], entry["floor_benchmark_sha256"]
+            )
             if self.result.get("model") != options.model_id:
                 raise ReaderUnavailable("Reader result model does not match the configured model.")
             self.policy = ReaderPolicy.from_result(
@@ -83,6 +86,7 @@ class ReaderArtifact:
             )
             self.policy_file = entry["policy_file"]
             self.evaluation_file = entry["evaluation_file"]
+            self.floor_benchmark_file = entry["floor_benchmark_file"]
         except (OSError, KeyError, ValueError, TypeError):
             raise ReaderUnavailable(
                 "Committed reader configuration or results are unavailable."
@@ -108,17 +112,20 @@ class ReaderArtifact:
         measured = (
             budgets.get(key, {}) if options.examples == 0 else budgets.get("all", {}).get(key, {})
         )
-        result = self.result.get("results", {}).get(str(options.examples), {})
-        audit = result.get("attacks", {}).get("baseline", {})
+        full = self.floored.get(options.model_id, {}).get(str(options.examples), {})
         return {
             "dataset": "MTOP",
             "history_rows": self.evaluation.get("split", {}).get("mtop", {}).get("train"),
             "accuracy": measured.get("accuracy"),
-            "confidence_only_coverage": measured.get("certified_coverage_test"),
-            "confidence_only_precision": measured.get("precision_auto_test"),
-            "with_floor_coverage": audit.get("coverage"),
-            "with_floor_precision": audit.get("precision"),
-            "with_floor_sample": len(audit.get("records", [])),
+            "with_floor_coverage": full.get("coverage"),
+            "with_floor_precision": full.get("precision"),
+            "with_floor_sample": full.get("test_rows", 0),
+            "with_floor_accepted": full.get("accepted"),
+            "with_floor_errors": full.get("errors"),
+            "with_floor_low95": full.get("low95"),
+            "calibration_audit": "model",
+            "audited_calibration_labels": self.result.get("audited_calib_labels"),
             "evaluation_file": self.evaluation_file,
-            "floor_result_file": self.policy_file,
+            "floor_result_file": self.floor_benchmark_file,
+            "policy_file": self.policy_file,
         }
