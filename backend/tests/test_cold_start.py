@@ -77,6 +77,7 @@ def live(tmp_path, monkeypatch):
         data_dir=tmp_path,
         frontend_dist=tmp_path / "none",
         meta_api_key="fake-test-key",
+        cold_start_paid=True,
         _env_file=None,
     )
     store = Store(settings.database_path)
@@ -282,3 +283,22 @@ def test_one_dollar_cap_stops_a_partial_history_and_resume_never_rebuys(live):
     assert begin(client, labels).status_code == 200
     assert finish(cold)["spent_usd"] == first["spent_usd"]
     assert len(calls) == previous_calls
+
+
+def test_paid_writing_is_off_unless_the_operator_turns_it_on(live):
+    client, cold, calls = live
+    cold.settings = cold.settings.model_copy(update={"cold_start_paid": False})
+    assert begin(client).status_code == 200
+    state = finish(cold)
+    assert state["status"] == "stopped" and "turned off" in state["error"] and not calls
+
+
+def test_all_workspaces_together_stay_within_the_server_cap(live):
+    client, cold, calls = live
+    cold.settings = cold.settings.model_copy(update={"cold_start_total_usd": Decimal("0.0001")})
+    begin(client, workspace="first")
+    finish(cold, "first")
+    spent = cold.spent()
+    begin(client, ["Rent", "Fuel"], workspace="second")
+    assert finish(cold, "second")["status"] == "stopped"
+    assert cold.spent() == spent and cold.spent("second") == 0

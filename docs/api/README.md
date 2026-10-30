@@ -81,6 +81,11 @@ are limited to 5 MiB, 100 unique columns and UTF-8 encoding. Workspace IDs use
 `POST /cold-start:import` accepts a one-column UTF-8 `file` and `paid=true`.
 The optional first row may be `label`, `labels` or `category`.
 
+Writing new examples is paid, so it is off unless the server sets
+`SECND_COLD_START_PAID=true`; label lists already in the cache still work without it.
+Each workspace may spend at most $1, and all workspaces together at most
+`SECND_COLD_START_TOTAL_USD` (default $3).
+
 | Method and path | Behavior |
 | --- | --- |
 | `PATCH /cold-start/history/{example_id}` | Replace `{text, label}` in this workspace |

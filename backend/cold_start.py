@@ -93,16 +93,19 @@ class ColdStartService:
     def ledger(self):
         return ledger_path(Path("docs/results/s5"), "meta-wonder")
 
-    def spent(self, workspace, ledger=None):
+    def spent(self, workspace=None, ledger=None):
+        """One workspace's invented-history spend, or every workspace's when `workspace` is None."""
         path = ledger or self.ledger
         if not path.exists():
             return Decimal(0)
+        mine = self.task(workspace) if workspace else None
         with path.open(newline="") as stream:
             return sum(
                 (
                     Decimal(row["cost_usd"])
                     for row in csv.DictReader(stream)
-                    if row["task"] == self.task(workspace)
+                    if row["task"] == mine
+                    or (mine is None and row["task"].startswith("cold-start-"))
                 ),
                 Decimal(0),
             )
@@ -186,6 +189,14 @@ class ColdStartService:
                             "An earlier request needs review; it will not be paid again.",
                         )
                         return
+                    if not self.settings.cold_start_paid:
+                        self._status(
+                            workspace,
+                            "stopped",
+                            "Writing new examples is turned off on this server; "
+                            "label lists it has already seen still work.",
+                        )
+                        return
                     settings = provider_settings(self.settings, "meta-wonder")
                     settings = settings.model_copy(update={"muse_budget_usd": CAP})
                     # One ledger entry per label; BudgetRun serializes the shared Meta ledger.
@@ -197,9 +208,12 @@ class ColdStartService:
                         ledger_path=self.ledger,
                         provider="meta-wonder",
                     ) as run:
-                        remaining = min(CAP, self.settings.meta_budget_usd) - self.spent(workspace)
+                        remaining = min(
+                            min(CAP, self.settings.meta_budget_usd) - self.spent(workspace),
+                            self.settings.cold_start_total_usd - self.spent(),
+                        )
                         if remaining <= 0:
-                            raise MuseError("The workspace's $1 example budget is exhausted.")
+                            raise MuseError("The example budget is exhausted.")
                         run.budget = remaining
                         with MuseClient(settings, run=run, transport=self.transport) as client:
                             # Reserve a durable attempt marker before network I/O. An interrupted
