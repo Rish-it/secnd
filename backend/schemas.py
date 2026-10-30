@@ -146,7 +146,45 @@ class AnswerResult(BaseModel):
     item_id: Identifier
     coverage: Probability
     model_version: Identifier
-    retrain: Literal["queued", "fixture"]
+    retrain: Literal["queued", "fixture", "history_updated"]
+
+
+class ColdStartRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    labels: list[Label] = Field(min_length=2, max_length=128)
+    paid: Literal[True]
+
+    @model_validator(mode="after")
+    def distinct_labels(self):
+        self.labels = [label.strip() for label in self.labels]
+        if any(not label for label in self.labels) or len(set(self.labels)) != len(self.labels):
+            raise ValueError("Use at least two distinct, nonempty label names.")
+        return self
+
+
+class InventedExample(BaseModel):
+    id: Identifier
+    label: Label
+    text: Annotated[str, Field(min_length=1, max_length=500)]
+
+
+class ExampleEdit(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    label: Label
+    text: Annotated[str, Field(min_length=1, max_length=500)]
+
+
+class ColdStartState(BaseModel):
+    workspace_id: WorkspaceId
+    labels: list[Label]
+    status: Literal["queued", "generating", "ready", "stopped"]
+    error: str | None
+    history: list[InventedExample]
+    spent_usd: str
+    cap_usd: str
+    demo: bool
 
 
 class HistoryPoint(BaseModel):

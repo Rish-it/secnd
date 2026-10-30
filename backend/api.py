@@ -24,18 +24,23 @@ from pydantic import BaseModel, ValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend import store
+from backend.cold_start import ColdStartConflict, ColdStartService, imported_labels
 from backend.config import Settings
 from backend.data import MAX_CSV_BYTES, CSVPreview, merchant_key, preview_csv
 from backend.evidence import Evidence
 from backend.meta_webhook import MetaWebhook
 from backend.meta_webhook import router as meta_router
+from backend.reader_serving import ReaderUnavailable
 from backend.schemas import (
     Answer,
     AnswerResult,
     ChatRequest,
     ChatResult,
+    ColdStartRequest,
+    ColdStartState,
     Decision,
     Error,
+    ExampleEdit,
     ImportResult,
     Item,
     MetricsResult,
@@ -54,7 +59,10 @@ class Health(BaseModel):
 
 
 def create_app(
-    settings: Settings | None = None, *, workspace_service: WorkspaceService | None = None
+    settings: Settings | None = None,
+    *,
+    workspace_service: WorkspaceService | None = None,
+    cold_start_service: ColdStartService | None = None,
 ) -> FastAPI:
     config = settings or Settings()
     evidence = Evidence(
@@ -69,6 +77,7 @@ def create_app(
             lambda: WorkspaceService(store.Store(config.database_path), config.data_dir)
         )
         app.state.workspaces = service
+        service.cold_start = cold_start_service or ColdStartService(service.store, config)
         app.state.meta_webhook = MetaWebhook(config, service)
         try:
             yield
@@ -190,6 +199,79 @@ def create_app(
             return None
         return service
 
+    @contract.post(
+        "/cold-start",
+        response_model=ColdStartState,
+        description="Invent starting history from label names, with a $1 workspace cap.",
+    )
+    def cold_start(ws: WorkspaceId, body: ColdStartRequest, response: Response):
+        try:
+            result = app.state.workspaces.cold_start.start(ws, body.labels)
+        except ColdStartConflict as error:
+            raise HTTPException(409, str(error)) from error
+        except ReaderUnavailable as error:
+            raise HTTPException(503, str(error)) from error
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        response.headers["X-Secnd-Mode"] = "live"
+        return result
+
+    @contract.post(
+        "/cold-start:import",
+        response_model=ColdStartState,
+        description="Import a one-column UTF-8 label list and start invented history.",
+    )
+    async def cold_start_import(
+        ws: WorkspaceId, file: UploadFile, response: Response, paid: Annotated[bool, Form()]
+    ):
+        try:
+            content = await file.read(MAX_CSV_BYTES + 1)
+            if len(content) > MAX_CSV_BYTES:
+                raise HTTPException(413, "Choose a label list smaller than 5 MiB.")
+            body = ColdStartRequest(labels=imported_labels(content), paid=paid)
+            return await run_in_threadpool(cold_start, ws, body, response)
+        except ValueError:
+            raise HTTPException(
+                422, "Use 2–128 distinct label names in one column and enable the example budget."
+            ) from None
+        finally:
+            await file.close()
+
+    @contract.get(
+        "/cold-start",
+        response_model=ColdStartState,
+        description="Saved invented history and generation progress.",
+    )
+    def cold_start_state(ws: WorkspaceId, response: Response):
+        try:
+            result = app.state.workspaces.cold_start.state(ws)
+        except KeyError:
+            raise HTTPException(404, "This workspace has no invented history.") from None
+        response.headers["X-Secnd-Mode"] = "live"
+        return result
+
+    @contract.patch("/cold-start/history/{example_id}", response_model=ColdStartState)
+    def edit_example(ws: WorkspaceId, example_id: str, body: ExampleEdit, response: Response):
+        try:
+            with app.state.workspaces._lock(ws):
+                result = app.state.workspaces.cold_start.edit(ws, example_id, body.text, body.label)
+        except KeyError:
+            raise HTTPException(404, "Example was not found in this workspace.") from None
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        response.headers["X-Secnd-Mode"] = "live"
+        return result
+
+    @contract.delete("/cold-start/history/{example_id}", response_model=ColdStartState)
+    def delete_example(ws: WorkspaceId, example_id: str, response: Response):
+        try:
+            with app.state.workspaces._lock(ws):
+                result = app.state.workspaces.cold_start.edit(ws, example_id, delete=True)
+        except KeyError:
+            raise HTTPException(404, "Example was not found in this workspace.") from None
+        response.headers["X-Secnd-Mode"] = "live"
+        return result
+
     def workspace_mode(ws, response, service):
         response.headers["X-Secnd-Mode"] = "live" if service.has_model(ws) else "fixture"
 
@@ -214,6 +296,8 @@ def create_app(
             )
             try:
                 result = service.route(ws, frame)
+            except ReaderUnavailable as error:
+                raise HTTPException(503, str(error)) from error
             except ModuleNotFoundError as error:
                 if error.name != "backend.loop":
                     raise

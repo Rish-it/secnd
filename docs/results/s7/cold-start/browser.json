@@ -1,0 +1,30 @@
+{
+  "teacher_transport": "simulated",
+  "new_paid_model_calls": 0,
+  "reader": "ic-ettin-150m-s6000-near",
+  "reader_device": "cpu",
+  "retrieval_device": "cpu",
+  "labels": [
+    "Software",
+    "Travel"
+  ],
+  "generated_examples": 20,
+  "after_edit_delete": 19,
+  "after_confirmed_answer_history_rows": 20,
+  "prediction_label": "Travel",
+  "prediction_auto": false,
+  "prediction_threshold": null,
+  "desktop": {
+    "viewport_width": 1440,
+    "document_width": 1440
+  },
+  "mobile": {
+    "viewport_width": 390,
+    "document_width": 390
+  },
+  "simulated_ledger_rows_after_predict_and_answer": 2,
+  "screenshots": [
+    "desktop.jpg",
+    "mobile-390.jpg"
+  ]
+}

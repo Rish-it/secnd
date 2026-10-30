@@ -73,6 +73,42 @@ Versioned HTTP and request-validation errors use `{code, message}`. CSV uploads
 are limited to 5 MiB, 100 unique columns and UTF-8 encoding. Workspace IDs use
 1–64 letters, digits, underscores or hyphens, starting with a letter or digit.
 
+## Start with label names
+
+`POST /cold-start` accepts `{labels: ["Travel", "Food"], paid: true}` with
+2–128 distinct names. It starts a background history job and returns progress;
+`GET /cold-start` returns its saved status and editable examples. Alternatively,
+`POST /cold-start:import` accepts a one-column UTF-8 `file` and `paid=true`.
+The optional first row may be `label`, `labels` or `category`.
+
+| Method and path | Behavior |
+| --- | --- |
+| `PATCH /cold-start/history/{example_id}` | Replace `{text, label}` in this workspace |
+| `DELETE /cold-start/history/{example_id}` | Remove an invented example; resume preserves the deletion |
+| `POST /predict` | CPU Ren reader suggestions over the current history, with human review |
+| `POST /answers` | Persist a human correction into history; returns `retrain: history_updated` |
+
+The Meta API provider is `meta-wonder`, using `MuseClient.examples(label, labels,
+n=10)` and the existing `BudgetRun` and `docs/results/s5/spend-meta.csv` ledger.
+The cumulative $1 workspace cap survives resume; the configured Meta budget and
+shared provider cap also apply. Generation stops before an unaffordable request,
+keeps completed examples and reports `stopped`. A large label list may receive
+only partial history. Cache keys use the canonical label list, so completed
+examples can be reused by another workspace without a new provider call.
+An interrupted or failed attempted label is never automatically paid for again.
+
+An existing workspace's label list cannot be replaced. Edits and deletions affect
+only its invented history; another workspace's cached examples remain intact.
+Human answers are durable and take precedence in the reader's history. Muse is
+called during explicit generation only, never by prediction or answer routes.
+
+These workspaces have zero certified coverage, a null threshold and unmeasured
+accuracy/precision until independent calibration is supplied. Invented examples
+do not certify accuracy. The reader checkpoint must already be installed as
+described in the root README; missing files return 503 before a paid request.
+The mode reports `X-Secnd-Mode: live` for real reader suggestions, while the
+registry remains empty because no calibrated classifier version was fitted.
+
 ## Maintaining the contract
 
 Add fields rather than renaming existing fields. The drift test compares the
