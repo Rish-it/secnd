@@ -12,11 +12,13 @@
     "dev": "concurrently --kill-others --names api,web --prefix-colors cyan,green \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "uv run uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000",
     "dev:web": "npm run dev --workspace @secnd/frontend",
+    "test:meta": "npm run build && playwright test --config playwright.meta.config.ts",
     "build": "npm run build --workspace @secnd/frontend",
     "lint": "npm run lint --workspace @secnd/frontend",
     "check": "uv run ruff check backend && uv run ruff format --check backend && uv run pytest && npm run lint && npm run build"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "concurrently": "^10.0.6"
   }
 }

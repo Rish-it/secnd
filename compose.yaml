@@ -1,6 +1,9 @@
 services:
   secnd:
     build: .
+    env_file:
+      - path: .env
+        required: false
     environment:
       SECND_FEATURIZER: ${SECND_FEATURIZER:-pt-minilm}
       SECND_ENCODER_REPO: ${SECND_ENCODER_REPO:-Secnd-AI/ren}

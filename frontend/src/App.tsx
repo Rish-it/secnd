@@ -6,6 +6,7 @@ import type { EvalCard, Preview } from "./api";
 import Companion from "./Companion";
 import Metrics from "./Metrics";
 import ColdStart from "./ColdStart";
+import MetaConnections from "./MetaConnections";
 
 type View = "Teach" | "Companion" | "Metrics";
 type Connection = "connecting" | "online" | "offline";
@@ -276,6 +277,7 @@ export default function App() {
               <ColdStart
                 onChange={() => setMetricsRefresh((value) => value + 1)}
               />
+              <MetaConnections />
               <section className="teach-card" aria-labelledby="upload-title">
                 <div className="section-heading">
                   <div>

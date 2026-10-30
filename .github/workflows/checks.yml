@@ -32,6 +32,20 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.26"
+          enable-cache: true
+      - run: uv sync --locked
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:meta
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meta-connectors-browser-check
+          path: |
+            docs/results/c2-meta-apps/
+            test-results/
 
   docker:
     runs-on: ubuntu-latest

@@ -18,6 +18,18 @@ history, training-label count and live `guarded` flag. Explicit `dataset=mtop`,
 `X-Secnd-Mode: evaluation`. Before import the default is the MTOP evaluation.
 Model-version reads and pointer changes use the workspace registry.
 
+## Meta connectors
+
+Signed WhatsApp, Messenger and Instagram text events use the existing workspace queue
+and answers API. Receiving accounts require explicit workspace mappings. Connector
+status lives at `GET /integrations/meta/status` under the workspace prefix.
+
+Ads routes under `/integrations/ads` expose status, a saved auto-act preference,
+read-only insight sync, guarded execution and a paginated action audit. The server
+switch and workspace auto-act both default off. Human answers never bypass current
+certification. Only explicitly allowlisted sandbox accounts are eligible.
+See [configuration, action semantics and replay behavior](../integrations/meta.md).
+
 ## Import and predict
 
 Install dependencies using the root README, then start an API process:

@@ -18,6 +18,14 @@ class Settings(BaseSettings):
     meta_verify_token: SecretStr = SecretStr("")
     whatsapp_token: SecretStr = SecretStr("")
     whatsapp_send_enabled: bool = False
+    # Keys are platform:receiving-account-id, values are workspace ids. Unmapped is rejected.
+    meta_workspace_accounts: dict[str, str] = Field(default_factory=dict)
+    ads_token: SecretStr = SecretStr("")
+    ads_send_enabled: bool = False
+    ads_workspace_accounts: dict[str, str] = Field(default_factory=dict)
+    ads_sandbox_accounts: list[str] = Field(default_factory=list)
+    ads_cpa_action_type: str = Field(default="purchase", pattern=r"^[a-zA-Z0-9_.]{1,100}$")
+    ads_budget_step_percent: int = Field(default=10, ge=1, le=25)
     meta_graph_version: str = Field(default="v25.0", pattern=r"^v\d+\.\d+$")
     muse_api_key: SecretStr = SecretStr("")
     muse_base_url: str = "https://inference.baseten.co/v1"

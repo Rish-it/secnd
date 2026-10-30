@@ -13,6 +13,7 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from backend.config import Settings
+from backend.connector_source import attach_source
 from backend.data import merchant_key
 from backend.schemas import Error, WorkspaceId
 from backend.store import IdempotencyConflict, encode
@@ -23,7 +24,7 @@ MetaId = Annotated[str, Field(pattern=r"^\d{1,32}$")]
 
 
 class Message(BaseModel):
-    platform: Literal["whatsapp", "messenger"]
+    platform: Literal["whatsapp", "messenger", "instagram"]
     message_id: Annotated[str, Field(min_length=1, max_length=512)]
     sender: MetaId
     account: MetaId
@@ -60,7 +61,7 @@ def parse(payload: dict) -> tuple[list[Message], int]:
                                 text=message["text"]["body"],
                             )
                         )
-            elif payload.get("object") == "page":
+            elif payload.get("object") in ("page", "instagram"):
                 for event in entry.get("messaging", []):
                     message = event.get("message", {})
                     if message.get("is_echo") or not message.get("text"):
@@ -68,7 +69,9 @@ def parse(payload: dict) -> tuple[list[Message], int]:
                         continue
                     messages.append(
                         Message(
-                            platform="messenger",
+                            platform="instagram"
+                            if payload["object"] == "instagram"
+                            else "messenger",
                             message_id=message["mid"],
                             sender=event["sender"]["id"],
                             account=event["recipient"]["id"],
@@ -85,8 +88,9 @@ def parse(payload: dict) -> tuple[list[Message], int]:
 
 
 class MetaWebhook:
-    def __init__(self, settings: Settings, service: WorkspaceService):
+    def __init__(self, settings: Settings, service: WorkspaceService, *, transport=None):
         self.settings, self.service = settings, service
+        self.transport = transport
         with service.store.connect(write=True) as db:
             db.execute("""CREATE TABLE IF NOT EXISTS meta_messages (
                 workspace_id TEXT NOT NULL REFERENCES workspaces(workspace_id),
@@ -102,6 +106,11 @@ class MetaWebhook:
             )
 
     def handle(self, workspace, message: Message) -> dict:
+        if (
+            self.settings.meta_workspace_accounts.get(f"{message.platform}:{message.account}")
+            != workspace
+        ):
+            raise ValueError("Receiving account is not mapped to this workspace.")
         service = self.service
         with service._lock(workspace):
             content = message.model_dump_json()
@@ -125,6 +134,15 @@ class MetaWebhook:
                         (workspace, message.item_id, content),
                     )
             decision = service.store.latest_prediction(workspace, message.item_id)
+            if decision is not None:
+                item = service.store.item(workspace, message.item_id)
+                if (item["text"], item["amount"], item["date"], item["merchant_key"]) != (
+                    message.text,
+                    None,
+                    None,
+                    merchant_key(message.text),
+                ):
+                    raise IdempotencyConflict("A message item ID already has different content.")
             if decision is None:
                 frame = pd.DataFrame(
                     [
@@ -134,10 +152,12 @@ class MetaWebhook:
                             amount=None,
                             date=None,
                             merchant_key=merchant_key(message.text),
+                            source_app=message.platform,
                         )
                     ]
                 )
                 decision = service.route(workspace, frame)[0]
+            attach_source(service, workspace, message.item_id, message.platform)
             result = {
                 "message_id": message.message_id,
                 "item_id": message.item_id,
@@ -157,19 +177,19 @@ class MetaWebhook:
                 result["status"] = "replying"
                 self._save(workspace, message.item_id, result)
                 try:
-                    response = httpx.post(
-                        f"https://graph.facebook.com/{self.settings.meta_graph_version}"
-                        f"/{message.account}/messages",
-                        headers={"Authorization": f"Bearer {token}"},
-                        json={
-                            "messaging_product": "whatsapp",
-                            "to": message.sender,
-                            "type": "text",
-                            "text": {"body": result["reply"]},
-                        },
-                        timeout=10,
-                    )
-                    response.raise_for_status()
+                    with httpx.Client(transport=self.transport, timeout=10) as client:
+                        response = client.post(
+                            f"https://graph.facebook.com/{self.settings.meta_graph_version}"
+                            f"/{message.account}/messages",
+                            headers={"Authorization": f"Bearer {token}"},
+                            json={
+                                "messaging_product": "whatsapp",
+                                "to": message.sender,
+                                "type": "text",
+                                "text": {"body": result["reply"]},
+                            },
+                        )
+                        response.raise_for_status()
                     result["status"] = "sent"
                 except httpx.HTTPError:
                     # A timeout can follow delivery; replay must never send it again.
@@ -184,6 +204,29 @@ def router(settings: Settings) -> APIRouter:
         tags=["Meta integration"],
         responses={status: {"model": Error} for status in (403, 404, 409, 413, 422, 503)},
     )
+
+    @routes.get("/status")
+    def status(ws: WorkspaceId, request: Request):
+        service = request.app.state.workspaces
+        accounts = {
+            platform: [
+                key.split(":", 1)[1]
+                for key, workspace in settings.meta_workspace_accounts.items()
+                if workspace == ws and key.startswith(platform + ":")
+            ]
+            for platform in ("whatsapp", "messenger", "instagram")
+        }
+        try:
+            service.store.workspace(ws)
+            ready = service.has_model(ws)
+        except KeyError:
+            ready = False
+        return {
+            "accounts": accounts,
+            "model_ready": ready,
+            "signing_configured": bool(settings.meta_app_secret.get_secret_value()),
+            "whatsapp_send_enabled": settings.whatsapp_send_enabled,
+        }
 
     @routes.get("/webhook", response_class=PlainTextResponse)
     def verify(
@@ -224,6 +267,11 @@ def router(settings: Settings) -> APIRouter:
             service.store.workspace(ws)
         except KeyError as error:
             raise HTTPException(404, "Workspace was not found.") from error
+        if any(
+            settings.meta_workspace_accounts.get(f"{m.platform}:{m.account}") != ws
+            for m in messages
+        ):
+            raise HTTPException(403, "Receiving account is not mapped to this workspace.")
         if messages and not service.has_model(ws):
             raise HTTPException(503, "Import labelled decisions before receiving Meta messages.")
         try:

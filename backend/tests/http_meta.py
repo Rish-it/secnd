@@ -6,7 +6,6 @@ import hmac
 import json
 import subprocess
 import time
-import uuid
 from pathlib import Path
 
 import httpx
@@ -18,12 +17,15 @@ from backend.tests.test_live_api import csv_rows
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://127.0.0.1:8022")
+    parser.add_argument(
+        "--workspace", required=True, help="Workspace mapped to the synthetic accounts"
+    )
     args = parser.parse_args()
     settings = Settings()
     secret = settings.meta_app_secret.get_secret_value()
     token = settings.meta_verify_token.get_secret_value()
     assert secret and token, "Configure the Meta app secret and verification token."
-    api = args.base_url.rstrip("/") + "/api/v1/workspaces/meta-" + uuid.uuid4().hex[:12]
+    api = args.base_url.rstrip("/") + "/api/v1/workspaces/" + args.workspace
     with httpx.Client(timeout=120) as client:
         imported = client.post(
             api + "/decisions:import",
@@ -42,7 +44,7 @@ def main():
         assert response.status_code == 200 and response.text == "1158201444"
         fixtures = Path(__file__).parent / "fixtures/meta"
         results = []
-        for platform in ("whatsapp", "messenger"):
+        for platform in ("whatsapp", "messenger", "instagram"):
             raw = (fixtures / f"{platform}-text.json").read_bytes()
             signature = "sha256=" + hmac.new(secret.encode(), raw, hashlib.sha256).hexdigest()
             headers = {"Content-Type": "application/json", "X-Hub-Signature-256": signature}

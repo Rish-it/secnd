@@ -1,0 +1,28 @@
+{
+  "scope": "Synthetic sandbox insights, deterministic Ren test fixture, httpx.MockTransport. No live Meta API delivery, model evaluation, provider calls or account changes.",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "document_width": 390
+    }
+  ],
+  "incoming_platforms": [
+    "whatsapp",
+    "messenger",
+    "instagram"
+  ],
+  "pending_decisions": 4,
+  "duplicate_delivery_checked": true,
+  "ads_auto_act_persisted": true,
+  "ads_server_switch": false,
+  "execution_attempts": 0,
+  "log_events": [
+    "proposed",
+    "auto_act_changed"
+  ]
+}

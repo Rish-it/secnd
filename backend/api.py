@@ -28,6 +28,9 @@ from backend.cold_start import ColdStartConflict, ColdStartService, imported_lab
 from backend.config import Settings
 from backend.data import MAX_CSV_BYTES, CSVPreview, merchant_key, preview_csv
 from backend.evidence import Evidence
+from backend.logging_filters import redact_access_logs
+from backend.meta_ads import AdsService
+from backend.meta_ads import router as ads_router
 from backend.meta_webhook import MetaWebhook
 from backend.meta_webhook import router as meta_router
 from backend.reader_serving import ReaderUnavailable
@@ -65,6 +68,7 @@ def create_app(
     cold_start_service: ColdStartService | None = None,
 ) -> FastAPI:
     config = settings or Settings()
+    redact_access_logs()
     evidence = Evidence(
         config.data_dir,
         config.evaluation_dir,
@@ -79,6 +83,7 @@ def create_app(
         app.state.workspaces = service
         service.cold_start = cold_start_service or ColdStartService(service.store, config)
         app.state.meta_webhook = MetaWebhook(config, service)
+        app.state.meta_ads = AdsService(config, service)
         try:
             yield
         finally:
@@ -86,6 +91,7 @@ def create_app(
 
     app = FastAPI(title="Secnd", version="0.1.0", lifespan=lifespan)
     app.include_router(meta_router(config))
+    app.include_router(ads_router())
 
     @app.exception_handler(StarletteHTTPException)
     async def http_error(request: Request, error: StarletteHTTPException):
