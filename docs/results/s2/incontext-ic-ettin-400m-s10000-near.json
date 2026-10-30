@@ -1,0 +1,144 @@
+{
+  "steps": 10000,
+  "final_loss": 0.16631107396038713,
+  "train_seconds": 1503,
+  "model": "ic-ettin-400m-s10000-near",
+  "base": "jhu-clsp/ettin-encoder-400m@7662476d60abb071a5bd319c9f3074f3072c062d",
+  "parameters": 395834369,
+  "device": "cuda",
+  "train_sets": {
+    "topv2": 151266,
+    "clinc150": 15191,
+    "massive_en": 11406,
+    "snips": 13080,
+    "atis": 4978,
+    "go_emotions": 36306,
+    "bitext_support": 24182
+  },
+  "results": {
+    "banking77": {
+      "0-shot": {
+        "accuracy": 0.6114,
+        "ece_test": 0.0397,
+        "temperature": 2.498,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-random": {
+        "accuracy": 0.6182,
+        "ece_test": 0.0431,
+        "temperature": 2.419,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-nearest": {
+        "accuracy": 0.8523,
+        "ece_test": 0.0128,
+        "temperature": 1.923,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "32-nearest": {
+        "accuracy": 0.8325,
+        "ece_test": 0.0172,
+        "temperature": 1.911,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-8": {
+        "accuracy": 0.9032,
+        "ece_test": 0.0386,
+        "temperature": 1.095,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8617,
+        "ece_test": 0.0547,
+        "temperature": 0.731,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      }
+    },
+    "mtop": {
+      "0-shot": {
+        "accuracy": 0.7788,
+        "ece_test": 0.0364,
+        "temperature": 1.648,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-random": {
+        "accuracy": 0.7766,
+        "ece_test": 0.0414,
+        "temperature": 1.623,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-nearest": {
+        "accuracy": 0.902,
+        "ece_test": 0.0097,
+        "temperature": 1.229,
+        "certified_coverage_test": 0.3931,
+        "precision_auto_test": 0.9954,
+        "cert_rows": 2000,
+        "cert_accepted": 783,
+        "cert_cp_lower": 0.994
+      },
+      "32-nearest": {
+        "accuracy": 0.915,
+        "ece_test": 0.0079,
+        "temperature": 1.176,
+        "certified_coverage_test": 0.2905,
+        "precision_auto_test": 0.9976,
+        "cert_rows": 2000,
+        "cert_accepted": 580,
+        "cert_cp_lower": 0.9948
+      },
+      "vote-8": {
+        "accuracy": 0.8607,
+        "ece_test": 0.0691,
+        "temperature": 1.039,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8518,
+        "ece_test": 0.0467,
+        "temperature": 0.775,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      }
+    }
+  }
+}
