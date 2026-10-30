@@ -59,7 +59,7 @@ def pretune(encoder: str, steps: int = 3000) -> str:
 
 
 @app.function(gpu="A10G", volumes={"/vol": volume}, timeout=4 * 3600)
-def incontext(encoder: str, steps: int) -> str:
+def incontext(encoder: str, steps: int, none: bool = False) -> str:
     """Train the in-context reader on the volume's training sets; score it on the held-out ones."""
     import torch
 
@@ -67,12 +67,14 @@ def incontext(encoder: str, steps: int) -> str:
     run = Path("/vol/run")
     run.mkdir(parents=True, exist_ok=True)
     subprocess.run(
-        ["python", "-m", "backend.incontext", "--encoder", encoder, "--steps", str(steps)],
+        ["python", "-m", "backend.incontext", "--encoder", encoder, "--steps", str(steps)]
+        + (["--none"] if none else []),
         cwd=run,
         check=True,
     )
     volume.commit()
-    return (run / f"docs/results/s2/incontext-ic-{encoder}-s{steps}-near.json").read_text()
+    out = f"ic-{encoder}-s{steps}-near" + ("-none" if none else "")
+    return (run / f"docs/results/s2/incontext-{out}.json").read_text()
 
 
 @app.function(gpu="A10G", volumes={"/vol": volume}, timeout=2 * 3600)
@@ -95,9 +97,10 @@ def budgets(out: str = "ic-ettin-32m-s6000-near"):
 
 
 @app.local_entrypoint()
-def reader(encoder: str = "ettin-32m", steps: int = 6000):
-    out = ROOT / f"docs/results/s2/incontext-ic-{encoder}-s{steps}-near.json"
-    out.write_text(incontext.remote(encoder, steps))
+def reader(encoder: str = "ettin-32m", steps: int = 6000, none: bool = False):
+    name = f"ic-{encoder}-s{steps}-near" + ("-none" if none else "")
+    out = ROOT / f"docs/results/s2/incontext-{name}.json"
+    out.write_text(incontext.remote(encoder, steps, none))
     print(f"saved {out}")
 
 

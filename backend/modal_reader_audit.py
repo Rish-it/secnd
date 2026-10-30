@@ -46,12 +46,11 @@ gpu_image = image.run_commands(
 
 
 @app.function(image=gpu_image, gpu="A10G", volumes={"/vol": volume}, timeout=7200)
-def attacks(natural: bool = False):
+def attacks(natural: bool = False, model_name: str = "ic-ettin-150m-s6000-near"):
     from backend.reader_audit import run
 
-    return persist(
-        run(Path("/vol/data"), natural=natural), "paraphrase-results" if natural else "attacks"
-    )
+    name = "paraphrase-results" if natural else "attacks"
+    return persist(run(Path("/vol/data"), natural=natural, model_name=model_name), name)
 
 
 @app.local_entrypoint()
@@ -61,7 +60,7 @@ def main(
     # Snapshot provenance before dispatch; later doc edits cannot change a run's identity.
     protocol_hash = hashlib.sha256((ROOT / "docs/results/s3r/protocol.md").read_bytes()).hexdigest()
     runner_hash = hashlib.sha256((ROOT / "backend/reader_audit.py").read_bytes()).hexdigest()
-    report = json.loads(cpu.remote(model_name) if latency else attacks.remote(natural))
+    report = json.loads(cpu.remote(model_name) if latency else attacks.remote(natural, model_name))
     report["protocol_sha256"] = protocol_hash
     report["runner_sha256"] = runner_hash
     name = (
@@ -69,5 +68,7 @@ def main(
         if latency
         else ("paraphrase-results" if natural else "attacks")
     )
+    if model_name.endswith("-none"):
+        name += "-none"
     path = ROOT / "docs/results/s3r" / f"{name}.json"
     path.write_text(json.dumps(report, indent=2) + "\n")

@@ -10,7 +10,7 @@ import httpx
 from backend.config import Settings
 from backend.muse import BudgetRun, MuseClient, MuseError, MuseUnavailable, Usage
 
-Provider = Literal["meta", "baseten", "nebius"]
+Provider = Literal["meta", "meta-wonder", "baseten", "nebius"]
 PROVIDERS: tuple[Provider, ...] = ("meta", "baseten", "nebius")
 
 
@@ -20,6 +20,13 @@ def provider_settings(settings: Settings, provider: Provider) -> Settings:
             muse_api_key=settings.meta_api_key,
             muse_base_url=settings.meta_base_url,
             muse_model=settings.meta_model,
+            muse_budget_usd=settings.meta_budget_usd,
+        )
+    elif provider == "meta-wonder":
+        values = dict(
+            muse_api_key=settings.meta_api_key,
+            muse_base_url=settings.meta_base_url,
+            muse_model="muse-wonder-1.0",
             muse_budget_usd=settings.meta_budget_usd,
         )
     elif provider == "nebius":
@@ -35,7 +42,8 @@ def provider_settings(settings: Settings, provider: Provider) -> Settings:
 
 
 def ledger_path(directory: Path, provider: Provider) -> Path:
-    return directory / ("spend.csv" if provider == "baseten" else f"spend-{provider}.csv")
+    name = {"baseten": "spend.csv", "meta-wonder": "spend-meta.csv"}.get(provider)
+    return directory / (name or f"spend-{provider}.csv")
 
 
 class MuseProviders(MuseClient):

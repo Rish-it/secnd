@@ -51,6 +51,11 @@ EVAL = (
     ("32-nearest", 32, True),
 )
 INTENT = "What does the customer want?"
+# A reader trained with NONE always gets one extra option after the labels. In DROP of its
+# training episodes the right label (and every example carrying it) is left out and NONE is the
+# answer, so a message whose intent is missing from the set draws its mass away from the labels.
+NONE = "none of these"
+DROP = 0.1
 QUESTIONS = {"go_emotions": "Which emotion does this message express?"}
 
 
@@ -227,6 +232,7 @@ class Reader(nn.Module):
         self.encoder = AutoModel.from_pretrained(repo, revision=revision)
         d = self.encoder.config.hidden_size
         self.scorer = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, d), nn.GELU(), nn.Linear(d, 1))
+        self.none = False
 
     def forward(self, ids, attention, markers, marker_mask):
         h = self.encoder(input_ids=ids, attention_mask=attention).last_hidden_state
@@ -235,11 +241,17 @@ class Reader(nn.Module):
 
 
 def render(
-    tok, task: Task, text: str, options: list[int], shots: list[tuple[str, int]]
+    tok,
+    task: Task,
+    text: str,
+    options: list[int],
+    shots: list[tuple[str, int]],
+    none: bool = False,
 ) -> list[int]:
     """Token ids for one question; options come before the message, so truncation drops examples."""
     clean = lambda s: str(s).replace(tok.mask_token, " ").replace(tok.sep_token, " ")  # noqa: E731
     head = task.question + "".join(f" {tok.mask_token} {task.labels[o]}" for o in options)
+    head += f" {tok.mask_token} {NONE}" if none else ""
     tail = " ".join(f"{clean(t)} => {task.labels[y]} ;" for t, y in shots)
     return tok(
         f"{head} {tok.sep_token} {clean(text)} {tok.sep_token} {tail}",
@@ -248,20 +260,24 @@ def render(
     )["input_ids"]
 
 
-def episode(task: Task, rng: np.random.Generator, shots: int):
-    """(text, options, gold slot, examples) for one training question."""
+def episode(task: Task, rng: np.random.Generator, shots: int, drop: float = 0.0):
+    """(text, options, gold slot, examples) for one training question. With probability `drop`
+    the gold label is left out and the slot after the options (NONE) is the answer."""
     q = int(rng.integers(len(task.train)))
     text, gold = task.train[q]
     n = len(task.labels)
     k = int(rng.integers(2, min(n, MAX_OPTIONS) + 1))
     others = rng.permutation([i for i in range(n) if i != gold])[: k - 1]
     options = list(rng.permutation(np.append(others, gold)))
+    if drop and rng.random() < drop:
+        options.remove(gold)
+    slot = options.index(gold) if gold in options else len(options)
     allowed = set(options)
     if shots and task.train_vecs is not None and rng.random() < NEAREST:
         return (
             text,
             options,
-            options.index(gold),
+            slot,
             nearest(task, task.train_vecs[q], shots, allowed, skip=text),
         )
     pool = [
@@ -269,7 +285,7 @@ def episode(task: Task, rng: np.random.Generator, shots: int):
         for r in (task.train[i] for i in rng.integers(len(task.train), size=8 * shots + 8))
         if r[1] in allowed and r[0] != text
     ]
-    return text, options, options.index(gold), pool[:shots]
+    return text, options, slot, pool[:shots]
 
 
 def batch(tok, items, dev):
@@ -290,7 +306,14 @@ def batch(tok, items, dev):
     return ids.to(dev), attention.to(dev), markers.to(dev), mask.to(dev), gold.to(dev)
 
 
-def train(name: str, tasks: list[Task], steps: int, batch_size: int = 16, seed: int = 0):
+def train(
+    name: str,
+    tasks: list[Task],
+    steps: int,
+    batch_size: int = 16,
+    seed: int = 0,
+    none: bool = False,
+):
     from transformers import AutoTokenizer, get_linear_schedule_with_warmup
 
     torch.manual_seed(seed)
@@ -299,6 +322,7 @@ def train(name: str, tasks: list[Task], steps: int, batch_size: int = 16, seed: 
     repo, revision = ENCODERS[name]
     tok = AutoTokenizer.from_pretrained(repo, revision=revision)
     model = Reader(repo, revision).to(dev)
+    model.none = none
     optim = torch.optim.AdamW(
         [
             {"params": model.encoder.parameters(), "lr": 5e-5},
@@ -315,8 +339,10 @@ def train(name: str, tasks: list[Task], steps: int, batch_size: int = 16, seed: 
         items = []
         for _ in range(batch_size):
             task = tasks[rng.choice(len(tasks), p=weights)]
-            text, options, gold, shots = episode(task, rng, int(rng.choice(SHOTS)))
-            items.append((render(tok, task, text, options, shots), gold))
+            text, options, gold, shots = episode(
+                task, rng, int(rng.choice(SHOTS)), DROP if none else 0.0
+            )
+            items.append((render(tok, task, text, options, shots, none), gold))
         ids, attention, markers, mask, gold = batch(tok, items, dev)
         with torch.autocast(dev, dtype=torch.bfloat16, enabled=dev == "cuda"):
             logits = model(ids, attention, markers, mask)
@@ -372,11 +398,12 @@ def _predict(model, tok, task, part, shots, near, seed, batch_size) -> np.ndarra
                     if shots
                     else []
                 )
-            items.append((render(tok, task, text, options, context), gold))
+            items.append((render(tok, task, text, options, context, model.none), gold))
         ids, attention, markers, mask, _ = batch(tok, items, dev)
         with torch.autocast(dev, dtype=torch.bfloat16, enabled=dev == "cuda"):
             logits = model(ids, attention, markers, mask).float()
-        out.append(torch.softmax(logits, -1)[:, : len(options)].cpu().numpy())
+        width = len(options) + model.none
+        out.append(torch.softmax(logits, -1)[:, :width].cpu().numpy())
     return np.concatenate(out)
 
 
@@ -404,8 +431,10 @@ def score(task: Task, p: dict[str, np.ndarray], seed: int = 0) -> dict:
     half = np.random.default_rng(seed).permutation(len(yc))
     fit, cert = half[: len(yc) // 2], half[len(yc) // 2 :]
     t = fit_temperature(yc[fit], p["calib"][fit])
-    tau, n_auto, _, lower = choose_threshold(yc[cert], scale(p["calib"][cert], t))
-    pt = scale(p["test"], t)
+    # a reader's NONE column takes part in the temperature, never in an answer
+    k = len(task.labels)
+    tau, n_auto, _, lower = choose_threshold(yc[cert], scale(p["calib"][cert], t)[:, :k])
+    pt = scale(p["test"], t)[:, :k]
     auto = pt.max(1) >= tau if tau is not None else np.zeros(len(yt), bool)
     hits = pt.argmax(1) == yt
     return {
@@ -456,6 +485,16 @@ def head(task: Task) -> dict[str, np.ndarray]:
     return out
 
 
+def load(folder: Path):
+    """A saved reader on this host's device, with its tokenizer."""
+    from transformers import AutoTokenizer
+
+    model = Reader(str(folder / "encoder"))
+    model.scorer.load_state_dict(torch.load(folder / "scorer.pt", map_location="cpu"))
+    model.none = (folder / "none").exists()
+    return model.to(device()).eval(), AutoTokenizer.from_pretrained(folder / "encoder")
+
+
 def budgeted(model, tok, evals: dict[str, Task], save: Path) -> dict:
     """Reader, vote and head given the same 200, 1,000 or all labelled history rows per set.
     Every probability matrix is also saved under `save`, so gate rules can be compared on CPU."""
@@ -488,16 +527,11 @@ def budgeted(model, tok, evals: dict[str, Task], save: Path) -> dict:
 
 def evaluate(out: str) -> None:
     """Re-score a saved reader on the held-out sets at each history budget."""
-    from transformers import AutoTokenizer
 
     from backend.config import Settings
 
     data_dir = Settings().data_dir
-    folder = data_dir / "encoders" / out
-    model = Reader(str(folder / "encoder"))
-    model.scorer.load_state_dict(torch.load(folder / "scorer.pt", map_location="cpu"))
-    model = model.to(device()).eval()
-    tok = AutoTokenizer.from_pretrained(folder / "encoder")
+    model, tok = load(data_dir / "encoders" / out)
     evals = held_out(data_dir)
     index(list(evals.values()))
     split = {
@@ -519,6 +553,7 @@ def main():
     parser.add_argument("--encoder", choices=sorted(ENCODERS))
     parser.add_argument("--steps", type=int, default=6000)
     parser.add_argument("--evaluate", help="re-score a saved reader, e.g. ic-ettin-32m-s6000-near")
+    parser.add_argument("--none", action="store_true", help=f"train with a '{NONE}' option")
     args = parser.parse_args()
     if args.evaluate:
         return evaluate(args.evaluate)
@@ -526,11 +561,13 @@ def main():
     evals = held_out(data_dir)
     tasks = training_pool(data_dir, evals)
     index(tasks + list(evals.values()))
-    model, tok, report = train(args.encoder, tasks, args.steps)
-    out = f"ic-{args.encoder}-s{args.steps}-near"
+    model, tok, report = train(args.encoder, tasks, args.steps, none=args.none)
+    out = f"ic-{args.encoder}-s{args.steps}-near" + ("-none" if args.none else "")
     model.encoder.save_pretrained(data_dir / "encoders" / out / "encoder")
     tok.save_pretrained(data_dir / "encoders" / out / "encoder")
     torch.save(model.scorer.state_dict(), data_dir / "encoders" / out / "scorer.pt")
+    if args.none:
+        (data_dir / "encoders" / out / "none").touch()
     report |= {
         "model": out,
         "base": "@".join(ENCODERS[args.encoder]),
