@@ -55,7 +55,7 @@ def task_and_history(data_dir):
 
 
 @torch.inference_mode()
-def run(data_dir: Path, model_name: str, int8: bool = False) -> dict:
+def run(data_dir: Path, model_name: str, int8: bool = False, dev: str = "cpu") -> dict:
     from sentence_transformers import SentenceTransformer
     from transformers import AutoTokenizer
 
@@ -75,9 +75,9 @@ def run(data_dir: Path, model_name: str, int8: bool = False) -> dict:
     ).half()
     folder = data_dir / "encoders" / model_name
     load = time.perf_counter()
-    model = ic.Reader(str(folder / "encoder")).to("cpu").eval()
+    model = ic.Reader(str(folder / "encoder")).to(dev).eval()
     model.scorer.load_state_dict(
-        torch.load(folder / "scorer.pt", map_location="cpu", weights_only=True)
+        torch.load(folder / "scorer.pt", map_location=dev, weights_only=True)
     )
     tokenizer = AutoTokenizer.from_pretrained(folder / "encoder")
     assert next(model.parameters()).dtype == torch.float32
@@ -85,7 +85,7 @@ def run(data_dir: Path, model_name: str, int8: bool = False) -> dict:
         # Dynamic int8: Linear weights stored int8, activations quantized per request.
         model = torch.ao.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
     load_seconds = time.perf_counter() - load
-    assert all(p.device.type == "cpu" for p in model.parameters())
+    assert all(p.device.type == dev for p in model.parameters())
     options = list(range(113))
     selected = np.random.default_rng(SEED).permutation(len(task.test))[: WARMUPS + REQUESTS]
     conditions = {}
@@ -106,8 +106,9 @@ def run(data_dir: Path, model_name: str, int8: bool = False) -> dict:
                 search_ms = 1000 * (search_end - embed_end)
             reader_start = time.perf_counter()
             ids = ic.render(tokenizer, task, text, options, context)
-            packed = ic.batch(tokenizer, [(ids, 0)], "cpu")
-            probabilities = torch.softmax(model(*packed[:4]).float(), -1)
+            packed = ic.batch(tokenizer, [(ids, 0)], dev)
+            with torch.autocast(dev, dtype=torch.bfloat16, enabled=dev == "cuda"):
+                probabilities = torch.softmax(model(*packed[:4]).float(), -1)
             _ = float(probabilities.max())
             finished = time.perf_counter()
             if i >= WARMUPS:
@@ -137,7 +138,7 @@ def run(data_dir: Path, model_name: str, int8: bool = False) -> dict:
     cpuinfo = Path("/proc/cpuinfo").read_text()
     return {
         "model": model_name,
-        "device": "cpu",
+        "device": dev,
         "dtype": "int8-dynamic" if int8 else "float32",
         "batch_size": 1,
         "history_rows": len(task.train),

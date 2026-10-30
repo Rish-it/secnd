@@ -41,6 +41,29 @@ def reader(model_name: str, int8: bool):
     return json.dumps(run(Settings().data_dir, model_name, int8))
 
 
+gpu_image = image.run_commands(
+    "uv pip install --python /.uv/.venv/bin/python --reinstall-package torch "
+    "--index-url https://pypi.org/simple torch==2.15.0"
+)
+
+
+@app.function(image=gpu_image, gpu="A10G", volumes={"/vol": volume}, timeout=1800)
+def reader_gpu(model_name: str):
+    from backend.config import Settings
+    from backend.latency_reader import run
+
+    return json.dumps(run(Settings().data_dir, model_name, dev="cuda"))
+
+
+@app.local_entrypoint()
+def gpu(model_name: str = "ic-ettin-400m-s6000-near"):
+    """One A10G; retrieval stays on CPU, the reader is BF16 as in the attack audit."""
+    report = json.loads(reader_gpu.remote(model_name))
+    path = ROOT / f"docs/results/s8/latency-gpu-{model_name}.json"
+    path.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
+    print(f"Saved {path.relative_to(ROOT)}", flush=True)
+
+
 @app.local_entrypoint()
 def ren11(model_name: str = "ic-ettin-400m-s6000-near"):
     """FP32 and int8 on separate, identical CPU allocations."""
