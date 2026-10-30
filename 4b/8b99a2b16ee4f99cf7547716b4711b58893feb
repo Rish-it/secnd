@@ -1,0 +1,93 @@
+.env.example
+  s_6b0b1bb57c592c::t_f91b070f686973 30-43
+.github/workflows/checks.yml
+  s_6b0b1bb57c592c::t_4c2ec33dc88a61 35-48
+.gitignore
+  s_6b0b1bb57c592c::t_2de8b3fc2183ec 19-20
+README.md
+  s_6b0b1bb57c592c::t_a394c90d9cf992 111,116-119
+backend/api.py
+  s_a6c455fd9dad14::t_9b2f1be949db23 31-33,71,86,94
+backend/config.py
+  s_6b0b1bb57c592c::t_3d83e24882e40f 21-28
+backend/connector_source.py
+  s_a6c455fd9dad14::t_d8327d835ab073 1-23
+backend/logging_filters.py
+  s_a6c455fd9dad14::t_df02e030e90747 1-32
+backend/meta_ads.py
+  s_a6c455fd9dad14::t_d0e2f4e09b8d65 1-627
+backend/meta_webhook.py
+  s_a6c455fd9dad14::t_ceaf3829039a87 16,27,64,72-74,91,93,109-113,137-145,155,160,180-192,208-230,270-274
+backend/tests/fixtures/meta/README.md
+  s_6b0b1bb57c592c::t_3c9cff846b336e 12-13
+backend/tests/fixtures/meta/instagram-text.json
+  s_a6c455fd9dad14::t_e58d769e181df5 1-13
+backend/tests/http_meta.py
+  s_6b0b1bb57c592c::t_a7b17b2389464d 20-22,28,47
+backend/tests/meta_apps_demo.py
+  s_6b0b1bb57c592c::t_3e14c9cd0d2f66 1-106
+backend/tests/test_config.py
+  s_6b0b1bb57c592c::t_f2d6c6e6e4264e 29-44
+backend/tests/test_meta_ads.py
+  s_a6c455fd9dad14::t_44b1d0bcb3d282 1-406
+backend/tests/test_meta_webhook.py
+  s_a6c455fd9dad14::t_ddd396f973b9c3 42-46,53-57,87,90,96-98,109-110,112,153-155,157,162-163,183,203-283
+compose.yaml
+  s_6b0b1bb57c592c::t_1d43dbf8e72789 4-6
+docs/api/README.md
+  s_6b0b1bb57c592c::t_45b4482555838a 21-32
+docs/api/openapi.json
+  s_6b0b1bb57c592c::t_542a50744baceb 4-85,987-1094,1371-1432,2505-3014
+docs/integrations/meta.md
+  s_6b0b1bb57c592c::t_24f98914ce6b55 118-208
+docs/results/c2-meta-apps/README.md
+  s_6b0b1bb57c592c::t_dd8b0bc78d0b89 1-37
+docs/results/c2-meta-apps/browser.json
+  s_6b0b1bb57c592c::t_b05dba5d6e130e 1-28
+docs/results/c2-meta-apps/checks.json
+  s_6b0b1bb57c592c::t_ec7f3290040386 1-31
+docs/results/c2-meta-apps/integration.json
+  s_6b0b1bb57c592c::t_f91dd141ca486f 1-15
+frontend/meta-tests/inbox-wiring.spec.ts
+  s_6b0b1bb57c592c::t_df53fb4839589d 1-55
+frontend/meta-tests/meta.spec.ts
+  s_a6c455fd9dad14::t_5f1bd23f9ad5f5 1-125
+frontend/src/App.tsx
+  s_a6c455fd9dad14::t_d44205a5d4adda 9,280
+frontend/src/MetaConnections.css
+  s_a6c455fd9dad14::t_ae627973e42ae1 1-260
+frontend/src/MetaConnections.tsx
+  s_6b0b1bb57c592c::t_de12179e1a0363 1-375
+frontend/src/metaApi.ts
+  s_6b0b1bb57c592c::t_624842137e5136 1-84
+package-lock.json
+  s_6b0b1bb57c592c::t_917367140a2ee0 14,460-475,1612-1640
+package.json
+  s_6b0b1bb57c592c::t_371837bf474a11 15,21
+playwright.meta.config.ts
+  s_6b0b1bb57c592c::t_0b8cd684455424 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4b8b99a2b16ee4f99cf7547716b4711b58893feb",
+  "prompts": {},
+  "sessions": {
+    "s_6b0b1bb57c592c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_a6c455fd9dad14": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
