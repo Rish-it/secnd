@@ -160,5 +160,19 @@ audit, not a human audit. Full votes, changed labels and results are in `model-a
 
 The gate was refit on audited MTOP calibration labels and scored once from saved probabilities.
 Precision is measured against unchanged test labels, which keep any errors they contain. The 400M
-reader now certifies in every MTOP condition. Support floors were fitted before this audit and do
-not apply to the refit gate until refit.
+reader now certifies in every MTOP condition. Those coverage figures assume the right intent is
+always among the options.
+
+Support floors refit on the audited labels guard against a missing intent, and they cost most of
+that coverage. All 4,386 MTOP test rows at full history, gate and floor fixed on calibration:
+
+| Reader | Examples | Answered alone | Errors | 95% low | Wrong accepts, intent removed (of 500) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 400M | 0 | 14.4% | 0 | 99.42% | 1 |
+| 400M | 8 | 13.9% | 0 | 99.40% | 1 |
+| 400M | 32 | 7.3% | 0 | 98.86% | 0 |
+| 150M | 0 | 11.7% | 0 | 99.28% | 0 |
+| 150M | 8 | 10.9% | 0 | 99.23% | 2 |
+| 150M | 32 | 16.1% | 0 | 99.48% | 1 |
+
+Files: `attacks-floor-audited.json`, `attacks-floor-audited-400m.json`, `floor-full-test.json`.
