@@ -1,0 +1,113 @@
+.env.example
+  s_9245a16bb07969::t_2ea34f652ee532 40-53
+.github/workflows/checks.yml
+  s_9245a16bb07969::t_c42931c3948c3a 35-48,74-98
+README.md
+  s_9245a16bb07969::t_764c4bc91e17b8 121,126-129
+backend/api.py
+  s_9245a16bb07969::t_11715431aed72d 31-33,56,75,97,104,317-323,339,401-433
+backend/cold_start.py
+  s_9245a16bb07969::t_f1de90006b17c0 327-328
+backend/config.py
+  s_9245a16bb07969::t_511b8af6b90ecd 39-46
+backend/connector_source.py
+  s_9245a16bb07969::t_b12d34a3beee56 1-23
+backend/logging_filters.py
+  s_9245a16bb07969::t_f8d5f41ddf841c 1-32
+backend/meta_ads.py
+  s_9245a16bb07969::t_984665a261f820 1-627
+backend/meta_webhook.py
+  s_9245a16bb07969::t_d45bf36f53d6c6 16,27,64,72-74,91,93,109-113,137-145,155,160,180-192,208-230,270-274
+backend/schemas.py
+  s_9245a16bb07969::t_9076551dae5490 14,24,97-99,178-183
+backend/store.py
+  s_9245a16bb07969::t_3ee5e4f1f57ff6 13,70-78,202-206,256-260,269-299,334,356,362-373,375,379-380,394,400
+backend/tests/fixtures/meta/README.md
+  s_9245a16bb07969::t_3c209aa7b5d882 12-13
+backend/tests/fixtures/meta/instagram-text.json
+  s_9245a16bb07969::t_8332de368b0799 1-13
+backend/tests/http_meta.py
+  s_9245a16bb07969::t_33c24ee4547d80 20-22,28,47
+backend/tests/inbox_demo.py
+  s_9245a16bb07969::t_18d41d91d81e83 1-117
+backend/tests/meta_apps_demo.py
+  s_9245a16bb07969::t_d7ee3effee6f65 1-106
+backend/tests/test_cold_start.py
+  s_9245a16bb07969::t_3f2064dfd13dcd 305-339
+backend/tests/test_config.py
+  s_9245a16bb07969::t_9c9ba884b1d48c 29-44
+backend/tests/test_inbox.py
+  s_9245a16bb07969::t_0ac88d7db1ddef 1-180
+backend/tests/test_meta_ads.py
+  s_9245a16bb07969::t_de06db5045b223 1-406
+backend/tests/test_meta_webhook.py
+  s_9245a16bb07969::t_c215dd2a1bdb2c 42-46,53-57,87,90,96-98,109-110,112,153-155,157,162-163,183,203-283
+backend/tests/test_store.py
+  s_9245a16bb07969::t_be182f4fcc2cf4 6,31,37,41
+backend/workspace.py
+  s_9245a16bb07969::t_5fa91b6c77c823 13,17,241,245-272,278-301
+compose.yaml
+  s_9245a16bb07969::t_520c07851037dc 4-6
+docs/api/README.md
+  s_9245a16bb07969::t_2fde703e8b9616 21-32,233-257
+docs/api/openapi.json
+  s_9245a16bb07969::t_4c527bcf42e889 4-85,417-429,434-446,508-524,1040-1147,1209-1225,1441-1502,1958-1973,2183,2185-2186,2203,2214,2271,2277-2280,2293-2302,2308,2365,2369-2374,2449,2453-2456,2467-2561,2856-3400,3406,3453,3455,3459,3461,3476-3483,3487,3491,3544,3546,3761-3848,4224-4336
+docs/integrations/meta.md
+  s_9245a16bb07969::t_4b6d3ab6ed66f9 118-208
+docs/results/c1-inbox/README.md
+  s_9245a16bb07969::t_4a11f8d6e0a7c3 1-22
+docs/results/c1-inbox/browser.json
+  s_9245a16bb07969::t_afda25f03433f3 1-61
+docs/results/c1-inbox/checks.json
+  s_9245a16bb07969::t_1bc0f91c1b5371 1-10
+docs/results/c2-meta-apps/README.md
+  s_9245a16bb07969::t_b7275ea8bd704e 1-37
+docs/results/c2-meta-apps/browser.json
+  s_9245a16bb07969::t_4fee368fa77a19 1-28
+docs/results/c2-meta-apps/checks.json
+  s_9245a16bb07969::t_f04080f4826210 1-31
+docs/results/c2-meta-apps/integration.json
+  s_9245a16bb07969::t_677cc4a6f1c412 1-15
+frontend/meta-tests/inbox-wiring.spec.ts
+  s_9245a16bb07969::t_a2803e88009222 1-55
+frontend/meta-tests/meta.spec.ts
+  s_9245a16bb07969::t_97c16c0e882519 1-125
+frontend/src/App.tsx
+  s_9245a16bb07969::t_40e59df6cc4f51 9,70,195,198,220,238-240,280
+frontend/src/Companion.css
+  s_9245a16bb07969::t_8ce6219e33630d 1-2,4-9,11-14,16-19,21-27,29-30,32,34-38,40-46,48,50-52,54-61,63-74,76-82,85,87-88,90-91,93-99,101-104,106-109,111-113,115,117,122-126,128-129,131-137,139-141,143-145,147-149,151-153,155-159,161,163-167,169-174,177-181,184-188,190-192,194-196,198-202,204-207,209,211-214,216-217,219-220,222-224,226,230,232-235,237-238,240-242,244-247,249-255,257-259,261-271,273,276,278-282,284-297,300-326,328-357
+frontend/src/Companion.tsx
+  s_9245a16bb07969::t_8571e30136b1f2 2,6-7,9-24,26-32,34,38-53,56-57,59-71,74-75,77-92,94-97,99,104-113,116-119,130-131,134,137-138,143,146-149,152-157,160-195,197,202,205-206,209-211,213-215,217-220,222-300,302-311,313,315-343,345-395,398-421,424-427,429-487,490-512,514-516,518,520-529
+frontend/src/MetaConnections.css
+  s_9245a16bb07969::t_d93f2c9ba96388 1-260
+frontend/src/MetaConnections.tsx
+  s_9245a16bb07969::t_83a98dbb84eb26 1-375
+frontend/src/api.ts
+  s_9245a16bb07969::t_ea405c6d2d63b0 7,28-30,79,130,141,196-201
+frontend/src/metaApi.ts
+  s_9245a16bb07969::t_a05aa67be3cfb9 1-84
+frontend/tests/inbox.spec.ts
+  s_9245a16bb07969::t_345955b525d11e 1-146
+package.json
+  s_9245a16bb07969::t_05319a00513bab 16,19-20
+playwright.config.ts
+  s_9245a16bb07969::t_80acb5f4f473e7 1-13
+playwright.meta.config.ts
+  s_9245a16bb07969::t_838259cb7e8bf8 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "824db4fc53d3eeb78fd35221cb8677794fe87f22",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
