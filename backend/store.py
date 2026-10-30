@@ -10,7 +10,7 @@ from pathlib import Path
 from uuid import uuid4
 
 SOURCES = ("seed", "answer", "spot_check", "muse_cold_start")
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 TABLES = (
     """CREATE TABLE workspaces (
         workspace_id TEXT PRIMARY KEY, config_json TEXT NOT NULL, created_at TEXT NOT NULL
@@ -67,7 +67,15 @@ def initialize(database_path: Path) -> None:
             if version < 2:
                 for statement in TABLES:
                     connection.execute(statement)
-                connection.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
+            if version < 3:
+                connection.execute("""CREATE TABLE answer_undos (
+                    workspace_id TEXT NOT NULL, idempotency_key TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (workspace_id, idempotency_key),
+                    FOREIGN KEY (workspace_id, idempotency_key)
+                        REFERENCES answers(workspace_id, idempotency_key)
+                )""")
+            connection.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
             connection.commit()
         except BaseException:
             connection.rollback()
@@ -191,7 +199,11 @@ class Store:
             rows = db.execute(
                 """SELECT l.*, i.text, i.amount, i.date, i.merchant_key FROM labels l
                 JOIN items i ON i.workspace_id=l.workspace_id AND i.id=l.item_id
-                WHERE l.workspace_id=? ORDER BY l.created_at, l.position""",
+                WHERE l.workspace_id=? AND NOT EXISTS (
+                    SELECT 1 FROM answers a JOIN answer_undos u
+                    ON u.workspace_id=a.workspace_id AND u.idempotency_key=a.idempotency_key
+                    WHERE a.workspace_id=l.workspace_id AND a.label_id=l.id
+                ) ORDER BY l.created_at, l.position""",
                 (workspace,),
             ).fetchall()
         return [dict(row) for row in rows]
@@ -241,6 +253,11 @@ class Store:
             if old is not None:
                 if (old["item_id"], old["label"]) != (item_id, label):
                     raise IdempotencyConflict("This key already belongs to a different answer.")
+                if db.execute(
+                    "SELECT 1 FROM answer_undos WHERE workspace_id=? AND idempotency_key=?",
+                    (workspace, idempotency_key),
+                ).fetchone():
+                    raise IdempotencyConflict("This answer was undone. Use a new answer key.")
                 return json.loads(old["result_json"]), False
             label_id = self._label(db, workspace, item_id, label, source)
             db.execute(
@@ -248,6 +265,37 @@ class Store:
                 (workspace, item_id, label, idempotency_key, label_id, encode(result), timestamp()),
             )
         return result, True
+
+    def undo_answer(self, workspace, idempotency_key):
+        """Retract the latest active answer, retaining its audit and replay protection."""
+        with self.connect(write=True) as db:
+            row = db.execute(
+                "SELECT a.*, l.position FROM answers a JOIN labels l "
+                "ON l.workspace_id=a.workspace_id AND l.id=a.label_id "
+                "WHERE a.workspace_id=? AND a.idempotency_key=?",
+                (workspace, idempotency_key),
+            ).fetchone()
+            if row is None:
+                raise KeyError(idempotency_key)
+            if db.execute(
+                "SELECT 1 FROM answer_undos WHERE workspace_id=? AND idempotency_key=?",
+                (workspace, idempotency_key),
+            ).fetchone():
+                return dict(row), False
+            latest = db.execute(
+                "SELECT MAX(l.position) FROM answers a JOIN labels l "
+                "ON l.workspace_id=a.workspace_id AND l.id=a.label_id "
+                "WHERE a.workspace_id=? AND NOT EXISTS (SELECT 1 FROM answer_undos u "
+                "WHERE u.workspace_id=a.workspace_id AND u.idempotency_key=a.idempotency_key)",
+                (workspace,),
+            ).fetchone()[0]
+            if row["position"] != latest:
+                raise IdempotencyConflict("Undo the most recent answer first.")
+            db.execute(
+                "INSERT INTO answer_undos VALUES (?, ?, ?)",
+                (workspace, idempotency_key, timestamp()),
+            )
+            return dict(row), True
 
     def set_models(self, workspace: str, versions: list[dict]) -> None:
         if sum(bool(row["is_current"]) for row in versions) > 1:
@@ -283,7 +331,7 @@ class Store:
         return json.loads(row[0]) if row else None
 
     def decision_page(self, workspace, kind, cursor=None, limit=20):
-        if kind not in ("feed", "queue") or not 1 <= limit <= 100:
+        if kind not in ("feed", "queue", "overridden") or not 1 <= limit <= 100:
             raise ValueError("Invalid decision page.")
         self.workspace(workspace)
         with self.connect() as db:
@@ -305,26 +353,31 @@ class Store:
                         raise ValueError
                 except (ValueError, TypeError, binascii.Error, UnicodeError):
                     raise ValueError("Unknown decision cursor.") from None
-                if kind == "feed":
+                if kind != "queue":
                     after = " AND (p.created_at, p.id) < (?, ?)"
                     params.extend((previous["created_at"], previous["id"]))
                 else:
                     after = " AND (p.prob, p.created_at, p.id) > (?, ?, ?)"
                     params.extend(tuple(previous))
-            selection = (
-                "p.auto=1"
-                if kind == "feed"
-                else (
-                    "p.auto=0 AND NOT EXISTS (SELECT 1 FROM answers a "
-                    "WHERE a.workspace_id=p.workspace_id AND a.item_id=p.item_id)"
-                )
-            )
+            # Use the latest active human answer; undone answers remain audit records only.
+            answer = """(SELECT a.label FROM answers a JOIN labels l
+                ON l.workspace_id=a.workspace_id AND l.id=a.label_id
+                WHERE a.workspace_id=p.workspace_id AND a.item_id=p.item_id
+                AND NOT EXISTS (SELECT 1 FROM answer_undos u
+                    WHERE u.workspace_id=a.workspace_id AND u.idempotency_key=a.idempotency_key)
+                ORDER BY l.position DESC LIMIT 1)"""
+            selection = {
+                "feed": f"p.auto=1 AND ({answer} IS NULL OR {answer}=p.label)",
+                "queue": f"p.auto=0 AND {answer} IS NULL",
+                "overridden": f"{answer} IS NOT NULL AND {answer}!=p.label",
+            }[kind]
             ordering = (
-                "p.created_at DESC, p.id DESC" if kind == "feed" else ("p.prob, p.created_at, p.id")
+                "p.prob, p.created_at, p.id" if kind == "queue" else "p.created_at DESC, p.id DESC"
             )
             params.append(limit + 1)
             rows = db.execute(
-                "SELECT p.*, i.text, i.amount, i.date FROM predictions p JOIN items i "
+                f"SELECT p.*, i.text, i.amount, i.date, {answer} AS answer_label "
+                "FROM predictions p JOIN items i "
                 "ON i.workspace_id=p.workspace_id AND i.id=p.item_id "
                 "WHERE p.workspace_id=? AND " + selection + " AND NOT EXISTS ("
                 "SELECT 1 FROM predictions n WHERE n.workspace_id=p.workspace_id "
@@ -338,11 +391,13 @@ class Store:
         items = []
         for row in rows[:limit]:
             decision = json.loads(row["decision_json"])
+            decision["answer_label"] = row["answer_label"]
             decision["item"] = {
                 "item_id": row["item_id"],
                 "text": row["text"],
                 "amount": row["amount"],
                 "date": row["date"],
+                "source_app": decision.get("source_app"),
             }
             items.append(decision)
         next_cursor = None
