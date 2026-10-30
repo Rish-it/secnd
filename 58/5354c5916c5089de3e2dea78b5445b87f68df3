@@ -1,0 +1,101 @@
+backend/api.py
+  s_a6c455fd9dad14::t_cbfedbfc2ec064 33,68,84-91,216-224,231-232
+  s_a6c455fd9dad14::t_c3f81a0a9e3ac7 52,211-215,225-230
+  s_a6c455fd9dad14::t_c9d599b852bb94 233
+compose.yaml
+  s_a6c455fd9dad14::t_342b45c5ced50e 6-9
+.github/workflows/checks.yml
+  s_a6c455fd9dad14::t_342b45c5ced50e 39-41
+  s_a6c455fd9dad14::t_8e8556880c831d 79-102
+backend/cold_start.py
+  s_a6c455fd9dad14::t_342b45c5ced50e 314-315
+  s_a6c455fd9dad14::t_0dbcb008f6c6b9 47-49,51-52,85,318
+  s_a6c455fd9dad14::t_8ff6a79845e480 86-87,122,316-317,319-321,324
+backend/config.py
+  s_a6c455fd9dad14::t_fe3bd303ecb01b 3,5,9-20,30-34
+  s_a6c455fd9dad14::t_c3f81a0a9e3ac7 55-59
+  s_a6c455fd9dad14::t_4733124cf000a9 60
+backend/workspace.py
+  s_a6c455fd9dad14::t_5f4d8c8a5a9529 42,106-108,114-115,136-142,236-237
+backend/reader_policy.py
+  s_a6c455fd9dad14::t_342b45c5ced50e 1-116
+  s_a6c455fd9dad14::t_c70c4b91f16b4a 117-124
+backend/schemas.py
+  s_a6c455fd9dad14::t_82f0fac247bfe2 37-48,89,103-105,111-112
+  s_a6c455fd9dad14::t_c3f81a0a9e3ac7 49-77,106-110
+.env.example
+  s_a6c455fd9dad14::t_342b45c5ced50e 8-17
+Dockerfile
+  s_a6c455fd9dad14::t_342b45c5ced50e 28-30
+backend/tests/http_reader.py
+  s_a6c455fd9dad14::t_7b13e37ff3b91f 1-231
+  s_a6c455fd9dad14::t_7859f94c77e6a6 232-256
+.gitignore
+  s_a6c455fd9dad14::t_511ff36bbd660b 19-21
+README.md
+  s_a6c455fd9dad14::t_6540d1cbdf4ec7 10-12,41-42,44,47-50,69-73,158-162
+backend/reader-manifest.json
+  s_a6c455fd9dad14::t_b87530ec4d2dc8 1-39
+backend/reader_runtime.py
+  s_a6c455fd9dad14::t_3061996d2c3ef3 1-95
+backend/reader_scope.py
+  s_a6c455fd9dad14::t_22ba58c5d399c0 1-10
+backend/reader_serving.py
+  s_a6c455fd9dad14::t_f1513c5601118e 1,5,11-13,24-30,32,34-36,39-40,44-68,72-73,81-90,95-97,99-100,102-104,106,109,117,129-141,144-156,163-164,168-180
+backend/tests/conftest.py
+  s_a6c455fd9dad14::t_48a556f9544791 1-9
+backend/tests/reader_demo.py
+  s_a6c455fd9dad14::t_cbbc5d398b6acb 1-65
+backend/tests/test_reader_serving.py
+  s_a6c455fd9dad14::t_5c5ac8d0f785f8 1-279
+docs/api/openapi.json
+  s_a6c455fd9dad14::t_11c1d237d1ef7a 387-396,1191-1372,1420-1554,3376-3459
+docs/results/c3-serving/README.md
+  s_a6c455fd9dad14::t_3016fc6b63abba 1-72
+docs/results/c3-serving/browser-live.json
+  s_a6c455fd9dad14::t_4dfceb694a7c14 1-18
+docs/results/c3-serving/checks.json
+  s_a6c455fd9dad14::t_6f4715227bc7ad 1-25
+docs/results/c3-serving/http-cpu.json
+  s_a6c455fd9dad14::t_81d47809ba9cab 1-635
+docs/results/s2/incontext-ic-ettin-400m-s6000-near-clean.json
+  s_a6c455fd9dad14::t_50738a2496d874 1-294
+docs/results/s3r/attacks-floor-400m.json
+  s_a6c455fd9dad14::t_d17b8ccf53483b 1-84315
+docs/results/s3r/attacks-floor.json
+  s_a6c455fd9dad14::t_ab13ec1c3b30e0 1-84366
+docs/serving.md
+  s_a6c455fd9dad14::t_eccf90b1d86973 1-120
+frontend/reader-tests/serving.spec.ts
+  s_a6c455fd9dad14::t_991612a6be274c 1-45
+frontend/src/Metrics.tsx
+  s_a6c455fd9dad14::t_6f93fc4a333639 1,108-149,152-153,170-171,191-192
+frontend/src/ReaderStatus.css
+  s_a6c455fd9dad14::t_2f72ff3c32d387 1-53
+frontend/src/ReaderStatus.tsx
+  s_a6c455fd9dad14::t_f6631d77589504 1-160
+frontend/src/api.ts
+  s_a6c455fd9dad14::t_6c386c74f0c1e2 87-94
+package-lock.json
+  s_a6c455fd9dad14::t_53daff5ac56402 14,460-475,1612-1640
+package.json
+  s_a6c455fd9dad14::t_ef28dbb7309cdc 12,21
+playwright.reader.config.ts
+  s_a6c455fd9dad14::t_38e9f26d61ed2d 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "585354c5916c5089de3e2dea78b5445b87f68df3",
+  "prompts": {},
+  "sessions": {
+    "s_a6c455fd9dad14": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
