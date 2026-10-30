@@ -1,0 +1,25 @@
+backend/panel_floors.py
+  s_9245a16bb07969::t_5bed5cdda45619 1-68
+docs/results/s3r/README.md
+  s_9245a16bb07969::t_ac07693bf79b40 163-178
+docs/results/s3r/floor-full-test.json
+  s_9245a16bb07969::t_afa02214bd9aa5 1-60
+docs/results/s3r/attacks-floor-audited.json
+  s_9245a16bb07969::t_b14350b85e8e4a 1-84367
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ada0a0d124c89329af6c5a3573d806d47184e2b1",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
