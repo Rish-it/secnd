@@ -148,3 +148,17 @@ Same checkpoint, same 500 test rows. Results: [attacks-floor.json](attacks-floor
 Every other registered attack has zero accepted errors with the floor. The floor meets the
 target of at most one wrong accept per 500 missing-intent requests and costs roughly 45% of
 automatic answers; those requests go to the person instead.
+
+## Model audit of calibration labels
+
+Three language models replaced human labellers under Amendment 4 of the protocol. This is a model
+audit, not a human audit. Full votes, changed labels and results are in `model-audit.json`.
+
+- MTOP: 0 of 100 controls overturned. 12 of 26 confident disagreements changed label.
+- BANKING77: 2 of 60 controls overturned, above the 2% rule, so that audit is not used and its
+  labels and gate stay as they were.
+
+The gate was refit on audited MTOP calibration labels and scored once from saved probabilities.
+Precision is measured against unchanged test labels, which keep any errors they contain. The 400M
+reader now certifies in every MTOP condition. Support floors were fitted before this audit and do
+not apply to the refit gate until refit.

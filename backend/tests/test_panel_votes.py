@@ -41,3 +41,12 @@ def test_majority_needs_two_matching_votes():
     assert majority(["keep", "keep", None]) == "keep"
     assert majority(["keep", "pause", None]) is None
     assert majority([None, None, None]) is None
+
+
+def test_audited_moves_only_changed_rows():
+    from backend.panel_refit import audited
+
+    rows = [("a", 0), ("b", 1), ("c", 0)]
+    key = {"c2": dict(calib_index=2, gold="x", candidate="y")}
+    assert audited(rows, [dict(id="c2")], key, ["x", "y"]) == [("a", 0), ("b", 1), ("c", 1)]
+    assert rows[2] == ("c", 0)

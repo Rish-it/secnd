@@ -1,0 +1,480 @@
+{
+ "kind": "model audit, not a human audit",
+ "panel": [
+  "openai/gpt-6-luna",
+  "google/gemini-3.5-flash-lite",
+  "qwen/qwen3.8-flash"
+ ],
+ "test_labels": "unchanged; precision is measured against them",
+ "mtop": {
+  "changed": [
+   {
+    "id": "c2283",
+    "kind": "disagreement",
+    "old": "create alarm",
+    "votes": [
+     "create reminder",
+     "create reminder",
+     "create reminder"
+    ],
+    "message": "Please remind me on Friday at 1:30 pm to do my taxes.",
+    "new": "create reminder"
+   },
+   {
+    "id": "c2313",
+    "kind": "disagreement",
+    "old": "create alarm",
+    "votes": [
+     "create reminder",
+     "create reminder",
+     "create reminder"
+    ],
+    "message": "REMIND ME TO GO TO SHOP ON 14TH FEB",
+    "new": "create reminder"
+   },
+   {
+    "id": "c533",
+    "kind": "disagreement",
+    "old": "get event",
+    "votes": [
+     "get date time event",
+     "get date time event",
+     "get date time event"
+    ],
+    "message": "give me the time for the upcoming movies",
+    "new": "get date time event"
+   },
+   {
+    "id": "c3508",
+    "kind": "disagreement",
+    "old": "set available",
+    "votes": [
+     "get availability",
+     "get availability",
+     "get availability"
+    ],
+    "message": "Display availability",
+    "new": "get availability"
+   },
+   {
+    "id": "c2758",
+    "kind": "disagreement",
+    "old": "send message",
+    "votes": [
+     "get message",
+     "get message",
+     "get message"
+    ],
+    "message": "Get my video messages from the movie group",
+    "new": "get message"
+   },
+   {
+    "id": "c3002",
+    "kind": "disagreement",
+    "old": "send message",
+    "votes": [
+     "get message",
+     "get message",
+     "get message"
+    ],
+    "message": "Get my messages from the church thread",
+    "new": "get message"
+   },
+   {
+    "id": "c1890",
+    "kind": "disagreement",
+    "old": "end call",
+    "votes": [
+     "cancel call",
+     "Both fit equally",
+     "cancel call"
+    ],
+    "message": "Cancel the call, please",
+    "new": "cancel call"
+   },
+   {
+    "id": "c687",
+    "kind": "disagreement",
+    "old": "send message",
+    "votes": [
+     "get message",
+     "get message",
+     "get message"
+    ],
+    "message": "Get my messages from the hiking club chat",
+    "new": "get message"
+   },
+   {
+    "id": "c3037",
+    "kind": "disagreement",
+    "old": "prefer",
+    "votes": [
+     "get event",
+     "get event",
+     "get event"
+    ],
+    "message": "I want musical events",
+    "new": "get event"
+   },
+   {
+    "id": "c1976",
+    "kind": "disagreement",
+    "old": "send message",
+    "votes": [
+     "get message",
+     "get message",
+     "get message"
+    ],
+    "message": "Get my messages from the running class chat",
+    "new": "get message"
+   },
+   {
+    "id": "c37",
+    "kind": "disagreement",
+    "old": "question music",
+    "votes": [
+     "get event",
+     "get event",
+     "get event"
+    ],
+    "message": "What concerts are happening in the South",
+    "new": "get event"
+   },
+   {
+    "id": "c1794",
+    "kind": "disagreement",
+    "old": "create call",
+    "votes": [
+     "send message",
+     "send message",
+     "send message"
+    ],
+    "message": "ping Regina",
+    "new": "send message"
+   }
+  ],
+  "controls": 100,
+  "controls_overturned": 0,
+  "biased": false
+ },
+ "banking77": {
+  "used": false,
+  "reason": "controls overturned above the 2% rule",
+  "controls": 60,
+  "controls_overturned": 2
+ },
+ "results": {
+  "ic-ettin-150m-s6000-near": {
+   "200-reader-8": {
+    "dataset_labels": {
+     "accuracy": 0.8591,
+     "ece_test": 0.0259,
+     "temperature": 1.388,
+     "certified_coverage_test": 0.2857,
+     "precision_auto_test": 0.9976,
+     "cert_rows": 2000,
+     "cert_accepted": 532,
+     "cert_cp_lower": 0.9944
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.8591,
+     "ece_test": 0.0242,
+     "temperature": 1.373,
+     "certified_coverage_test": 0.2996,
+     "precision_auto_test": 0.9977,
+     "cert_rows": 2000,
+     "cert_accepted": 570,
+     "cert_cp_lower": 0.9948
+    }
+   },
+   "200-reader-32": {
+    "dataset_labels": {
+     "accuracy": 0.8575,
+     "ece_test": 0.0259,
+     "temperature": 1.385,
+     "certified_coverage_test": 0.2549,
+     "precision_auto_test": 0.9982,
+     "cert_rows": 2000,
+     "cert_accepted": 486,
+     "cert_cp_lower": 0.9939
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.8575,
+     "ece_test": 0.0273,
+     "temperature": 1.371,
+     "certified_coverage_test": 0.2857,
+     "precision_auto_test": 0.9976,
+     "cert_rows": 2000,
+     "cert_accepted": 540,
+     "cert_cp_lower": 0.9945
+    }
+   },
+   "1000-reader-8": {
+    "dataset_labels": {
+     "accuracy": 0.8981,
+     "ece_test": 0.0125,
+     "temperature": 1.284,
+     "certified_coverage_test": 0.2827,
+     "precision_auto_test": 0.9984,
+     "cert_rows": 2000,
+     "cert_accepted": 551,
+     "cert_cp_lower": 0.9946
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.8981,
+     "ece_test": 0.0136,
+     "temperature": 1.265,
+     "certified_coverage_test": 0.2813,
+     "precision_auto_test": 0.9984,
+     "cert_rows": 2000,
+     "cert_accepted": 550,
+     "cert_cp_lower": 0.9946
+    }
+   },
+   "1000-reader-32": {
+    "dataset_labels": {
+     "accuracy": 0.8983,
+     "ece_test": 0.0107,
+     "temperature": 1.254,
+     "certified_coverage_test": 0.29,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 563,
+     "cert_cp_lower": 0.9947
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.8983,
+     "ece_test": 0.0111,
+     "temperature": 1.235,
+     "certified_coverage_test": 0.2877,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 559,
+     "cert_cp_lower": 0.9947
+    }
+   },
+   "all-reader-8": {
+    "dataset_labels": {
+     "accuracy": 0.9289,
+     "ece_test": 0.0133,
+     "temperature": 1.251,
+     "certified_coverage_test": 0.3689,
+     "precision_auto_test": 0.9994,
+     "cert_rows": 2000,
+     "cert_accepted": 706,
+     "cert_cp_lower": 0.9933
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.9289,
+     "ece_test": 0.0134,
+     "temperature": 1.239,
+     "certified_coverage_test": 0.7068,
+     "precision_auto_test": 0.9965,
+     "cert_rows": 2000,
+     "cert_accepted": 1417,
+     "cert_cp_lower": 0.9936
+    }
+   },
+   "all-reader-32": {
+    "dataset_labels": {
+     "accuracy": 0.9323,
+     "ece_test": 0.009,
+     "temperature": 1.194,
+     "certified_coverage_test": 0.3235,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 640,
+     "cert_cp_lower": 0.9953
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.9323,
+     "ece_test": 0.0087,
+     "temperature": 1.181,
+     "certified_coverage_test": 0.3228,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 635,
+     "cert_cp_lower": 0.9953
+    }
+   },
+   "reader-0": {
+    "dataset_labels": {
+     "accuracy": 0.8098,
+     "ece_test": 0.0392,
+     "temperature": 1.513,
+     "certified_coverage_test": 0.2332,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 451,
+     "cert_cp_lower": 0.9934
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.8098,
+     "ece_test": 0.0388,
+     "temperature": 1.501,
+     "certified_coverage_test": 0.2389,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 465,
+     "cert_cp_lower": 0.9936
+    }
+   }
+  },
+  "ic-ettin-400m-s6000-near": {
+   "200-reader-8": {
+    "dataset_labels": {
+     "accuracy": 0.8668,
+     "ece_test": 0.0212,
+     "temperature": 1.395,
+     "certified_coverage_test": 0.0,
+     "precision_auto_test": null,
+     "cert_rows": 2000,
+     "cert_accepted": 0,
+     "cert_cp_lower": 0.0
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.8668,
+     "ece_test": 0.0213,
+     "temperature": 1.381,
+     "certified_coverage_test": 0.4334,
+     "precision_auto_test": 0.9953,
+     "cert_rows": 2000,
+     "cert_accepted": 856,
+     "cert_cp_lower": 0.9945
+    }
+   },
+   "200-reader-32": {
+    "dataset_labels": {
+     "accuracy": 0.8757,
+     "ece_test": 0.0212,
+     "temperature": 1.351,
+     "certified_coverage_test": 0.0,
+     "precision_auto_test": null,
+     "cert_rows": 2000,
+     "cert_accepted": 0,
+     "cert_cp_lower": 0.0
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.8757,
+     "ece_test": 0.0205,
+     "temperature": 1.336,
+     "certified_coverage_test": 0.3247,
+     "precision_auto_test": 0.9958,
+     "cert_rows": 2000,
+     "cert_accepted": 647,
+     "cert_cp_lower": 0.9954
+    }
+   },
+   "1000-reader-8": {
+    "dataset_labels": {
+     "accuracy": 0.9109,
+     "ece_test": 0.012,
+     "temperature": 1.286,
+     "certified_coverage_test": 0.2456,
+     "precision_auto_test": 0.9991,
+     "cert_rows": 2000,
+     "cert_accepted": 500,
+     "cert_cp_lower": 0.994
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.9109,
+     "ece_test": 0.0105,
+     "temperature": 1.271,
+     "certified_coverage_test": 0.5502,
+     "precision_auto_test": 0.9938,
+     "cert_rows": 2000,
+     "cert_accepted": 1072,
+     "cert_cp_lower": 0.9941
+    }
+   },
+   "1000-reader-32": {
+    "dataset_labels": {
+     "accuracy": 0.9154,
+     "ece_test": 0.0107,
+     "temperature": 1.241,
+     "certified_coverage_test": 0.2415,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 479,
+     "cert_cp_lower": 0.9938
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.9154,
+     "ece_test": 0.0094,
+     "temperature": 1.224,
+     "certified_coverage_test": 0.5732,
+     "precision_auto_test": 0.9964,
+     "cert_rows": 2000,
+     "cert_accepted": 1151,
+     "cert_cp_lower": 0.9933
+    }
+   },
+   "all-reader-8": {
+    "dataset_labels": {
+     "accuracy": 0.9368,
+     "ece_test": 0.0078,
+     "temperature": 1.188,
+     "certified_coverage_test": 0.2446,
+     "precision_auto_test": 1.0,
+     "cert_rows": 2000,
+     "cert_accepted": 479,
+     "cert_cp_lower": 0.9938
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.9368,
+     "ece_test": 0.0074,
+     "temperature": 1.18,
+     "certified_coverage_test": 0.6243,
+     "precision_auto_test": 0.9978,
+     "cert_rows": 2000,
+     "cert_accepted": 1245,
+     "cert_cp_lower": 0.9938
+    }
+   },
+   "all-reader-32": {
+    "dataset_labels": {
+     "accuracy": 0.9425,
+     "ece_test": 0.008,
+     "temperature": 1.114,
+     "certified_coverage_test": 0.0,
+     "precision_auto_test": null,
+     "cert_rows": 2000,
+     "cert_accepted": 0,
+     "cert_cp_lower": 0.0
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.9425,
+     "ece_test": 0.0077,
+     "temperature": 1.096,
+     "certified_coverage_test": 0.7467,
+     "precision_auto_test": 0.9963,
+     "cert_rows": 2000,
+     "cert_accepted": 1472,
+     "cert_cp_lower": 0.9938
+    }
+   },
+   "reader-0": {
+    "dataset_labels": {
+     "accuracy": 0.7763,
+     "ece_test": 0.0546,
+     "temperature": 1.56,
+     "certified_coverage_test": 0.0,
+     "precision_auto_test": null,
+     "cert_rows": 2000,
+     "cert_accepted": 0,
+     "cert_cp_lower": 0.0
+    },
+    "audited_calib_labels": {
+     "accuracy": 0.7763,
+     "ece_test": 0.0547,
+     "temperature": 1.55,
+     "certified_coverage_test": 0.3415,
+     "precision_auto_test": 0.9953,
+     "cert_rows": 2000,
+     "cert_accepted": 652,
+     "cert_cp_lower": 0.9954
+    }
+   }
+  }
+ }
+}
