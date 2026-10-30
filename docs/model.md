@@ -1,5 +1,58 @@
 # Ren: a decision model built for Meta apps
 
+## Current 150M reader: clean split and corrected certification
+
+Ren's experimental reader is `ic-ettin-150m-s6000-near`, distinct from the released
+encoder plus linear head documented below. #27 measured encoder tuning, #28
+introduced the in-context reader, and #29 separated temperature fitting,
+certification and test scoring. The earlier **25% / 65.7% certified figures are
+withdrawn**: those evaluations do not support the precision claim.
+
+The follow-up at commit `e2581ee` carves 4,000 calibration rows with seed 0 from
+MTOP's official training split, leaving 11,667 history rows and the fixed 4,386
+official test rows. Reader training already excluded MTOP training texts.
+The calibration halves contain 2,000 rows each: one fits temperature and the
+other certifies the unchanged rule-A gate. Test labels choose neither.
+
+This supersedes #29's calibration from official eval: 1,032 texts overlapped
+reader training, leaving only 1,203 clean rows and 602 certification rows.
+That earlier clean card certified zero coverage. Changing the calibration source
+increases evidence; it is not a gate-rule change. The new measured table is:
+
+| History | Certified test coverage | Precision of accepted answers |
+| --- | ---: | ---: |
+| none | 23.32% | 100.00% |
+| 200 human labels | 28.57% | 99.76% |
+| 1,000 human labels | 28.27% | 99.84% |
+| all human labels (11,667) | 36.89% | 99.94% |
+| 200 teacher-labelled rows | 30.19% | 99.77% |
+
+History conditions use eight nearest examples; “none” is zero-shot. Source:
+[150M clean card](results/s2/incontext-ic-ettin-150m-s6000-near-clean.json).
+The [200 teacher-labelled history result](results/s2/muse-teacher-mtop.json)
+measured 30.19% coverage at 99.77% accepted precision. BANKING77 and the logistic
+head still certify zero coverage. These are measured point estimates on the fixed
+split, not guarantees under distribution shift. The split change follows earlier
+experiments; an untouched external evaluation would provide stronger evidence.
+
+[S3R's registered audit](results/s3r/README.md) tested 500 paired MTOP messages.
+When the correct intent was removed from the options, the unchanged gate accepted
+4, 9 and 9 wrong answers at 0, 8 and 32 examples: **0% accepted precision** in
+that condition. Other registered attacks measured at least 99% on this sample,
+with confidence intervals too wide to establish a 99% lower bound. This supports
+an explicit option-set and distribution limit on the claim.
+
+On a four-CPU Modal allocation, the 150M reader measured p50/p95 of **325/347 ms**
+with no examples, **401/451 ms** with eight, and **610/677 ms** with 32; process
+peak RSS was **2.42 GiB**, including the retrieval index and initialization.
+Timings cover single-request CPU FP32 tokenization through softmax, excluding
+retrieval and API overhead; [raw measurements and the 32M comparison](results/s3r/README.md#cpu-serving-single-requests-113-options)
+record scope and limits. A [separate measurement](results/s8/latency-reader.md) on
+another four-CPU allocation, with 200-row history and retrieval included, gave
+**644 / 764 / 1,346 ms** p95 at 0 / 8 / 32 examples. The 150M reader meets a
+one-second p95 with up to eight examples on both hosts; with 32 it depends on the
+host. The 32M reader stays under 233 ms p95 in every condition measured.
+
 ## Why
 
 Ren is an independently released decision model built for Meta's platform. It

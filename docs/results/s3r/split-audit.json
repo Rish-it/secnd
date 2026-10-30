@@ -1,0 +1,39 @@
+{
+  "source_zip_sha256": "0c086500aed2ed48d3df383c91664b152e4a46e2adef6a635fa16d508ebaec0b",
+  "normalizers": {
+    "whitespace": "lowercase and collapse whitespace",
+    "training": "backend.finetune._norm: lowercase and replace nonalphanumeric runs with spaces"
+  },
+  "samples": {
+    "primary": {
+      "rows": 500,
+      "unique_exact_texts": 500,
+      "exact_overlap_history_rows": 0,
+      "whitespace": {
+        "unique_texts": 500,
+        "overlap_history_rows": 3,
+        "overlap_calib_rows": 1
+      },
+      "training": {
+        "unique_texts": 500,
+        "overlap_history_rows": 7,
+        "overlap_calib_rows": 4
+      }
+    },
+    "all_test": {
+      "rows": 4386,
+      "unique_exact_texts": 4384,
+      "exact_overlap_history_rows": 7,
+      "whitespace": {
+        "unique_texts": 4381,
+        "overlap_history_rows": 32,
+        "overlap_calib_rows": 16
+      },
+      "training": {
+        "unique_texts": 4373,
+        "overlap_history_rows": 69,
+        "overlap_calib_rows": 30
+      }
+    }
+  }
+}
