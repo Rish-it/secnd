@@ -57,6 +57,31 @@ jobs:
         if: always()
         run: docker compose down
 
+  inbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.26"
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: uv sync --locked
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:inbox
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inbox-browser-check
+          path: |
+            docs/results/c1-inbox/
+            test-results/
+
   evals:
     runs-on: ubuntu-latest
     timeout-minutes: 10

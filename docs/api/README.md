@@ -218,3 +218,28 @@ This service runs in one API process. Multiple processes require a durable
 worker queue and coordinated model/cache writes. Prepared predictions return
 409 when no model has passed the gate. Initial import fitting uses a worker
 thread; subsequent answer fitting stays off the request path.
+
+## Decision inbox
+
+The app opens the selected workspace's inbox. `?workspace=<id>` selects a workspace;
+Teach and Metrics use that same workspace. Source badges distinguish WhatsApp,
+Messenger, Instagram, Ads and workspace submissions.
+
+Existing `/queue`, `/feed`, `/predict`, `/answers`, `/models` and rollback routes
+serve the screen. Three small additions cover data those routes could not return:
+
+- `GET /labels`: every allowed workspace label, including labels outside prediction top-k.
+- `GET /overridden`: cursor-paginated decisions whose latest active human answer differs
+  from the saved prediction. Corrected automatic answers leave `/feed`.
+- `POST /answers:undo` with `{"idempotency_key":"<original answer key>"}`: retract the
+  latest active answer in reverse order. Repeat undo is idempotent; replaying a retracted
+  answer key returns 409. Other workspace keys return 404. The answer remains in the
+  audit ledger, leaves training history, and its question or original automatic answer
+  returns. The app retains its undo stack in browser session storage.
+
+Saved predictions carry `source_app` and their model's `cp_lower_bound`. Evidence lists
+nearest training-history examples; fixed calibration rows never enter that list.
+Older predictions may have no saved bound or neighbours and show them as unavailable.
+Undo restores the pre-answer model before rebuilding from active history, so a refused
+candidate cannot leave the retracted answer in the active classifier. The gate remains
+unchanged. Undo changes local labels; it does not recall a previously delivered message.
