@@ -1,0 +1,21 @@
+README.md
+  s_d75a8bfdc0509a::t_14505724a6f178 20-36
+docs/model.md
+  s_d75a8bfdc0509a::t_14505724a6f178 56-91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8b949b271ff1ac7f6756475923e1a4ad73c9dbbc",
+  "prompts": {},
+  "sessions": {
+    "s_d75a8bfdc0509a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1890a-afae-7d30-972c-76425591d4d6",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
