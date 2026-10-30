@@ -1,0 +1,21 @@
+backend/latency_reader.py
+  s_9245a16bb07969::t_6028f43a780baf 19,58,65,84-88,94,121,133,141,172
+backend/modal_latency_reader.py
+  s_9245a16bb07969::t_62c968687ff08c 36-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "383412eb54b3c57d7aa495cce65cf68b7c14b892",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
