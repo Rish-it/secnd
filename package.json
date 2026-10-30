@@ -9,6 +9,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
+    "test:reader": "npm run build && playwright test --config playwright.reader.config.ts",
     "dev": "concurrently --kill-others --names api,web --prefix-colors cyan,green \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "uv run uvicorn backend.api:app --reload --host 127.0.0.1 --port 8000",
     "dev:web": "npm run dev --workspace @secnd/frontend",

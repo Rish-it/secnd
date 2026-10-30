@@ -1,3 +1,4 @@
+import ReaderStatus from "./ReaderStatus";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, percent } from "./api";
 import type { Dataset, Metrics as WorkspaceMetrics, ModelVersion } from "./api";
@@ -104,31 +105,52 @@ export default function Metrics({ refresh }: { refresh: number }) {
         `${30 + (index / Math.max(1, history.length - 1)) * 380},${148 - row.coverage * 125}`,
     )
     .join(" ");
+  const readerWorkspace =
+    dataset === "workspace" && card.model_version.startsWith("ren-reader-");
+  const datasetPicker = (
+    <section className="dataset-picker" aria-label="Evaluation dataset">
+      <div>
+        <p className="eyebrow">PUBLISHED EVALUATIONS</p>
+        <p>
+          {metrics.dataset
+            ? "Fixed held-out test sets · 2,000 training labels · seed 0"
+            : readerWorkspace
+              ? `Workspace history · ${metrics.labels} rows`
+              : `Fixed workspace calibration · ${metrics.labels} training labels`}
+        </p>
+      </div>
+      <div className="dataset-buttons">
+        {(["workspace", "mtop", "banking77", "ipsa"] as const).map((name) => (
+          <button
+            key={name}
+            aria-pressed={dataset === name}
+            onClick={() => {
+              if (name === dataset) return;
+              setLoading(true);
+              setDataset(name);
+            }}
+          >
+            {name.toUpperCase()}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+  if (readerWorkspace)
+    return (
+      <div className="metrics-workspace">
+        <ReaderStatus />
+        {datasetPicker}
+        <p className="evidence-note">
+          Confirmed answers update the reader history. Published results above
+          are separate from workspace measurements.
+        </p>
+      </div>
+    );
   return (
     <div className="metrics-workspace">
-      <section className="dataset-picker" aria-label="Evaluation dataset">
-        <div>
-          <p className="eyebrow">PUBLISHED EVALUATIONS</p>
-          <p>{metrics.dataset
-            ? "Fixed held-out test sets · 2,000 training labels · seed 0"
-            : `Fixed workspace calibration · ${metrics.labels} training labels`}</p>
-        </div>
-        <div className="dataset-buttons">
-          {(["workspace", "mtop", "banking77", "ipsa"] as const).map((name) => (
-            <button
-              key={name}
-              aria-pressed={dataset === name}
-              onClick={() => {
-                if (name === dataset) return;
-                setLoading(true);
-                setDataset(name);
-              }}
-            >
-              {name.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </section>
+      <ReaderStatus />
+      {datasetPicker}
       {metrics.dataset && (
         <p className="evidence-note">
           Recorded {metrics.dataset.toUpperCase()} evaluation. These numbers
@@ -145,7 +167,8 @@ export default function Metrics({ refresh }: { refresh: number }) {
       {metrics.guarded && (
         <p role="status" className="gate-warning">
           Guarded: automatic answers paused. Spot-checks show precision below
-          the target; every new item goes to a person until a new version passes.
+          the target; every new item goes to a person until a new version
+          passes.
         </p>
       )}
       {error && (
@@ -165,8 +188,8 @@ export default function Metrics({ refresh }: { refresh: number }) {
             {metrics.guarded
               ? "Automatic answers paused (guarded)."
               : card.coverage === 0
-              ? "Not certified yet. Answers nothing yet."
-              : `${measuredPercent(card.coverage)} answered automatically${missedTarget ? "; precision target missed" : ""}.`}
+                ? "Not certified yet. Answers nothing yet."
+                : `${measuredPercent(card.coverage)} answered automatically${missedTarget ? "; precision target missed" : ""}.`}
           </h2>
           <p>
             {card.threshold == null

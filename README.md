@@ -7,7 +7,9 @@ become questions for a person, whose answers train the next classifier version.
 
 The open encoder is [Secnd-AI/ren](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0):
 release **ren-1.0.0**, tag **v1.0.0**, pinned by immutable revision and
-[SHA-256 manifest](backend/encoder-ren-1.0.0.json). Serving runs on CPU.
+[SHA-256 manifest](backend/encoder-ren-1.0.0.json). The app defaults to the released encoder and workspace classifier.
+The 150M CPU reader and optional 400M GPU reader are explicitly configurable.
+[Serving configuration and required local reader files](docs/serving.md).
 
 On the fixed English MTOP split at 2,000 workspace labels, the released encoder
 and calibrated head measured **42.42% automatic coverage at 99.93% test precision**.
@@ -36,9 +38,16 @@ wrong answers when the correct intent is absent from its options.
 
 ## Run one container
 
+The default command starts with the released encoder and workspace classifier:
+
 ```sh
 docker compose up --build
 ```
+
+To opt into a reader, install its checkpoint and pinned MiniLM retrieval cache,
+then select it in [serving configuration](docs/serving.md). Existing registered
+workspaces keep their own calibrated gates unless explicitly selected for a reader.
+An explicitly configured reader fails startup if its files or device are unavailable.
 
 Open **http://localhost:8000**. The build downloads and verifies the pinned public
 encoder. Runtime can copy it into the persistent data volume and infer offline.
@@ -58,10 +67,11 @@ editable history for its suggestions. Saved examples are shared by label-list
 hash; resuming keeps edits and deletions and does not buy completed examples
 again. Failed or interrupted requests require review before another paid attempt.
 
-This mode requires the experimental 150M reader checkpoint (`encoder/` and
-`scorer.pt`) under `SECND_DATA_DIR/encoders/ic-ettin-150m-s6000-near`, plus
-`SECND_META_API_KEY`. The released encoder above is a separate artifact. Reader
-and retrieval inference run on CPU with up to eight nearest history examples.
+This mode requires the configured reader checkpoint (default 150M; `encoder/` and
+`scorer.pt`) under `SECND_DATA_DIR/encoders/<model_id>`, the pinned local MiniLM
+retrieval cache, plus `SECND_META_API_KEY`. The released encoder above is a separate
+artifact. The default reader and retrieval inference run on CPU with up to eight
+nearest history examples.
 Generation refuses to start if the reader cannot load. With only invented
 history there is no independent workspace calibration, so every suggestion
 requires human review. Confirmed answers join the history without a teacher call.
@@ -149,6 +159,10 @@ npm run check
 Development UI: **http://localhost:3000**. API docs: **http://127.0.0.1:8000/docs**.
 Vite proxies `/api` to FastAPI. Production serves the built frontend and API from
 one process. `uv.lock` and `package-lock.json` pin dependencies.
+
+The app defaults to `SECND_SERVING_BACKEND=head`; reader checkpoints are optional.
+Reader choices, workspace overrides and frozen safety policy are documented in
+[serving configuration](docs/serving.md).
 
 Configuration stays in the backend. `SECND_DATA_DIR` defaults to `.data` locally;
 `SECND_FEATURIZER` defaults to `pt-minilm`, with a logged base-encoder fallback on

@@ -1,0 +1,60 @@
+{
+ "ic-ettin-150m-s6000-near": {
+  "0": {
+   "test_rows": 4386,
+   "accepted_without_floor": 1048,
+   "accepted": 513,
+   "errors": 0,
+   "coverage": 0.117,
+   "precision": 1.0,
+   "low95": 0.9928
+  },
+  "8": {
+   "test_rows": 4386,
+   "accepted_without_floor": 3100,
+   "accepted": 476,
+   "errors": 0,
+   "coverage": 0.1085,
+   "precision": 1.0,
+   "low95": 0.9923
+  },
+  "32": {
+   "test_rows": 4386,
+   "accepted_without_floor": 1416,
+   "accepted": 707,
+   "errors": 0,
+   "coverage": 0.1612,
+   "precision": 1.0,
+   "low95": 0.9948
+  }
+ },
+ "ic-ettin-400m-s6000-near": {
+  "0": {
+   "test_rows": 4386,
+   "accepted_without_floor": 1498,
+   "accepted": 630,
+   "errors": 0,
+   "coverage": 0.1436,
+   "precision": 1.0,
+   "low95": 0.9942
+  },
+  "8": {
+   "test_rows": 4386,
+   "accepted_without_floor": 2736,
+   "accepted": 609,
+   "errors": 0,
+   "coverage": 0.1389,
+   "precision": 1.0,
+   "low95": 0.994
+  },
+  "32": {
+   "test_rows": 4386,
+   "accepted_without_floor": 3275,
+   "accepted": 322,
+   "errors": 0,
+   "coverage": 0.0734,
+   "precision": 1.0,
+   "low95": 0.9886
+  }
+ }
+}

@@ -492,6 +492,16 @@
             "title": "Probabilities",
             "type": "object"
           },
+          "reader": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReaderDecision"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "reasons": {
             "$ref": "#/components/schemas/Reasons"
           },
@@ -1490,6 +1500,221 @@
         "title": "Proposal",
         "type": "object"
       },
+      "ReaderBenchmark": {
+        "properties": {
+          "accuracy": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy"
+          },
+          "audited_calibration_labels": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audited Calibration Labels"
+          },
+          "calibration_audit": {
+            "const": "model",
+            "title": "Calibration Audit",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "evaluation_file": {
+            "title": "Evaluation File",
+            "type": "string"
+          },
+          "floor_result_file": {
+            "title": "Floor Result File",
+            "type": "string"
+          },
+          "history_rows": {
+            "title": "History Rows",
+            "type": "integer"
+          },
+          "policy_file": {
+            "title": "Policy File",
+            "type": "string"
+          },
+          "with_floor_accepted": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Accepted"
+          },
+          "with_floor_coverage": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Coverage"
+          },
+          "with_floor_errors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Errors"
+          },
+          "with_floor_low95": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Low95"
+          },
+          "with_floor_precision": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Precision"
+          },
+          "with_floor_sample": {
+            "title": "With Floor Sample",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dataset",
+          "history_rows",
+          "accuracy",
+          "with_floor_coverage",
+          "with_floor_precision",
+          "with_floor_sample",
+          "with_floor_accepted",
+          "with_floor_errors",
+          "with_floor_low95",
+          "calibration_audit",
+          "audited_calibration_labels",
+          "evaluation_file",
+          "floor_result_file",
+          "policy_file"
+        ],
+        "title": "ReaderBenchmark",
+        "type": "object"
+      },
+      "ReaderDecision": {
+        "properties": {
+          "device": {
+            "title": "Device",
+            "type": "string"
+          },
+          "examples": {
+            "title": "Examples",
+            "type": "integer"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "policy_complete": {
+            "title": "Policy Complete",
+            "type": "boolean"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "scope_authorized": {
+            "title": "Scope Authorized",
+            "type": "boolean"
+          },
+          "support": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": -1.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support"
+          },
+          "support_floor": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Floor"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          }
+        },
+        "required": [
+          "model_id",
+          "revision",
+          "device",
+          "examples",
+          "support",
+          "support_floor",
+          "temperature",
+          "policy_complete",
+          "scope_authorized"
+        ],
+        "title": "ReaderDecision",
+        "type": "object"
+      },
       "Reasons": {
         "properties": {
           "merchant_memory": {
@@ -1535,6 +1760,146 @@
           "count"
         ],
         "title": "ReliabilityBin",
+        "type": "object"
+      },
+      "ServingStatus": {
+        "properties": {
+          "backend": {
+            "enum": [
+              "head",
+              "reader"
+            ],
+            "title": "Backend",
+            "type": "string"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReaderBenchmark"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "device": {
+            "title": "Device",
+            "type": "string"
+          },
+          "examples": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Examples"
+          },
+          "guarded": {
+            "default": false,
+            "title": "Guarded",
+            "type": "boolean"
+          },
+          "history_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History Rows"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "policy_complete": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Complete"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "scope_matches": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope Matches"
+          },
+          "scope_note": {
+            "title": "Scope Note",
+            "type": "string"
+          },
+          "support_floor": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Floor"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "required": [
+          "backend",
+          "model_id",
+          "device",
+          "scope_note"
+        ],
+        "title": "ServingStatus",
         "type": "object"
       },
       "SliceMetrics": {
@@ -4175,6 +4540,90 @@
           }
         },
         "summary": "Queue",
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/serving": {
+      "get": {
+        "description": "Active serving configuration and separate published reader evidence.",
+        "operationId": "serving_api_v1_workspaces__ws__serving_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServingStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Serving",
         "tags": [
           "Workspace"
         ]
