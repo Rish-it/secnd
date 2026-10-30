@@ -1,0 +1,21 @@
+backend/modal_bench.py
+  s_9245a16bb07969::t_ec7a795657d864 93,95
+docs/results/s2/incontext-ic-ettin-400m-s6000-near.json
+  s_9245a16bb07969::t_7cd80375ec2f25 1-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "39f3c3f664d87c22c909ab406e19bad503fde259",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
