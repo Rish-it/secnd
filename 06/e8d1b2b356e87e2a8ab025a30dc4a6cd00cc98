@@ -1,0 +1,25 @@
+backend/panel_refit.py
+  s_9245a16bb07969::t_279811ec0649f9 1-106
+backend/tests/test_panel_votes.py
+  s_9245a16bb07969::t_6bc5f967cbd77d 44-52
+docs/results/s3r/README.md
+  s_9245a16bb07969::t_53df2623395383 151-164
+docs/results/s3r/model-audit.json
+  s_9245a16bb07969::t_5125aa6f94f888 1-480
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "06e8d1b2b356e87e2a8ab025a30dc4a6cd00cc98",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
