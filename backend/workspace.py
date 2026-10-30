@@ -38,6 +38,7 @@ class WorkspaceService:
         self._guard = threading.RLock()
         self._locks, self._loops, self._positions = {}, {}, {}
         self._pending, self._errors = set(), {}
+        self.cold_start = None
         # carmy: one process; use a durable worker queue before running multiple API processes.
         self._executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="workspace-answer")
 
@@ -99,9 +100,13 @@ class WorkspaceService:
             }
 
     def has_model(self, workspace):
+        if self.cold_start and self.cold_start.owns(workspace):
+            return True
         return Registry(self.data_dir, workspace).current() is not None
 
     def card(self, workspace):
+        if self.cold_start and self.cold_start.owns(workspace):
+            return self.cold_start.card(workspace)
         registry = Registry(self.data_dir, workspace)
         current = registry.current()
         return (
@@ -115,6 +120,13 @@ class WorkspaceService:
 
     def metrics(self, workspace):
         with self._lock(workspace):
+            if self.cold_start and self.cold_start.owns(workspace):
+                return dict(
+                    card=self.card(workspace),
+                    history=[],
+                    guarded=False,
+                    labels=len(self.cold_start.history(workspace)),
+                )
             registry = Registry(self.data_dir, workspace)
             history = []
             for version in registry.versions():
@@ -206,6 +218,8 @@ class WorkspaceService:
 
     def route(self, workspace, frame: pd.DataFrame) -> list[dict]:
         with self._lock(workspace):
+            if self.cold_start and self.cold_start.owns(workspace):
+                return self.cold_start.route(workspace, frame)
             loop = self._runtime(workspace)
             decisions = [
                 Decision.model_validate(row).model_dump(mode="json") for row in loop.route(frame)
@@ -216,6 +230,9 @@ class WorkspaceService:
             return decisions
 
     def answer(self, workspace, item_id, label, idempotency_key, *, source=None) -> dict:
+        if self.cold_start and self.cold_start.owns(workspace):
+            with self._lock(workspace):
+                return self.cold_start.answer(workspace, item_id, label, idempotency_key)
         item = self.store.item(workspace, item_id)
         if source is None:
             previous = self.store.latest_prediction(workspace, item_id)
@@ -297,4 +314,6 @@ class WorkspaceService:
                 )
 
     def close(self):
+        if self.cold_start:
+            self.cold_start.close()
         self._executor.shutdown(wait=True)

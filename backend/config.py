@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     meta_budget_usd: Decimal = Field(default=Decimal("10"), ge=0, le=30)
     nebius_api_key: SecretStr = Field(default=SecretStr(""), validation_alias="NEBIUS_API_KEY")
     nebius_budget_usd: Decimal = Field(default=Decimal("10"), ge=0, le=25)
+    # Inventing starting history pays Muse Wonder from a public endpoint: off unless the operator
+    # turns it on, and capped across every workspace together.
+    cold_start_paid: bool = False
+    cold_start_total_usd: Decimal = Field(default=Decimal("3"), ge=0, le=10)
 
     @property
     def database_path(self) -> Path:

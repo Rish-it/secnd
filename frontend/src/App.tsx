@@ -5,6 +5,7 @@ import { api, percent } from "./api";
 import type { EvalCard, Preview } from "./api";
 import Companion from "./Companion";
 import Metrics from "./Metrics";
+import ColdStart from "./ColdStart";
 
 type View = "Teach" | "Companion" | "Metrics";
 type Connection = "connecting" | "online" | "offline";
@@ -272,6 +273,9 @@ export default function App() {
                   <span className="orbit-dot three" />
                 </div>
               </div>
+              <ColdStart
+                onChange={() => setMetricsRefresh((value) => value + 1)}
+              />
               <section className="teach-card" aria-labelledby="upload-title">
                 <div className="section-heading">
                   <div>

@@ -51,6 +51,22 @@ rollback and `guarded` when automatic answers are paused. Published evaluations
 and the recorded teacher handoff remain separate from workspace measurements.
 Chat currently remains a preview.
 
+Teach also offers **Start with only label names**: enter 2–128 labels or import
+a one-column list. Muse Wonder on the Meta API invents up to ten starting
+messages per label, with a **$1 cumulative workspace cap**, then Ren reads the
+editable history for its suggestions. Saved examples are shared by label-list
+hash; resuming keeps edits and deletions and does not buy completed examples
+again. Failed or interrupted requests require review before another paid attempt.
+
+This mode requires the experimental 150M reader checkpoint (`encoder/` and
+`scorer.pt`) under `SECND_DATA_DIR/encoders/ic-ettin-150m-s6000-near`, plus
+`SECND_META_API_KEY`. The released encoder above is a separate artifact. Reader
+and retrieval inference run on CPU with up to eight nearest history examples.
+Generation refuses to start if the reader cannot load. With only invented
+history there is no independent workspace calibration, so every suggestion
+requires human review. Confirmed answers join the history without a teacher call.
+[Cold-start API and budget behavior](docs/api/README.md#start-with-label-names).
+
 ## CSV to a live decision
 
 This generates 200 deliberately noisy illustrative rows, not a benchmark:

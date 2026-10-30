@@ -73,6 +73,17 @@ export type Preview = {
   rows: Record<string, string>[];
 };
 export type Result<T> = { data: T; fixture: boolean };
+export type InventedExample = { id: string; label: string; text: string };
+export type ColdStartState = {
+  workspace_id: string;
+  labels: string[];
+  status: "queued" | "generating" | "ready" | "stopped";
+  error: string | null;
+  history: InventedExample[];
+  spent_usd: string;
+  cap_usd: string;
+  demo: boolean;
+};
 const base = "/api/v1/workspaces/default";
 
 async function request<T>(
@@ -115,6 +126,36 @@ function json(body: unknown): RequestInit {
   };
 }
 export const api = {
+  coldState: () => request<ColdStartState>(`${base}/cold-start`),
+  coldStart: (labels: string[]) =>
+    request<ColdStartState>(`${base}/cold-start`, json({ labels, paid: true })),
+  importLabels(file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("paid", "true");
+    return request<ColdStartState>(`${base}/cold-start:import`, {
+      method: "POST",
+      body: form,
+    });
+  },
+  editExample: (row: InventedExample) =>
+    request<ColdStartState>(
+      `${base}/cold-start/history/${encodeURIComponent(row.id)}`,
+      {
+        ...json({ text: row.text, label: row.label }),
+        method: "PATCH",
+      },
+    ),
+  deleteExample: (id: string) =>
+    request<ColdStartState>(
+      `${base}/cold-start/history/${encodeURIComponent(id)}`,
+      { method: "DELETE" },
+    ),
+  predict: (text: string, item_id: string) =>
+    request<Decision[]>(
+      `${base}/predict`,
+      json({ items: [{ item_id, text }] }),
+    ),
   preview(file: File) {
     const form = new FormData();
     form.append("file", file);
@@ -147,7 +188,7 @@ export const api = {
       item_id: string;
       coverage: number;
       model_version: string;
-      retrain: "queued" | "fixture";
+      retrain: "queued" | "fixture" | "history_updated";
     }>(`${base}/answers`, {
       ...json({ item_id, label }),
       headers: {

@@ -75,7 +75,9 @@ export default function Companion({ open, onOpen, onClose, onAnswer }: Props) {
       setNotice(
         result.fixture
           ? "Example answer checked. Your answer has not been saved."
-          : "Answer saved. Ren is checking the next model version.",
+          : result.data.retrain === "history_updated"
+            ? "Answer saved to Ren’s history."
+            : "Answer saved. Ren is checking the next model version.",
       );
       setOther(null);
       setOtherLabel("");
