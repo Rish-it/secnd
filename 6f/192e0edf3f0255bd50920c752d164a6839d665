@@ -1,0 +1,19 @@
+docs/results/s8/latency-gpu-ic-ettin-400m-s6000-near.json
+  s_9245a16bb07969::t_86cc586cbf5b52 1-1967
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6f192e0edf3f0255bd50920c752d164a6839d665",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
