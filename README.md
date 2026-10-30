@@ -17,6 +17,23 @@ benchmark results, separate from an uploaded workspace's calibration card.
 [re-splits](docs/results/s3/robustness-mtop-pt-minilm+lr-b2000.json) ·
 [model and limits](docs/model.md).
 
+The experimental 150M reader also uses Meta models as teachers for its history.
+On fixed MTOP splits, **3,000 teacher-labelled history rows and zero human history
+labels** measured **87.7% accuracy, 42.5% certified coverage and 99.7% accepted
+precision**. Gold calibration labels are still required. Inventing ten messages
+per label from label names alone measured **84.95% accuracy and 25.6% coverage**,
+about equal to 200 human history labels. These are offline reader results;
+Meta models supply history and Ren makes the decisions.
+[Teacher protocol and results](docs/results/s2/teacher.md).
+
+On typed-decisions, the fixed five-member ensemble measured **80.25% accuracy**.
+The pre-registered label-fit point has Brier **0.098** and ECE **0.019**; a later
+teacher-distribution fit has Brier **0.042** and ECE **0.169**, at the same accuracy.
+Both operating points remain reported together. The reader can still accept
+wrong answers when the correct intent is absent from its options.
+[Ensemble protocol](docs/results/s2/typed-ensemble-plan.md) ·
+[Missing-intent audit](docs/results/s3r/README.md).
+
 ## Run one container
 
 ```sh
