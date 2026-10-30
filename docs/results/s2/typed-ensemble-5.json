@@ -6,6 +6,7 @@
     "typed-ettin-400m-e8-s0",
     "typed-ettin-400m-e8-s1"
   ],
+  "temperature_target": "label",
   "temperatures": {
     "choice": 0.425,
     "noul": 0.375,

@@ -40,6 +40,7 @@ from backend.muse import (
     MuseOutputError,
     Usage,
 )
+from backend.providers import ledger_path, provider_settings
 
 TASK = {"escalate": "s2-mtop-escalate", "teacher": "s2-mtop-teacher"}
 CAP = Decimal("12")
@@ -49,6 +50,7 @@ EXAMPLES = 8
 TEST_ROWS = 1000
 # Eight parallel calls hit the provider's rate limit after ~50 requests; two do not.
 WORKERS = 2
+STOP_AFTER = 20
 MODEL = "ic-ettin-150m-s6000-near"
 # Until a pilot has measured real usage, estimate each call conservatively.
 GUESS = Usage(prompt_tokens=2000, completion_tokens=2048)
@@ -73,8 +75,22 @@ def load_cache(path: Path) -> dict:
     return json.loads(path.read_text()) if path.exists() else {}
 
 
-def ask(settings, cache_path, jobs, *, task_name, label, allow_paid):
-    """Run `label(job)` for every job not yet cached; jobs are (key, payload)."""
+def ask(
+    settings,
+    cache_path,
+    jobs,
+    *,
+    task_name,
+    label,
+    allow_paid,
+    provider="baseten",
+    cap=CAP,
+    capped=None,
+    workers=WORKERS,
+    fields=("label", "confidence", "usage", "latency_ms"),
+):
+    """Run `label(job)` for every job not yet cached; jobs are (key, payload). Spend on the
+    `capped` tasks together stays within `cap` on the provider's own ledger."""
     cache = load_cache(cache_path)
     missing = [(k, job) for k, job in jobs if k not in cache]
     print(f"{task_name}: {len(jobs) - len(missing)} cached, {len(missing)} to ask", flush=True)
@@ -91,20 +107,18 @@ def ask(settings, cache_path, jobs, *, task_name, label, allow_paid):
         if seen
         else GUESS
     )
+    settings = provider_settings(settings, provider)
+    ledger = ledger_path(SPEND_PATH.parent, provider)
     with BudgetRun(
         settings,
         task=task_name,
         rows=len(missing),
-        provider="baseten",
+        provider=provider,
         measured_tokens=measured,
-        ledger_path=SPEND_PATH,
+        ledger_path=ledger,
     ) as run:
-        run.budget = min(
-            run.budget,
-            CAP
-            - task_spend(SPEND_PATH, TASK["escalate"])
-            - task_spend(SPEND_PATH, TASK["teacher"]),
-        )
+        spent = sum(task_spend(ledger, t) for t in (capped or TASK.values()))
+        run.budget = min(run.budget, cap - spent)
         print(f"estimate ${run.estimate:.2f}, allowed ${run.budget:.2f}", flush=True)
         if run.estimate > run.budget:
             raise MuseError("Estimate exceeds the remaining task cap.")
@@ -119,17 +133,20 @@ def ask(settings, cache_path, jobs, *, task_name, label, allow_paid):
                             raise
 
             failures = 0
-            with ThreadPoolExecutor(max_workers=WORKERS) as workers:
-                pending = {workers.submit(one, job): k for k, job in missing}
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                pending = {pool.submit(one, job): k for k, job in missing}
                 for n, future in enumerate(as_completed(pending), 1):
                     try:
                         result = future.result()
                     except MuseError:
                         failures += 1
+                        # failed calls are booked at their full reservation: stop, don't burn it
+                        if failures >= STOP_AFTER and failures > n - failures:
+                            pool.shutdown(cancel_futures=True)
+                            print(f"  stopping: {failures} of {n} calls failed", flush=True)
+                            break
                         continue
-                    cache[pending[future]] = result.model_dump(
-                        mode="json", include={"label", "confidence", "usage", "latency_ms"}
-                    )
+                    cache[pending[future]] = result.model_dump(mode="json", include=set(fields))
                     if n % 50 == 0 or n == len(missing):
                         staged = cache_path.with_suffix(".tmp")
                         staged.write_text(json.dumps(cache, sort_keys=True))

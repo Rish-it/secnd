@@ -42,6 +42,7 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
     model.scorer.load_state_dict(
         torch.load(folder / "scorer.pt", map_location=dev, weights_only=True)
     )
+    model.none = (folder / "none").exists()
     tok = AutoTokenizer.from_pretrained(folder / "encoder")
     load_seconds = time.perf_counter() - start
     task = ic.held_out(data_dir)["mtop"]
@@ -75,7 +76,7 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
         )
 
     def infer(text, opts, context):
-        ids = ic.render(tok, task, text, opts, context)
+        ids = ic.render(tok, task, text, opts, context, model.none)
         packed = ic.batch(tok, [(ids, 0)], dev)
         with torch.autocast(dev, dtype=torch.bfloat16, enabled=dev == "cuda"):
             logits = model(*packed[:4]).float()
@@ -132,7 +133,7 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
         half = np.random.default_rng(0).permutation(len(yc))
         fit, cert = half[: len(yc) // 2], half[len(yc) // 2 :]
         temperature = fit_temperature(yc[fit], pc[fit])
-        tau, _, _, _ = choose_threshold(yc[cert], scale(pc[cert], temperature))
+        tau, _, _, _ = choose_threshold(yc[cert], scale(pc[cert], temperature)[:, : len(options)])
         conditions = {}
         attack_names = (
             ("baseline", "natural")
@@ -167,7 +168,8 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
                     ic.nearest(task, query, shots, allowed=set(opts), skip=text) if shots else []
                 )
                 p, length = infer(text, opts, context)
-                p = scale(p, temperature)[0]
+                # a NONE column shares the temperature but is never an answer
+                p = scale(p, temperature)[0][: len(opts)]
                 pred = opts[int(p.argmax())]
                 records.append(
                     dict(

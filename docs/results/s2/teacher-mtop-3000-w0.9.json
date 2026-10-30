@@ -1,0 +1,68 @@
+{
+  "dataset": "mtop",
+  "model": "ic-ettin-150m-s6000-near",
+  "history": 3000,
+  "below": 0.9,
+  "relabelled": 583,
+  "teacher_accuracy_on_history": 0.8853,
+  "gold-reader-8": {
+    "accuracy": 0.915,
+    "ece_test": 0.0137,
+    "temperature": 1.266,
+    "certified_coverage_test": 0.2766,
+    "precision_auto_test": 1.0,
+    "cert_rows": 2000,
+    "cert_accepted": 539,
+    "cert_cp_lower": 0.9945
+  },
+  "gold-reader-32": {
+    "accuracy": 0.9161,
+    "ece_test": 0.0114,
+    "temperature": 1.233,
+    "certified_coverage_test": 0.5187,
+    "precision_auto_test": 0.9965,
+    "cert_rows": 2000,
+    "cert_accepted": 992,
+    "cert_cp_lower": 0.9937
+  },
+  "gold-head": {
+    "accuracy": 0.8782,
+    "ece_test": 0.0153,
+    "temperature": 0.715,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 2000,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  },
+  "taught-reader-8": {
+    "accuracy": 0.8769,
+    "ece_test": 0.012,
+    "temperature": 1.521,
+    "certified_coverage_test": 0.2921,
+    "precision_auto_test": 1.0,
+    "cert_rows": 2000,
+    "cert_accepted": 573,
+    "cert_cp_lower": 0.9948
+  },
+  "taught-reader-32": {
+    "accuracy": 0.8771,
+    "ece_test": 0.0122,
+    "temperature": 1.48,
+    "certified_coverage_test": 0.425,
+    "precision_auto_test": 0.9968,
+    "cert_rows": 2000,
+    "cert_accepted": 796,
+    "cert_cp_lower": 0.9941
+  },
+  "taught-head": {
+    "accuracy": 0.8112,
+    "ece_test": 0.0219,
+    "temperature": 0.851,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 2000,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  }
+}

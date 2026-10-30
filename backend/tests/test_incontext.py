@@ -50,3 +50,25 @@ def test_score_chooses_nothing_from_test_labels():
     after = ic.score(task, p)
     fixed = ("temperature", "cert_rows", "cert_accepted", "cert_cp_lower")
     assert all(before[k] == after[k] for k in fixed)
+
+
+def test_dropped_gold_leaves_its_examples_out_and_answers_none():
+    task = _task()
+    rng = np.random.default_rng(0)
+    for _ in range(20):
+        text, options, slot, shots = ic.episode(task, rng, 4, drop=1.0)
+        gold = dict(task.train)[text]
+        assert gold not in options and slot == len(options)
+        assert all(y in options and y != gold for _, y in shots)
+
+
+def test_none_column_never_answers():
+    task = _task()
+    task.calib = [(f"c{i}", 0) for i in range(600)]
+    task.test = [(f"t{i}", 0) for i in range(50)]
+    # every row puts nearly all its mass on NONE (the fourth column)
+    p = {
+        part: np.tile([0.02, 0.01, 0.01, 0.96], (len(getattr(task, part)), 1)) for part in ic.PARTS
+    }
+    report = ic.score(task, p)
+    assert report["accuracy"] == 1.0 and report["certified_coverage_test"] == 0.0

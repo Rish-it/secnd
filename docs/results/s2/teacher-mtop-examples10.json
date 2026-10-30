@@ -1,0 +1,46 @@
+{
+  "dataset": "mtop",
+  "model": "ic-ettin-150m-s6000-near",
+  "per_label": 10,
+  "history": 1130,
+  "reader-0": {
+    "accuracy": 0.8094,
+    "ece_test": 0.039,
+    "temperature": 1.511,
+    "certified_coverage_test": 0.2342,
+    "precision_auto_test": 1.0,
+    "cert_rows": 2000,
+    "cert_accepted": 456,
+    "cert_cp_lower": 0.9935
+  },
+  "invented-reader-8": {
+    "accuracy": 0.8418,
+    "ece_test": 0.0248,
+    "temperature": 1.466,
+    "certified_coverage_test": 0.2617,
+    "precision_auto_test": 0.9991,
+    "cert_rows": 2000,
+    "cert_accepted": 513,
+    "cert_cp_lower": 0.9942
+  },
+  "invented-reader-32": {
+    "accuracy": 0.8495,
+    "ece_test": 0.0198,
+    "temperature": 1.401,
+    "certified_coverage_test": 0.2565,
+    "precision_auto_test": 0.9991,
+    "cert_rows": 2000,
+    "cert_accepted": 487,
+    "cert_cp_lower": 0.9939
+  },
+  "invented-head": {
+    "accuracy": 0.6473,
+    "ece_test": 0.0376,
+    "temperature": 0.563,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 2000,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  }
+}

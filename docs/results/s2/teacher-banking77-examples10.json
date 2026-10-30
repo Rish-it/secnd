@@ -1,0 +1,46 @@
+{
+  "dataset": "banking77",
+  "model": "ic-ettin-150m-s6000-near",
+  "per_label": 10,
+  "history": 770,
+  "reader-0": {
+    "accuracy": 0.6143,
+    "ece_test": 0.0292,
+    "temperature": 1.966,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 1500,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  },
+  "invented-reader-8": {
+    "accuracy": 0.6818,
+    "ece_test": 0.0266,
+    "temperature": 1.803,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 1500,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  },
+  "invented-reader-32": {
+    "accuracy": 0.6662,
+    "ece_test": 0.0355,
+    "temperature": 1.686,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 1500,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  },
+  "invented-head": {
+    "accuracy": 0.7357,
+    "ece_test": 0.0193,
+    "temperature": 0.621,
+    "certified_coverage_test": 0.0,
+    "precision_auto_test": null,
+    "cert_rows": 1500,
+    "cert_accepted": 0,
+    "cert_cp_lower": 0.0
+  }
+}

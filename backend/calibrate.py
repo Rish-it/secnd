@@ -40,6 +40,16 @@ def fit_temperature(y: np.ndarray, p: np.ndarray) -> float:
     return float(np.exp(minimize_scalar(nll, bounds=LOG_T_BOUNDS, method="bounded").x))
 
 
+def fit_temperature_soft(q: np.ndarray, p: np.ndarray) -> float:
+    """The T minimising cross-entropy against target distributions `q` (one row per item), for a
+    benchmark that scores probabilities against a teacher's distribution instead of one label."""
+
+    def loss(log_t):
+        return -(q * np.log(np.clip(scale(p, np.exp(log_t)), 1e-12, 1))).sum(1).mean()
+
+    return float(np.exp(minimize_scalar(loss, bounds=LOG_T_BOUNDS, method="bounded").x))
+
+
 def choose_threshold(y: np.ndarray, p: np.ndarray, target: float = SELECT, alpha: float = ALPHA):
     """The lowest tau reached by walking down from the most confident answers while the calib
     answers at confidence >= tau keep a CP lower bound >= target; the walk stops at the first tau
