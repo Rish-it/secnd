@@ -110,3 +110,19 @@ threshold and floor unchanged to every registered attack on the same 500 test ro
 Report, beside the unchanged gate: accepted, errors and coverage with the floor, the
 calibration coverage the floor costs on clean rows, and the floor itself. Target:
 at most 1 wrong accept per 500 missing-intent rows at every shot count.
+
+## Amendment 3: human audit of calibration labels (registered before any labeller result)
+
+Reason: the frozen gate needs zero errors among its first 427 answers, and the rows that break it
+for the 400M reader look like wrong labels. That is a hypothesis, so people test it.
+
+Audit only calibration rows; test labels are never audited or changed. Rows: every confident
+disagreement between a reader and its label, plus random confident rows where they agree, as
+controls. Three independent labellers per row see the message and two options in random order, and
+are not told which is the label. A label changes only when at least 2 of 3 pick the other option.
+
+Agreeing rows are audited because fixing only disagreements could only flatter the model. If the
+majority overturns more than 2% of controls, the audit is reported as biased and not used. All
+labels the audit changes are published with their votes. The gate is then refit on calibration,
+and the result is reported on both label sets, including precision against unaudited test labels,
+which can fall below 99% because those labels keep their errors. Any certified claim states this.
