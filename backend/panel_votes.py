@@ -7,6 +7,7 @@ import json
 import os
 import random
 import threading
+import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -81,7 +82,7 @@ def tally(rows, votes, key):
     return report
 
 
-def run(rows, out, domain, cap, key, workers=6):
+def run(rows, out, domain, cap, key, workers=16):
     out = Path(out)
     done = {}
     if out.exists():
@@ -95,7 +96,8 @@ def run(rows, out, domain, cap, key, workers=6):
         model, row = job
         prompt, options = request_for(row, model, domain)
         answer, cost = None, 0.0
-        for _ in range(3):
+        for attempt in range(3):
+            time.sleep(attempt * 5)
             with lock:
                 if spent >= cap:
                     return
@@ -119,7 +121,8 @@ def run(rows, out, domain, cap, key, workers=6):
             cost += used
             with lock:
                 spent += used
-            answer = parse(body["choices"][0]["message"].get("content"), options)
+            message = (body.get("choices") or [{}])[0].get("message") or {}
+            answer = parse(message.get("content"), options)
             if answer:
                 break
         with lock:
