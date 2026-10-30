@@ -1,0 +1,19 @@
+docs/results/s2/incontext-ic-ettin-400m-s10000-near-clean.json
+  s_a6c455fd9dad14::t_5a8b36be3731b4 1-294
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "77f12e9f7a5d40781265861a81ebfd042bfa073e",
+  "prompts": {},
+  "sessions": {
+    "s_a6c455fd9dad14": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
