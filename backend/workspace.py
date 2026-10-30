@@ -10,9 +10,11 @@ from pathlib import Path
 
 import pandas as pd
 from pydantic import TypeAdapter
+from sklearn.metrics.pairwise import cosine_similarity
 
 from backend.config import Settings
 from backend.encoders import fetch
+from backend.features import featurize
 from backend.importing import holdout, labelled_rows
 from backend.registry import Registry
 from backend.schemas import Decision, EvalCard, WorkspaceId
@@ -39,6 +41,7 @@ class WorkspaceService:
         self._locks, self._loops, self._positions = {}, {}, {}
         self._pending, self._errors = set(), {}
         self.cold_start = None
+        self.readers = None
         # carmy: one process; use a durable worker queue before running multiple API processes.
         self._executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="workspace-answer")
 
@@ -102,11 +105,16 @@ class WorkspaceService:
     def has_model(self, workspace):
         if self.cold_start and self.cold_start.owns(workspace):
             return True
+        if self.readers and self.readers.enabled(workspace):
+            self.store.workspace(workspace)
+            return True
         return Registry(self.data_dir, workspace).current() is not None
 
     def card(self, workspace):
         if self.cold_start and self.cold_start.owns(workspace):
             return self.cold_start.card(workspace)
+        if self.readers and self.readers.enabled(workspace):
+            return self.readers.card(workspace)
         registry = Registry(self.data_dir, workspace)
         current = registry.current()
         return (
@@ -126,6 +134,13 @@ class WorkspaceService:
                     history=[],
                     guarded=False,
                     labels=len(self.cold_start.history(workspace)),
+                )
+            if self.readers and self.readers.enabled(workspace):
+                return dict(
+                    card=self.card(workspace),
+                    history=[],
+                    guarded=self.readers.guarded(workspace),
+                    labels=len(self.readers.history(workspace)),
                 )
             registry = Registry(self.data_dir, workspace)
             history = []
@@ -220,22 +235,77 @@ class WorkspaceService:
         with self._lock(workspace):
             if self.cold_start and self.cold_start.owns(workspace):
                 return self.cold_start.route(workspace, frame)
+            if self.readers and self.readers.enabled(workspace):
+                return self.readers.route(workspace, frame)
             loop = self._runtime(workspace)
+            card = self.card(workspace)
             decisions = [
                 Decision.model_validate(row).model_dump(mode="json") for row in loop.route(frame)
             ]
+            # Read-only evidence over training history; calibration rows never enter this list.
+            history = {r["item_id"]: r for r in self.store.labels(workspace)}
+            rows = list(history.values())
+            similarities = None
+            if rows and hasattr(loop, "featurizer"):
+                past = pd.DataFrame(rows).assign(amount=None, date=None)
+                query = frame.assign(amount=None, date=None)
+                similarities = cosine_similarity(
+                    featurize(query, loop.featurizer, loop.cache_dir),
+                    featurize(past, loop.featurizer, loop.cache_dir),
+                )
+            for index, (decision, item) in enumerate(
+                zip(decisions, frame.to_dict("records"), strict=True)
+            ):
+                decision["source_app"] = item.get("source_app")
+                decision["cp_lower_bound"] = card.cp_lower_bound
+                if similarities is not None:
+                    nearest = sorted(range(len(rows)), key=lambda i: -similarities[index, i])
+                    decision["reasons"]["neighbours"] = [
+                        dict(
+                            item_id=rows[i]["item_id"],
+                            text=rows[i]["text"],
+                            label=rows[i]["label"],
+                            similarity=float(max(0, min(1, similarities[index, i]))),
+                        )
+                        for i in nearest
+                        if rows[i]["item_id"] != decision["item_id"]
+                    ][:3]
             self.store.record_predictions(
                 workspace, json.loads(frame.to_json(orient="records", date_format="iso")), decisions
             )
             return decisions
+
+    def undo_answer(self, workspace, key):
+        with self._lock(workspace):
+            row, changed = self.store.undo_answer(workspace, key)
+            cold = self.cold_start and self.cold_start.owns(workspace)
+            if changed and not cold:
+                # Restore the pre-answer artifact before rebuilding. A refused candidate must
+                # never leave a classifier trained on the retracted answer serving requests.
+                previous = json.loads(row["result_json"])["model_version"]
+                registry = Registry(self.data_dir, workspace)
+                if previous in registry.versions():
+                    registry.promote(previous)
+                else:
+                    (registry.root / "current").unlink(missing_ok=True)
+                self._loops.pop(workspace, None)
+                self._positions.pop(workspace, None)
+                self._runtime(workspace)
+            current = self.card(workspace)
+            return dict(
+                item_id=row["item_id"],
+                coverage=current.coverage,
+                model_version=current.model_version,
+                retrain="history_updated" if cold else "queued",
+            )
 
     def answer(self, workspace, item_id, label, idempotency_key, *, source=None) -> dict:
         if self.cold_start and self.cold_start.owns(workspace):
             with self._lock(workspace):
                 return self.cold_start.answer(workspace, item_id, label, idempotency_key)
         item = self.store.item(workspace, item_id)
+        previous = self.store.latest_prediction(workspace, item_id)
         if source is None:
-            previous = self.store.latest_prediction(workspace, item_id)
             source = "spot_check" if previous and previous.get("spot_check") else "answer"
         self._validate_training(workspace, pd.DataFrame([item]), [label])
         current = self.card(workspace)
@@ -253,6 +323,8 @@ class WorkspaceService:
             source,
         )
         if created:
+            if self.readers and source == "spot_check":
+                self.readers.on_answer(workspace, item_id, label, previous)
             with self.store.connect() as db:
                 position = db.execute(
                     """SELECT l.position FROM answers a JOIN labels l

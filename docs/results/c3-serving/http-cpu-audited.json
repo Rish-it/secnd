@@ -1,0 +1,740 @@
+{
+  "measured_at": "2026-10-30T15:12:25.998854+00:00",
+  "model_id": "ic-ettin-150m-s6000-near",
+  "revision": "b6521c3ffaa0aff9abb8eab96c3890ebd925ac3d8691c28f5602f5cee7ac5a15",
+  "policy_file": "docs/results/s3r/attacks-floor-audited.json",
+  "policy_sha256": "31b99eb07840365f50ed0f360ec7c1f3dc7141420e7b0b7b6047ca01bb7a79d4",
+  "threshold": 0.9622600674629211,
+  "support_floor": 0.92,
+  "temperature": 1.238845673573654,
+  "device": "cpu",
+  "examples": 8,
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "cpu": "Apple M4 Pro",
+  "torch": "2.15.0",
+  "logical_cores": 12,
+  "python": "3.12.12",
+  "threads": 4,
+  "warmups": 20,
+  "requests": 100,
+  "history_rows": 11667,
+  "labels": 113,
+  "split_sha256": "1cac4f23ac65a27f03abeaf794d57e33e4d81e4724b2cb52cddab491d0ae5c7e",
+  "startup_seconds": 3.577955875021871,
+  "p50_ms": 162.48681252181996,
+  "p95_ms": 231.36031635367544,
+  "measurement": "Sequential loopback HTTP requests: full-history SQL read, scope check, MiniLM retrieval, tokenization, CPU FP32 reader, frozen temperature/support checks, SQLite persistence and JSON response. Warmup excludes model/index initialization. No concurrency/throughput or quality claim.",
+  "runner_sha256": "08f85e35255f0d28d1ef3accbba0f95a8da50ac037630c444280e63919c72517",
+  "checkpoint_sha256": {
+    "encoder/config.json": "bc59aa5a54aa20199c23b744fb989428a91eaf88349366ec459d3a0dd3b84299",
+    "encoder/model.safetensors": "74979ac6a04a2469805065fa2cc02b1172c188ee84bbb06142f835780e2fc918",
+    "encoder/tokenizer.json": "3b67e6b106786d2bd769675fd65b8b2f85a99bc045346afbdd7871d77f84b1c5",
+    "encoder/tokenizer_config.json": "fb54f027372062b2ca52282efb04d178a8b57167a00cd8f4e816515823a2c016",
+    "scorer.pt": "9cdaec36bde1a60bdb1c4ba89535ae0dc33eb2e59260fe45c777a92895ba018b"
+  },
+  "records": [
+    {
+      "source": 3539,
+      "http_ms": 158.0047919997014,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2856,
+      "http_ms": 163.9686250127852,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 846,
+      "http_ms": 235.56262499187142,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2371,
+      "http_ms": 153.81187500315718,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1865,
+      "http_ms": 151.52012498583645,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1116,
+      "http_ms": 161.29600000567734,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1403,
+      "http_ms": 168.50787500152364,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 325,
+      "http_ms": 159.91787498933263,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1488,
+      "http_ms": 163.35920902201906,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1945,
+      "http_ms": 154.62674997979775,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4069,
+      "http_ms": 161.2849590019323,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3190,
+      "http_ms": 155.88649999699555,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3351,
+      "http_ms": 164.5556250005029,
+      "auto": false,
+      "spot_check": true,
+      "examples": 8
+    },
+    {
+      "source": 2750,
+      "http_ms": 160.3780419973191,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2513,
+      "http_ms": 231.3439580029808,
+      "auto": false,
+      "spot_check": true,
+      "examples": 8
+    },
+    {
+      "source": 3424,
+      "http_ms": 163.2552919909358,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3934,
+      "http_ms": 167.04633299377747,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2309,
+      "http_ms": 167.45920799439773,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4166,
+      "http_ms": 152.65725000062957,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1675,
+      "http_ms": 159.30329202092253,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 514,
+      "http_ms": 172.9744999902323,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3582,
+      "http_ms": 164.46966599323787,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4157,
+      "http_ms": 156.1650829971768,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 354,
+      "http_ms": 167.63858299236745,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 988,
+      "http_ms": 169.92387498612516,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 517,
+      "http_ms": 167.1490000153426,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3578,
+      "http_ms": 220.41166701819748,
+      "auto": true,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3726,
+      "http_ms": 161.34600000805221,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2105,
+      "http_ms": 161.8703340063803,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 46,
+      "http_ms": 163.05975001887418,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 360,
+      "http_ms": 165.55150001659058,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4195,
+      "http_ms": 164.05216700513847,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1318,
+      "http_ms": 169.79979199822992,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2226,
+      "http_ms": 163.4715830150526,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 52,
+      "http_ms": 169.65075000189245,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2823,
+      "http_ms": 171.50758401839994,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1451,
+      "http_ms": 160.58899997733533,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1439,
+      "http_ms": 158.2804589997977,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 960,
+      "http_ms": 240.25012500351295,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 329,
+      "http_ms": 153.96779199363664,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 597,
+      "http_ms": 161.7126249766443,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3272,
+      "http_ms": 150.94508297624998,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3392,
+      "http_ms": 159.78337498381734,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 941,
+      "http_ms": 159.39587500179186,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2771,
+      "http_ms": 158.96883298410103,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3028,
+      "http_ms": 159.61041700211354,
+      "auto": true,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2351,
+      "http_ms": 162.47175002354197,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3469,
+      "http_ms": 167.6849579962436,
+      "auto": true,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 638,
+      "http_ms": 159.14666702155955,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 156,
+      "http_ms": 162.50187502009794,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3181,
+      "http_ms": 225.22391699021682,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3305,
+      "http_ms": 157.78362500714138,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3512,
+      "http_ms": 151.62499999860302,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1516,
+      "http_ms": 159.21562499715947,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4238,
+      "http_ms": 168.15241597942077,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2440,
+      "http_ms": 163.2046670129057,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 964,
+      "http_ms": 163.3751250046771,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2834,
+      "http_ms": 163.04279200267047,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3778,
+      "http_ms": 164.02899997774512,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2859,
+      "http_ms": 203.92537501174957,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3679,
+      "http_ms": 164.46645898395218,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1068,
+      "http_ms": 160.8092919923365,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1771,
+      "http_ms": 231.96062500937842,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3788,
+      "http_ms": 165.0322089844849,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1155,
+      "http_ms": 164.82420801185071,
+      "auto": true,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2179,
+      "http_ms": 157.31766700628214,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1118,
+      "http_ms": 182.27724998723716,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4119,
+      "http_ms": 160.66408299957402,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2173,
+      "http_ms": 167.705833009677,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1880,
+      "http_ms": 152.6652080065105,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 857,
+      "http_ms": 160.25591699872166,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4178,
+      "http_ms": 159.33245798805729,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2465,
+      "http_ms": 169.02104098699056,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3553,
+      "http_ms": 160.4330830159597,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3836,
+      "http_ms": 231.82849999284372,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 4019,
+      "http_ms": 164.41608301829547,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 936,
+      "http_ms": 160.92691698577255,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 649,
+      "http_ms": 159.88941700197756,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 844,
+      "http_ms": 160.17358301905915,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3612,
+      "http_ms": 158.93758297897875,
+      "auto": true,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3279,
+      "http_ms": 165.48858399619348,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2658,
+      "http_ms": 163.40725001646206,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1535,
+      "http_ms": 160.28583300067112,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3290,
+      "http_ms": 160.06912500597537,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2816,
+      "http_ms": 152.4563339771703,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3247,
+      "http_ms": 163.2075419765897,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2072,
+      "http_ms": 224.83012499287724,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 1817,
+      "http_ms": 163.27941601048224,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2846,
+      "http_ms": 167.73637500591576,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2721,
+      "http_ms": 177.25845801760443,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 767,
+      "http_ms": 158.96541700931266,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2620,
+      "http_ms": 159.19529198436067,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3043,
+      "http_ms": 160.73574998881668,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3035,
+      "http_ms": 161.76708301645704,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 430,
+      "http_ms": 161.16383302141912,
+      "auto": true,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 475,
+      "http_ms": 163.7034170271363,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 2988,
+      "http_ms": 153.1274580047466,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 957,
+      "http_ms": 161.83141601504758,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 3121,
+      "http_ms": 231.6711250168737,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    },
+    {
+      "source": 931,
+      "http_ms": 160.34441700321622,
+      "auto": false,
+      "spot_check": false,
+      "examples": 8
+    }
+  ],
+  "live_sends": 0,
+  "ad_changes": 0,
+  "paid_calls": 0
+}

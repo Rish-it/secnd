@@ -9,3 +9,5 @@ Names, message text and identifiers are synthetic.
 
 Tests derive status notifications, attachments, echoes and unsupported message types
 from these fixtures. No fixture is an evaluation dataset or training benchmark.
+
+- [Instagram messaging webhooks](https://developers.facebook.com/docs/instagram-platform/webhooks/) (`instagram-text.json`, synthetic account and sender).

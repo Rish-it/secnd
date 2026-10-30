@@ -1,6 +1,88 @@
 {
   "components": {
     "schemas": {
+      "AdsStatus": {
+        "additionalProperties": false,
+        "properties": {
+          "account": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Account"
+          },
+          "auto_act": {
+            "default": false,
+            "title": "Auto Act",
+            "type": "boolean"
+          },
+          "budget_step_percent": {
+            "title": "Budget Step Percent",
+            "type": "integer"
+          },
+          "demo": {
+            "default": false,
+            "title": "Demo",
+            "type": "boolean"
+          },
+          "sandbox_allowed": {
+            "title": "Sandbox Allowed",
+            "type": "boolean"
+          },
+          "server_send_enabled": {
+            "title": "Server Send Enabled",
+            "type": "boolean"
+          },
+          "token_configured": {
+            "title": "Token Configured",
+            "type": "boolean"
+          },
+          "workspace_ready": {
+            "title": "Workspace Ready",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "account",
+          "sandbox_allowed",
+          "token_configured",
+          "server_send_enabled",
+          "workspace_ready",
+          "budget_step_percent"
+        ],
+        "title": "AdsStatus",
+        "type": "object"
+      },
+      "AdsSyncRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "level": {
+            "default": "adset",
+            "enum": [
+              "campaign",
+              "adset"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "since": {
+            "format": "date",
+            "title": "Since",
+            "type": "string"
+          },
+          "until": {
+            "format": "date",
+            "title": "Until",
+            "type": "string"
+          }
+        },
+        "title": "AdsSyncRequest",
+        "type": "object"
+      },
       "Answer": {
         "additionalProperties": false,
         "properties": {
@@ -332,9 +414,35 @@
       },
       "Decision": {
         "properties": {
+          "answer_label": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer Label"
+          },
           "auto": {
             "title": "Auto",
             "type": "boolean"
+          },
+          "cp_lower_bound": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cp Lower Bound"
           },
           "item": {
             "anyOf": [
@@ -384,8 +492,35 @@
             "title": "Probabilities",
             "type": "object"
           },
+          "reader": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReaderDecision"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "reasons": {
             "$ref": "#/components/schemas/Reasons"
+          },
+          "source_app": {
+            "anyOf": [
+              {
+                "enum": [
+                  "whatsapp",
+                  "messenger",
+                  "instagram",
+                  "ads"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source App"
           },
           "spot_check": {
             "default": false,
@@ -902,6 +1037,114 @@
         "title": "ImportResult",
         "type": "object"
       },
+      "Insight": {
+        "properties": {
+          "account_id": {
+            "pattern": "^\\d{1,32}$",
+            "title": "Account Id",
+            "type": "string"
+          },
+          "campaign_id": {
+            "pattern": "^\\d{1,32}$",
+            "title": "Campaign Id",
+            "type": "string"
+          },
+          "cpa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cpa"
+          },
+          "cpa_action_type": {
+            "title": "Cpa Action Type",
+            "type": "string"
+          },
+          "ctr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ctr"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "type": "string"
+          },
+          "daily_budget": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 1000000000000000.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Daily Budget"
+          },
+          "level": {
+            "enum": [
+              "campaign",
+              "adset"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "since": {
+            "format": "date",
+            "title": "Since",
+            "type": "string"
+          },
+          "spend": {
+            "title": "Spend",
+            "type": "string"
+          },
+          "target_id": {
+            "pattern": "^\\d{1,32}$",
+            "title": "Target Id",
+            "type": "string"
+          },
+          "until": {
+            "format": "date",
+            "title": "Until",
+            "type": "string"
+          }
+        },
+        "required": [
+          "account_id",
+          "level",
+          "target_id",
+          "campaign_id",
+          "name",
+          "since",
+          "until",
+          "currency",
+          "spend",
+          "cpa",
+          "cpa_action_type",
+          "ctr",
+          "daily_budget"
+        ],
+        "title": "Insight",
+        "type": "object"
+      },
       "InventedExample": {
         "properties": {
           "id": {
@@ -962,6 +1205,23 @@
             "minLength": 1,
             "title": "Item Id",
             "type": "string"
+          },
+          "source_app": {
+            "anyOf": [
+              {
+                "enum": [
+                  "whatsapp",
+                  "messenger",
+                  "instagram",
+                  "ads"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source App"
           },
           "text": {
             "maxLength": 10000,
@@ -1178,6 +1438,283 @@
         "title": "PredictRequest",
         "type": "object"
       },
+      "Preference": {
+        "additionalProperties": false,
+        "properties": {
+          "auto_act": {
+            "default": false,
+            "title": "Auto Act",
+            "type": "boolean"
+          }
+        },
+        "title": "Preference",
+        "type": "object"
+      },
+      "Proposal": {
+        "properties": {
+          "action": {
+            "enum": [
+              "pause",
+              "keep",
+              "raise budget",
+              "lower budget"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/Decision"
+          },
+          "duplicate": {
+            "default": false,
+            "title": "Duplicate",
+            "type": "boolean"
+          },
+          "insight": {
+            "$ref": "#/components/schemas/Insight"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "proposed",
+              "executing",
+              "executed",
+              "delivery_unknown",
+              "kept"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "item_id",
+          "insight",
+          "action",
+          "decision",
+          "status"
+        ],
+        "title": "Proposal",
+        "type": "object"
+      },
+      "ReaderBenchmark": {
+        "properties": {
+          "accuracy": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy"
+          },
+          "audited_calibration_labels": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audited Calibration Labels"
+          },
+          "calibration_audit": {
+            "const": "model",
+            "title": "Calibration Audit",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "evaluation_file": {
+            "title": "Evaluation File",
+            "type": "string"
+          },
+          "floor_result_file": {
+            "title": "Floor Result File",
+            "type": "string"
+          },
+          "history_rows": {
+            "title": "History Rows",
+            "type": "integer"
+          },
+          "policy_file": {
+            "title": "Policy File",
+            "type": "string"
+          },
+          "with_floor_accepted": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Accepted"
+          },
+          "with_floor_coverage": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Coverage"
+          },
+          "with_floor_errors": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Errors"
+          },
+          "with_floor_low95": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Low95"
+          },
+          "with_floor_precision": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "With Floor Precision"
+          },
+          "with_floor_sample": {
+            "title": "With Floor Sample",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dataset",
+          "history_rows",
+          "accuracy",
+          "with_floor_coverage",
+          "with_floor_precision",
+          "with_floor_sample",
+          "with_floor_accepted",
+          "with_floor_errors",
+          "with_floor_low95",
+          "calibration_audit",
+          "audited_calibration_labels",
+          "evaluation_file",
+          "floor_result_file",
+          "policy_file"
+        ],
+        "title": "ReaderBenchmark",
+        "type": "object"
+      },
+      "ReaderDecision": {
+        "properties": {
+          "device": {
+            "title": "Device",
+            "type": "string"
+          },
+          "examples": {
+            "title": "Examples",
+            "type": "integer"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "policy_complete": {
+            "title": "Policy Complete",
+            "type": "boolean"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "string"
+          },
+          "scope_authorized": {
+            "title": "Scope Authorized",
+            "type": "boolean"
+          },
+          "support": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": -1.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support"
+          },
+          "support_floor": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Floor"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          }
+        },
+        "required": [
+          "model_id",
+          "revision",
+          "device",
+          "examples",
+          "support",
+          "support_floor",
+          "temperature",
+          "policy_complete",
+          "scope_authorized"
+        ],
+        "title": "ReaderDecision",
+        "type": "object"
+      },
       "Reasons": {
         "properties": {
           "merchant_memory": {
@@ -1223,6 +1760,146 @@
           "count"
         ],
         "title": "ReliabilityBin",
+        "type": "object"
+      },
+      "ServingStatus": {
+        "properties": {
+          "backend": {
+            "enum": [
+              "head",
+              "reader"
+            ],
+            "title": "Backend",
+            "type": "string"
+          },
+          "benchmark": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReaderBenchmark"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "device": {
+            "title": "Device",
+            "type": "string"
+          },
+          "examples": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Examples"
+          },
+          "guarded": {
+            "default": false,
+            "title": "Guarded",
+            "type": "boolean"
+          },
+          "history_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History Rows"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "policy_complete": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Complete"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "scope_matches": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope Matches"
+          },
+          "scope_note": {
+            "title": "Scope Note",
+            "type": "string"
+          },
+          "support_floor": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Floor"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "required": [
+          "backend",
+          "model_id",
+          "device",
+          "scope_note"
+        ],
+        "title": "ServingStatus",
         "type": "object"
       },
       "SliceMetrics": {
@@ -1276,6 +1953,22 @@
           "count"
         ],
         "title": "SliceMetrics",
+        "type": "object"
+      },
+      "UndoAnswer": {
+        "additionalProperties": false,
+        "properties": {
+          "idempotency_key": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Idempotency Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "idempotency_key"
+        ],
+        "title": "UndoAnswer",
         "type": "object"
       },
       "ValidationError": {
@@ -1482,6 +2175,100 @@
           }
         },
         "summary": "Answers",
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/answers:undo": {
+      "post": {
+        "description": "Retract the most recent active human answer; retain its audit record.",
+        "operationId": "undo_answer_api_v1_workspaces__ws__answers_undo_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoAnswer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Undo Answer",
         "tags": [
           "Workspace"
         ]
@@ -2250,6 +3037,516 @@
         ]
       }
     },
+    "/api/v1/workspaces/{ws}/integrations/ads/insights:sync": {
+      "post": {
+        "operationId": "sync_api_v1_workspaces__ws__integrations_ads_insights_sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdsSyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Proposal"
+                  },
+                  "title": "Response Sync Api V1 Workspaces  Ws  Integrations Ads Insights Sync Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Sync",
+        "tags": [
+          "Meta Ads"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/integrations/ads/log": {
+      "get": {
+        "operationId": "log_api_v1_workspaces__ws__integrations_ads_log_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "After",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Log",
+        "tags": [
+          "Meta Ads"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/integrations/ads/preferences": {
+      "put": {
+        "operationId": "preferences_api_v1_workspaces__ws__integrations_ads_preferences_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Preference"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdsStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Preferences",
+        "tags": [
+          "Meta Ads"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/integrations/ads/proposals/{item_id}:execute": {
+      "post": {
+        "operationId": "execute_api_v1_workspaces__ws__integrations_ads_proposals__item_id__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Proposal"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Execute",
+        "tags": [
+          "Meta Ads"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/integrations/ads/status": {
+      "get": {
+        "operationId": "status_api_v1_workspaces__ws__integrations_ads_status_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdsStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Status",
+        "tags": [
+          "Meta Ads"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/integrations/meta/status": {
+      "get": {
+        "operationId": "status_api_v1_workspaces__ws__integrations_meta_status_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Status",
+        "tags": [
+          "Meta integration"
+        ]
+      }
+    },
     "/api/v1/workspaces/{ws}/integrations/meta/webhook": {
       "get": {
         "operationId": "verify_api_v1_workspaces__ws__integrations_meta_webhook_get",
@@ -2458,6 +3755,94 @@
         "summary": "Receive",
         "tags": [
           "Meta integration"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/labels": {
+      "get": {
+        "description": "All allowed workspace labels.",
+        "operationId": "labels_api_v1_workspaces__ws__labels_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Labels Api V1 Workspaces  Ws  Labels Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Labels",
+        "tags": [
+          "Workspace"
         ]
       }
     },
@@ -2836,6 +4221,119 @@
         ]
       }
     },
+    "/api/v1/workspaces/{ws}/overridden": {
+      "get": {
+        "description": "Decisions whose latest active human answer differs from Ren's prediction.",
+        "operationId": "overridden_api_v1_workspaces__ws__overridden_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 512,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_Decision_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Overridden",
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
     "/api/v1/workspaces/{ws}/predict": {
       "post": {
         "description": "Routes and logs decisions for stored workspaces; otherwise returns fixtures.",
@@ -3042,6 +4540,90 @@
           }
         },
         "summary": "Queue",
+        "tags": [
+          "Workspace"
+        ]
+      }
+    },
+    "/api/v1/workspaces/{ws}/serving": {
+      "get": {
+        "description": "Active serving configuration and separate published reader evidence.",
+        "operationId": "serving_api_v1_workspaces__ws__serving_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ws",
+            "required": true,
+            "schema": {
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$",
+              "title": "Ws",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServingStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Request Entity Too Large"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Serving",
         "tags": [
           "Workspace"
         ]

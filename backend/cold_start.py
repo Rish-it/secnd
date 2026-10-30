@@ -44,9 +44,12 @@ def imported_labels(content):
 
 
 class ColdStartService:
-    def __init__(self, store, settings, *, reader_factory=CPUReader, transport=None, demo=False):
+    def __init__(
+        self, store, settings, *, reader_factory=None, reader_pool=None, transport=None, demo=False
+    ):
         self.store, self.settings = store, settings
-        self.reader_factory, self.transport, self.demo = reader_factory, transport, demo
+        self.reader_factory = reader_factory or (lambda path: CPUReader(path, settings.reader))
+        self.reader_pool, self.transport, self.demo = reader_pool, transport, demo
         self._reader, self._guard = None, RLock()
         self._executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="invented-history")
         self._pending = {}
@@ -79,7 +82,9 @@ class ColdStartService:
                 is not None
             )
 
-    def reader(self):
+    def reader(self, workspace=None):
+        if self.reader_pool and workspace is not None:
+            return self.reader_pool.reader(workspace)
         with self._guard:
             if self._reader is None:
                 self._reader = self.reader_factory(self.settings.data_dir)
@@ -114,7 +119,7 @@ class ColdStartService:
         labels = sorted(labels)
         key = label_hash(labels)
         # Fail before any paid call when the decision model is unavailable.
-        self.reader().validate_labels(labels)
+        self.reader(workspace).validate_labels(labels)
         with self._guard:
             try:
                 existing = self.store.workspace(workspace)
@@ -306,12 +311,21 @@ class ColdStartService:
 
     def card(self, workspace):
         labels = self.store.workspace(workspace)["labels"]
-        return EvalCard(model_version=history_version(labels, self.history(workspace)), coverage=0)
+        history = self.history(workspace)
+        reader = self.reader(workspace)
+        version = (
+            reader.version(labels, history)
+            if hasattr(reader, "version")
+            else history_version(labels, history)
+        )
+        return EvalCard(model_version=version, coverage=0)
 
     def route(self, workspace, frame: pd.DataFrame):
-        rows = self.reader().predict(
+        rows = self.reader(workspace).predict(
             self.store.workspace(workspace)["labels"], self.history(workspace), frame
         )
+        for row, item in zip(rows, frame.to_dict("records"), strict=True):
+            row["source_app"] = item.get("source_app")
         self.store.record_predictions(workspace, json.loads(frame.to_json(orient="records")), rows)
         return rows
 

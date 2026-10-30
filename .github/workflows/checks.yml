@@ -32,6 +32,20 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.26"
+          enable-cache: true
+      - run: uv sync --locked
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:meta
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meta-connectors-browser-check
+          path: |
+            docs/results/c2-meta-apps/
+            test-results/
 
   docker:
     runs-on: ubuntu-latest
@@ -57,6 +71,31 @@ jobs:
         if: always()
         run: docker compose down
 
+  inbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.26"
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: uv sync --locked
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:inbox
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: inbox-browser-check
+          path: |
+            docs/results/c1-inbox/
+            test-results/
+
   evals:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -73,3 +112,27 @@ jobs:
       - run: uv sync --locked
       - name: Reproduce IPSA and BANKING77 CPU evaluations (under two minutes)
         run: timeout 120 uv run python -m backend.ci_eval
+
+  reader:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.9.26"
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: uv sync --locked
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:reader
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reader-browser
+          path: |
+            test-results/
+            docs/results/c3-serving/*.png

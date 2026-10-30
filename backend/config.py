@@ -1,8 +1,21 @@
 from decimal import Decimal
 from pathlib import Path
+from typing import Literal
 
-from pydantic import Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class ReaderOptions(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    model_id: Literal["ic-ettin-150m-s6000-near", "ic-ettin-400m-s6000-near"] = (
+        "ic-ettin-150m-s6000-near"
+    )
+    # None resolves to the immutable checkpoint fingerprint in reader-manifest.json.
+    revision: str | None = None
+    device: Literal["cpu", "cuda"] = "cpu"
+    examples: Literal[0, 8, 32] = 8
 
 
 class Settings(BaseSettings):
@@ -14,10 +27,23 @@ class Settings(BaseSettings):
     featurizer: str = "pt-minilm"
     encoder_repo: str = "Secnd-AI/ren"
     encoder_revision: str = "5560f25414195f1d1224a6ae7efd19c6b7646d3f"
+    serving_backend: Literal["reader", "head"] = "head"
+    reader: ReaderOptions = Field(default_factory=ReaderOptions)
+    workspace_backends: dict[str, Literal["reader", "head"]] = Field(default_factory=dict)
+    workspace_readers: dict[str, ReaderOptions] = Field(default_factory=dict)
+
     meta_app_secret: SecretStr = SecretStr("")
     meta_verify_token: SecretStr = SecretStr("")
     whatsapp_token: SecretStr = SecretStr("")
     whatsapp_send_enabled: bool = False
+    # Keys are platform:receiving-account-id, values are workspace ids. Unmapped is rejected.
+    meta_workspace_accounts: dict[str, str] = Field(default_factory=dict)
+    ads_token: SecretStr = SecretStr("")
+    ads_send_enabled: bool = False
+    ads_workspace_accounts: dict[str, str] = Field(default_factory=dict)
+    ads_sandbox_accounts: list[str] = Field(default_factory=list)
+    ads_cpa_action_type: str = Field(default="purchase", pattern=r"^[a-zA-Z0-9_.]{1,100}$")
+    ads_budget_step_percent: int = Field(default=10, ge=1, le=25)
     meta_graph_version: str = Field(default="v25.0", pattern=r"^v\d+\.\d+$")
     muse_api_key: SecretStr = SecretStr("")
     muse_base_url: str = "https://inference.baseten.co/v1"
@@ -33,6 +59,12 @@ class Settings(BaseSettings):
     # turns it on, and capped across every workspace together.
     cold_start_paid: bool = False
     cold_start_total_usd: Decimal = Field(default=Decimal("3"), ge=0, le=10)
+
+    def backend_for(self, workspace):
+        return self.workspace_backends.get(workspace, self.serving_backend)
+
+    def reader_for(self, workspace):
+        return self.workspace_readers.get(workspace, self.reader)
 
     @property
     def database_path(self) -> Path:

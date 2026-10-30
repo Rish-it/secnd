@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
-from backend.store import IdempotencyConflict, Store, initialize
+from backend.store import SCHEMA_VERSION, IdempotencyConflict, Store, initialize
 
 
 @pytest.fixture
@@ -28,17 +28,17 @@ def test_migration_from_bootstrap_is_repeatable_and_keeps_data(tmp_path, previou
     initialize(path)
     assert store.workspace("saved") == {"labels": ["a"]}
     with sqlite3.connect(path) as db:
-        assert db.execute("PRAGMA user_version").fetchone()[0] == 2
+        assert db.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION
 
 
 def test_newer_schema_is_never_downgraded(tmp_path):
     path = tmp_path / "db.sqlite3"
     with sqlite3.connect(path) as db:
-        db.execute("PRAGMA user_version=3")
+        db.execute(f"PRAGMA user_version={SCHEMA_VERSION + 1}")
     with pytest.raises(RuntimeError, match="newer"):
         initialize(path)
     with sqlite3.connect(path) as db:
-        assert db.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert db.execute("PRAGMA user_version").fetchone()[0] == SCHEMA_VERSION + 1
 
 
 def test_workspace_item_labels_predictions_and_models_round_trip(store):
