@@ -1,0 +1,39 @@
+{
+  "members": [
+    "typed-ic-ettin-150m-s6000-near-e8-s0",
+    "typed-ic-ettin-150m-s6000-near-e8-s1",
+    "typed-ic-ettin-150m-s6000-near-e8-s2",
+    "typed-ettin-400m-e8-s0",
+    "typed-ettin-400m-e8-s1"
+  ],
+  "temperature_target": "teacher",
+  "temperatures": {
+    "choice": 1.028,
+    "noul": 0.991,
+    "score": 1.038
+  },
+  "val": {
+    "decisions": 600,
+    "accuracy": 0.8183,
+    "per_type": {
+      "choice": 0.8056,
+      "noul": 0.8667,
+      "score": 0.7917
+    },
+    "brier": 0.0476,
+    "soft_accuracy": 0.5761,
+    "ece": 0.1899
+  },
+  "test": {
+    "decisions": 2000,
+    "accuracy": 0.8025,
+    "per_type": {
+      "choice": 0.7683,
+      "noul": 0.8717,
+      "score": 0.7762
+    },
+    "brier": 0.0416,
+    "soft_accuracy": 0.5734,
+    "ece": 0.1693
+  }
+}

@@ -23,7 +23,7 @@ import torch
 from torch import nn
 
 from backend import incontext as ic
-from backend.calibrate import fit_temperature, scale
+from backend.calibrate import fit_temperature, fit_temperature_soft, scale
 from backend.features import device
 
 MAX_LEN = 512
@@ -141,14 +141,19 @@ def correct(d: Decision, p: np.ndarray) -> bool:
     return pred == d.label
 
 
-def temperatures(ds, probs) -> dict[str, float]:
-    return {
-        kind: fit_temperature(
-            np.array([d.label for d in ds if d.kind == kind]),
-            pad([p for d, p in zip(ds, probs, strict=True) if d.kind == kind]),
+def temperatures(ds, probs, target: str = "label") -> dict[str, float]:
+    """One temperature per type, fit on validation to the gold label's NLL, or with target
+    "teacher" to the cross-entropy against the teacher distribution that Brier is scored on."""
+    out = {}
+    for kind in ("choice", "noul", "score"):
+        mine = [(d, p) for d, p in zip(ds, probs, strict=True) if d.kind == kind]
+        p = pad([p for _, p in mine])
+        out[kind] = (
+            fit_temperature(np.array([d.label for d, _ in mine]), p)
+            if target == "label"
+            else fit_temperature_soft(pad([d.gold for d, _ in mine]), p)
         )
-        for kind in ("choice", "noul", "score")
-    }
+    return out
 
 
 def pad(probs: list[np.ndarray]) -> np.ndarray:
@@ -256,7 +261,7 @@ def train(init, data_dir, epochs, seed, batch_size=16, lr=3e-5):
     }
 
 
-def ensemble(data_dir: Path, paths: list[Path]) -> dict:
+def ensemble(data_dir: Path, paths: list[Path], target: str = "label") -> dict:
     """Mean of saved runs' probabilities; temperatures refit on validation, test scored once."""
     _, val, test = load(data_dir)
     saved = [np.load(p) for p in paths]
@@ -266,9 +271,10 @@ def ensemble(data_dir: Path, paths: list[Path]) -> dict:
         ]
         for part, ds in (("val", val), ("test", test))
     }
-    temps = temperatures(val, probs["val"])
+    temps = temperatures(val, probs["val"], target)
     return {
         "members": [p.stem for p in paths],
+        "temperature_target": target,
         "temperatures": {k: round(v, 3) for k, v in temps.items()},
         "val": report(val, probs["val"], temps),
         "test": report(test, probs["test"], temps),
@@ -283,11 +289,13 @@ def main():
     parser.add_argument("--epochs", type=int, default=8)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--ensemble", nargs="+", type=Path, help="saved runs to average")
+    parser.add_argument("--fit", choices=("label", "teacher"), default="label")
     args = parser.parse_args()
     data_dir = Settings().data_dir
     if args.ensemble:
-        result = ensemble(data_dir, args.ensemble)
-        path = Path("docs/results/s2") / f"typed-ensemble-{len(args.ensemble)}.json"
+        result = ensemble(data_dir, args.ensemble, args.fit)
+        suffix = "" if args.fit == "label" else f"-{args.fit}"
+        path = Path("docs/results/s2") / f"typed-ensemble-{len(args.ensemble)}{suffix}.json"
         path.write_text(json.dumps(result, indent=2) + "\n")
         print(json.dumps(result["test"]))
         return

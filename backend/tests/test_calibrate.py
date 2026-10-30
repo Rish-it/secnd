@@ -69,3 +69,11 @@ def test_threshold_takes_the_lowest_qualifying_tau_and_whole_ties():
     tau, n, correct, _ = calibrate.choose_threshold(y, p, target=0.99)
     # 699/700 still clears 0.99; adding the ten wrong 0.9 rows does not.
     assert (tau, n, correct) == (0.95, 700, 699)
+
+
+def test_soft_temperature_recovers_the_target_spread():
+    from backend.calibrate import fit_temperature_soft, scale
+
+    q = np.tile([0.6, 0.3, 0.1], (50, 1))
+    sharp = scale(q, 0.4)
+    assert abs(fit_temperature_soft(q, sharp) - 2.5) < 0.05

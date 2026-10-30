@@ -26,3 +26,26 @@ Ensemble per type: choice 0.768, yes/no 0.872, score 0.776; soft accuracy 0.636.
 Above the strongest published small model (0.796) by 0.65 points, within one standard error of
 2,000 decisions (about 0.9 points, before accounting for decisions shared by a case). Brier,
 scored against the benchmark's teacher distributions, is not the best published.
+
+## Temperature target (added after the result above; a second operating point, not a new model)
+
+The temperatures above minimise each type's NLL of the gold label on validation. They come out
+near 0.4, which sharpens the probabilities toward that one label: good for ECE, which scores the
+top probability against correctness, but Brier and soft accuracy score the whole distribution
+against the benchmark's teacher distributions, and a sharpened distribution sits far from them.
+
+Fitting the same three temperatures to the cross-entropy against the teacher distributions on the
+same validation decisions (`python -m backend.typed --fit teacher --ensemble ...`) gives
+temperatures near 1.0, so the members' training objective already matches the teacher. Same
+members, same probabilities, test scored once:
+
+| Temperatures fit to | Test accuracy | Brier | Soft accuracy | ECE |
+|---|---|---|---|---|
+| gold label (above) | 0.8025 | 0.098 | 0.636 | **0.019** |
+| teacher distribution | 0.8025 | **0.042** | 0.573 | 0.169 |
+
+This choice was made after the first result showed the Brier gap, so it is reported as a second
+operating point next to the pre-registered one, never in place of it. Accuracy cannot change
+(one temperature per type keeps every top option). One distribution cannot be best at both
+targets: matching the teacher's spread raises ECE against correctness, and sharpening raises
+Brier against the teacher.
