@@ -1,0 +1,21 @@
+docs/results/c1-inbox/README.md
+  s_6b0b1bb57c592c::t_1ee862ad506dbb 9-10
+docs/results/c1-inbox/checks.json
+  s_6b0b1bb57c592c::t_be5f42fb87f2dd 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a55965a56a80abc8c714b29895041fb5b610fb03",
+  "prompts": {},
+  "sessions": {
+    "s_6b0b1bb57c592c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
