@@ -131,3 +131,20 @@ labels; accepted/error totals, exact-repeat identity, shared split/checkpoint
 hashes, unchanged temperatures/thresholds and latency quantiles were checked
 against the raw cards. `npm run check` passed with 202 tests, frontend lint and
 build; lint reports two existing React effect warnings.
+
+## Support floor for missing intents (Amendment 2)
+
+Registered before inference in [protocol.md](protocol.md). The floor is fixed per shot count on
+the 2,000 calibration certification rows with the gold intent removed: the lowest 0.01 step at
+which at most 4 of 2,000 of those rows are still accepted. Temperature and threshold are unchanged.
+Same checkpoint, same 500 test rows. Results: [attacks-floor.json](attacks-floor.json).
+
+| Examples | Floor | Missing intent: wrong accepts / 500 | Clean accepted / 500 (errors) | Calibration clean accepts kept |
+| ---: | ---: | --- | --- | --- |
+| 0 | 0.84 | 4 → **0** | 115 (0) → 61 (0) | 232 / 451 |
+| 8 | 0.80 | 9 → **1** | 189 (1) → 110 (0) | 401 / 706 |
+| 32 | 0.83 | 9 → **1** | 167 (0) → 87 (0) | 330 / 640 |
+
+Every other registered attack has zero accepted errors with the floor. The floor meets the
+target of at most one wrong accept per 500 missing-intent requests and costs roughly 45% of
+automatic answers; those requests go to the person instead.
