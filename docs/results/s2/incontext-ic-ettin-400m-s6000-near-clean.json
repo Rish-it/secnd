@@ -1,0 +1,294 @@
+{
+  "model": "ic-ettin-400m-s6000-near",
+  "device": "cuda",
+  "split": {
+    "banking77": {
+      "train": 7003,
+      "calib": 3000,
+      "test": 3080
+    },
+    "mtop": {
+      "train": 11667,
+      "calib": 4000,
+      "test": 4386
+    }
+  },
+  "budgets": {
+    "banking77": {
+      "reader-0": {
+        "accuracy": 0.6399,
+        "ece_test": 0.0269,
+        "temperature": 1.963,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "200": {
+        "head": {
+          "accuracy": 0.5416,
+          "ece_test": 0.0681,
+          "temperature": 0.532,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.3367,
+          "ece_test": 0.1094,
+          "temperature": 1.665,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.7305,
+          "ece_test": 0.0382,
+          "temperature": 1.68,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.7253,
+          "ece_test": 0.047,
+          "temperature": 1.588,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        }
+      },
+      "1000": {
+        "head": {
+          "accuracy": 0.8532,
+          "ece_test": 0.0116,
+          "temperature": 0.522,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.7386,
+          "ece_test": 0.1104,
+          "temperature": 1.079,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.8175,
+          "ece_test": 0.0226,
+          "temperature": 1.491,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.7935,
+          "ece_test": 0.0225,
+          "temperature": 1.373,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        }
+      },
+      "all": {
+        "head": {
+          "accuracy": 0.925,
+          "ece_test": 0.0156,
+          "temperature": 0.694,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.9032,
+          "ece_test": 0.0386,
+          "temperature": 1.095,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.8896,
+          "ece_test": 0.0165,
+          "temperature": 1.401,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.8539,
+          "ece_test": 0.0051,
+          "temperature": 1.345,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 1500,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        }
+      }
+    },
+    "mtop": {
+      "reader-0": {
+        "accuracy": 0.7763,
+        "ece_test": 0.0546,
+        "temperature": 1.56,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "200": {
+        "head": {
+          "accuracy": 0.6954,
+          "ece_test": 0.0568,
+          "temperature": 0.538,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.6076,
+          "ece_test": 0.1467,
+          "temperature": 1.378,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.8668,
+          "ece_test": 0.0212,
+          "temperature": 1.395,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-32": {
+          "accuracy": 0.8757,
+          "ece_test": 0.0212,
+          "temperature": 1.351,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        }
+      },
+      "1000": {
+        "head": {
+          "accuracy": 0.8046,
+          "ece_test": 0.0231,
+          "temperature": 0.728,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.7405,
+          "ece_test": 0.0834,
+          "temperature": 1.16,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.9109,
+          "ece_test": 0.012,
+          "temperature": 1.286,
+          "certified_coverage_test": 0.2456,
+          "precision_auto_test": 0.9991,
+          "cert_rows": 2000,
+          "cert_accepted": 500,
+          "cert_cp_lower": 0.994
+        },
+        "reader-32": {
+          "accuracy": 0.9154,
+          "ece_test": 0.0107,
+          "temperature": 1.241,
+          "certified_coverage_test": 0.2415,
+          "precision_auto_test": 1.0,
+          "cert_rows": 2000,
+          "cert_accepted": 479,
+          "cert_cp_lower": 0.9938
+        }
+      },
+      "all": {
+        "head": {
+          "accuracy": 0.9291,
+          "ece_test": 0.0093,
+          "temperature": 0.75,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "vote-8": {
+          "accuracy": 0.8607,
+          "ece_test": 0.0691,
+          "temperature": 1.039,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        },
+        "reader-8": {
+          "accuracy": 0.9368,
+          "ece_test": 0.0078,
+          "temperature": 1.188,
+          "certified_coverage_test": 0.2446,
+          "precision_auto_test": 1.0,
+          "cert_rows": 2000,
+          "cert_accepted": 479,
+          "cert_cp_lower": 0.9938
+        },
+        "reader-32": {
+          "accuracy": 0.9425,
+          "ece_test": 0.008,
+          "temperature": 1.114,
+          "certified_coverage_test": 0.0,
+          "precision_auto_test": null,
+          "cert_rows": 2000,
+          "cert_accepted": 0,
+          "cert_cp_lower": 0.0
+        }
+      }
+    }
+  }
+}
