@@ -1,0 +1,25 @@
+backend/modal_reader_audit.py
+  s_9245a16bb07969::t_b0570567516e67 19,50-55,59-65,74,80,89-90
+backend/reader_audit.py
+  s_9245a16bb07969::t_e02f714045a59b 31-39,54,67-68,91
+backend/tests/test_reader_audit.py
+  s_9245a16bb07969::t_d5a27c6ce6ea4c 1-3,11-16
+docs/results/s3r/protocol.md
+  s_9245a16bb07969::t_3525f7e8bf9092 158-163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "425f2b29f5ab4972a83855dc7abd689463be7714",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
