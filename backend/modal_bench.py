@@ -90,9 +90,9 @@ def reader_budgets(out: str) -> str:
 
 
 @app.local_entrypoint()
-def budgets(out: str = "ic-ettin-32m-s6000-near"):
+def budgets(out: str = "ic-ettin-32m-s6000-near", gpu: str = "A10G"):
     path = ROOT / f"docs/results/s2/incontext-{out}-clean.json"
-    path.write_text(reader_budgets.remote(out))
+    path.write_text(reader_budgets.with_options(gpu=gpu).remote(out))
     print(f"saved {path}")
 
 
