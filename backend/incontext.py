@@ -34,8 +34,10 @@ ENCODERS = {
     "ettin-150m": ("jhu-clsp/ettin-encoder-150m", "45d08642849e5c5701b162671ac811b7654bfd9f"),
     "ettin-400m": ("jhu-clsp/ettin-encoder-400m", "7662476d60abb071a5bd319c9f3074f3072c062d"),
 }
-# BANKING77 ships no dev split: this many training rows, drawn once with seed 0, calibrate instead.
-BANKING77_CALIB = 3000
+# Calibration rows carved once from each official train split (seed 0). Every reader's training
+# pool already excludes these texts; MTOP's official eval shares ~1,000 texts with TOPv2, so it
+# cannot calibrate readers trained on TOPv2.
+CALIB = {"banking77": 3000, "mtop": 4000}
 MAX_LEN = 1536
 MAX_OPTIONS = 128
 SHOTS = (0, 0, 1, 2, 4, 8, 16, 32)
@@ -135,8 +137,8 @@ def _frame(text, label) -> pd.DataFrame:
 
 
 def held_out(data_dir: Path) -> dict[str, Task]:
-    """The evaluation sets: official train (history), MTOP's official eval or a fixed slice of
-    BANKING77's train (calib), and official test."""
+    """The evaluation sets: official train minus a fixed calib slice (history), that slice, and
+    official test."""
     folder = data_dir / "datasets"
     bank = {p: pd.read_csv(folder / "banking77" / f"{p}.csv", dtype=str) for p in ("train", "test")}
     with zipfile.ZipFile(folder / "mtop" / "mtop.zip") as archive:
@@ -150,16 +152,18 @@ def held_out(data_dir: Path) -> dict[str, Task]:
                 dtype=str,
                 quoting=csv.QUOTE_NONE,
             )
-            for p in ("train", "eval", "test")
+            for p in ("train", "test")
         }
-    shuffled = bank["train"].sample(frac=1, random_state=0)
-    bank["calib"], bank["train"] = shuffled[:BANKING77_CALIB], shuffled[BANKING77_CALIB:]
-    bank = {p: _frame(f["text"], f["category"]) for p, f in bank.items()}
-    mtop = {p: _frame(f["text"], f["intent"]) for p, f in mtop.items()}
-    return {
-        "banking77": _task("banking77", bank["train"], bank["test"], set(), bank["calib"]),
-        "mtop": _task("mtop", mtop["train"], mtop["test"], set(), mtop["eval"]),
+    frames = {
+        "banking77": {p: _frame(f["text"], f["category"]) for p, f in bank.items()},
+        "mtop": {p: _frame(f["text"], f["intent"]) for p, f in mtop.items()},
     }
+    out = {}
+    for name, f in frames.items():
+        shuffled = f["train"].sample(frac=1, random_state=0)
+        calib, train = shuffled[: CALIB[name]], shuffled[CALIB[name] :]
+        out[name] = _task(name, train, f["test"], set(), calib)
+    return out
 
 
 def training_pool(data_dir: Path, evals: dict[str, Task]) -> list[Task]:
@@ -460,7 +464,7 @@ def budgeted(model, tok, evals: dict[str, Task], save: Path) -> dict:
     def kept(task, key, p):
         np.savez_compressed(
             save / f"{key}.npz",
-            **{f"p_{k}": v.astype(np.float16) for k, v in p.items()},
+            **{f"p_{k}": v.astype(np.float32) for k, v in p.items()},  # float16 ties confident rows
             y_calib=labels_of(task.calib),
             y_test=labels_of(task.test),
         )
@@ -495,13 +499,6 @@ def evaluate(out: str) -> None:
     model = model.to(device()).eval()
     tok = AutoTokenizer.from_pretrained(folder / "encoder")
     evals = held_out(data_dir)
-    # Readers trained before calib was held out saw some of its texts (MTOP's eval shares ~1,000
-    # with TOPv2): calibrate on the rest only.
-    texts = lambda rows: _norm(pd.Series([r[0] for r in rows]))  # noqa: E731
-    trained = {t for task in training_pool(data_dir, {}) for t in texts(task.train)}
-    for task in evals.values():
-        fresh = ~texts(task.calib).isin(trained)
-        task.calib = [r for r, ok in zip(task.calib, fresh, strict=True) if ok]
     index(list(evals.values()))
     split = {
         name: {p: len(getattr(t, p)) for p in ("train", "calib", "test")}

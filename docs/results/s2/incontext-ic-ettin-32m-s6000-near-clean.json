@@ -4,12 +4,12 @@
   "split": {
     "banking77": {
       "train": 7003,
-      "calib": 2998,
+      "calib": 3000,
       "test": 3080
     },
     "mtop": {
-      "train": 15667,
-      "calib": 1203,
+      "train": 11667,
+      "calib": 4000,
       "test": 4386
     }
   },
@@ -17,52 +17,52 @@
     "banking77": {
       "reader-0": {
         "accuracy": 0.4893,
-        "ece_test": 0.036,
-        "temperature": 1.884,
+        "ece_test": 0.0378,
+        "temperature": 1.9,
         "certified_coverage_test": 0.0,
         "precision_auto_test": null,
-        "cert_rows": 1499,
+        "cert_rows": 1500,
         "cert_accepted": 0,
         "cert_cp_lower": 0.0
       },
       "200": {
         "head": {
           "accuracy": 0.5416,
-          "ece_test": 0.0693,
-          "temperature": 0.531,
+          "ece_test": 0.0681,
+          "temperature": 0.532,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "vote-8": {
           "accuracy": 0.3367,
-          "ece_test": 0.1004,
-          "temperature": 1.608,
+          "ece_test": 0.1094,
+          "temperature": 1.665,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-8": {
           "accuracy": 0.562,
-          "ece_test": 0.0423,
-          "temperature": 1.661,
+          "ece_test": 0.0441,
+          "temperature": 1.68,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-32": {
           "accuracy": 0.5445,
-          "ece_test": 0.0412,
-          "temperature": 1.65,
+          "ece_test": 0.0427,
+          "temperature": 1.657,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         }
@@ -70,41 +70,41 @@
       "1000": {
         "head": {
           "accuracy": 0.8532,
-          "ece_test": 0.0078,
-          "temperature": 0.536,
+          "ece_test": 0.0116,
+          "temperature": 0.522,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "vote-8": {
           "accuracy": 0.7386,
-          "ece_test": 0.1164,
-          "temperature": 1.106,
+          "ece_test": 0.1104,
+          "temperature": 1.079,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-8": {
           "accuracy": 0.6799,
           "ece_test": 0.0465,
-          "temperature": 1.537,
+          "temperature": 1.538,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-32": {
           "accuracy": 0.6588,
-          "ece_test": 0.044,
-          "temperature": 1.53,
+          "ece_test": 0.0445,
+          "temperature": 1.537,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         }
@@ -112,41 +112,41 @@
       "all": {
         "head": {
           "accuracy": 0.9253,
-          "ece_test": 0.0176,
-          "temperature": 0.701,
+          "ece_test": 0.0162,
+          "temperature": 0.694,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "vote-8": {
           "accuracy": 0.9032,
-          "ece_test": 0.0399,
-          "temperature": 1.102,
+          "ece_test": 0.0386,
+          "temperature": 1.095,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-8": {
           "accuracy": 0.8049,
-          "ece_test": 0.0381,
-          "temperature": 1.393,
+          "ece_test": 0.037,
+          "temperature": 1.382,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-32": {
           "accuracy": 0.8023,
-          "ece_test": 0.0482,
-          "temperature": 1.398,
+          "ece_test": 0.0465,
+          "temperature": 1.378,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 1499,
+          "cert_rows": 1500,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         }
@@ -155,136 +155,136 @@
     "mtop": {
       "reader-0": {
         "accuracy": 0.7159,
-        "ece_test": 0.014,
-        "temperature": 1.747,
+        "ece_test": 0.0183,
+        "temperature": 1.654,
         "certified_coverage_test": 0.0,
         "precision_auto_test": null,
-        "cert_rows": 602,
+        "cert_rows": 2000,
         "cert_accepted": 0,
         "cert_cp_lower": 0.0
       },
       "200": {
         "head": {
-          "accuracy": 0.6968,
-          "ece_test": 0.0666,
-          "temperature": 0.584,
+          "accuracy": 0.6954,
+          "ece_test": 0.0568,
+          "temperature": 0.538,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "vote-8": {
-          "accuracy": 0.6256,
-          "ece_test": 0.16,
-          "temperature": 1.409,
+          "accuracy": 0.6076,
+          "ece_test": 0.1467,
+          "temperature": 1.378,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-8": {
-          "accuracy": 0.7998,
-          "ece_test": 0.0238,
-          "temperature": 1.478,
+          "accuracy": 0.7959,
+          "ece_test": 0.0193,
+          "temperature": 1.431,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-32": {
-          "accuracy": 0.8032,
-          "ece_test": 0.0234,
-          "temperature": 1.49,
+          "accuracy": 0.7941,
+          "ece_test": 0.0232,
+          "temperature": 1.435,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         }
       },
       "1000": {
         "head": {
-          "accuracy": 0.819,
-          "ece_test": 0.0085,
-          "temperature": 0.743,
+          "accuracy": 0.8046,
+          "ece_test": 0.0231,
+          "temperature": 0.728,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "vote-8": {
-          "accuracy": 0.7585,
-          "ece_test": 0.1277,
-          "temperature": 1.214,
+          "accuracy": 0.7405,
+          "ece_test": 0.0834,
+          "temperature": 1.16,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-8": {
-          "accuracy": 0.8292,
-          "ece_test": 0.0115,
-          "temperature": 1.384,
+          "accuracy": 0.8358,
+          "ece_test": 0.0174,
+          "temperature": 1.332,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-32": {
-          "accuracy": 0.8365,
-          "ece_test": 0.0101,
-          "temperature": 1.409,
+          "accuracy": 0.8436,
+          "ece_test": 0.0137,
+          "temperature": 1.333,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         }
       },
       "all": {
         "head": {
-          "accuracy": 0.9364,
-          "ece_test": 0.0125,
-          "temperature": 0.808,
+          "accuracy": 0.9289,
+          "ece_test": 0.0102,
+          "temperature": 0.751,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "vote-8": {
-          "accuracy": 0.8653,
-          "ece_test": 0.0609,
-          "temperature": 1.02,
+          "accuracy": 0.8607,
+          "ece_test": 0.0691,
+          "temperature": 1.039,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-8": {
-          "accuracy": 0.886,
-          "ece_test": 0.0187,
-          "temperature": 1.244,
+          "accuracy": 0.8785,
+          "ece_test": 0.0134,
+          "temperature": 1.276,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         },
         "reader-32": {
-          "accuracy": 0.9054,
-          "ece_test": 0.0099,
-          "temperature": 1.233,
+          "accuracy": 0.9004,
+          "ece_test": 0.0063,
+          "temperature": 1.244,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
-          "cert_rows": 602,
+          "cert_rows": 2000,
           "cert_accepted": 0,
           "cert_cp_lower": 0.0
         }
