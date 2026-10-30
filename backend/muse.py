@@ -80,8 +80,8 @@ PRICES = {
 CACHED = {"meta-wonder": Decimal("0.20")}
 # Lifetime limits per ledger; Muse Wonder bills to the Meta account and shares its ledger.
 TOTAL_CAPS = {
-    "meta": Decimal(27),
-    "meta-wonder": Decimal(27),
+    "meta": Decimal(40),
+    "meta-wonder": Decimal(40),
     "baseten": Decimal(33),
     "nebius": Decimal(25),
 }
