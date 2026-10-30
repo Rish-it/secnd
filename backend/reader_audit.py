@@ -28,6 +28,15 @@ def choose_floor(supports, n):
     return float(next((f for f in FLOOR_GRID if (supports >= f).sum() <= MISSING_RATE * n), 1.01))
 
 
+def apply_audit(task, changed):
+    """Move audited calibration labels in place; test labels are never touched."""
+    for change in changed:
+        i = int(change["id"][1:])
+        text, label = task.calib[i]
+        assert text == change["message"] and task.labels[label] == change["old"], change["id"]
+        task.calib[i] = (text, task.labels.index(change["new"]))
+
+
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
 
@@ -42,7 +51,7 @@ def typo(text):
 
 
 @torch.inference_mode()
-def run(data_dir, latency=False, natural=False, model_name=MODEL, floor=False):
+def run(data_dir, latency=False, natural=False, model_name=MODEL, floor=False, audit=None):
     torch.set_num_threads(4)
     dev = "cpu" if latency else ic.device()
     folder = data_dir / "encoders" / model_name
@@ -55,6 +64,8 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL, floor=False):
     tok = AutoTokenizer.from_pretrained(folder / "encoder")
     load_seconds = time.perf_counter() - start
     task = ic.held_out(data_dir)["mtop"]
+    if audit:
+        apply_audit(task, audit)
     ic.index([task])
     options = list(range(len(task.labels)))
     assert len(options) == 113
@@ -77,6 +88,7 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL, floor=False):
         torch=str(torch.__version__),
         platform=platform.platform(),
         threads=4,
+        audited_calib_labels=len(audit or ()),
         results={},
     )
     if Path("/proc/cpuinfo").exists():

@@ -155,3 +155,9 @@ has none. These tasks are written, not collected, and these labels are model lab
 measured on them is reported as accuracy on real data.
 
 Spend is capped at $1, checked before every request.
+
+### Support floors after the model audit (registered before their inference)
+
+Thresholds change with the audited labels, so floors are refit by the Amendment 2 method, unchanged,
+on the audited MTOP calibration labels, and the 500-row attack set is rerun once. Test labels stay
+unchanged. Only values from this run ship with the refit gate.
