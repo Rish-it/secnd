@@ -1,0 +1,28 @@
+{
+  "model": "ic-ettin-150m-s6000-near",
+  "history": 200,
+  "muse_model": "meta-models/muse-spark-open-1026",
+  "ren": {
+    "certified_coverage_test": 0.247,
+    "precision_auto_test": 1.0,
+    "cert_accepted": 486,
+    "cert_cp_lower": 0.9939
+  },
+  "ren+muse": {
+    "certified_coverage_test": 0.273,
+    "precision_auto_test": 1.0,
+    "cert_accepted": 565,
+    "cert_cp_lower": 0.9947
+  },
+  "test": {
+    "rows": 1000,
+    "ren_accuracy": 0.848,
+    "muse_accuracy": 0.919,
+    "muse_none": 0.008,
+    "gold_in_ren_top_options": 0.975,
+    "agree": 0.862,
+    "precision_when_agree": 0.9617,
+    "muse_accuracy_when_disagree": 0.6522,
+    "ren_accuracy_when_disagree": 0.1377
+  }
+}

@@ -4,7 +4,7 @@
     "ic-ettin-150m-s6000-near": {
       "banking77-1000-head": {
         "accuracy": 0.8532,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -21,12 +21,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.388,
+        "headroom": 0.3893,
         "zero_cause": "sample size"
       },
       "banking77-1000-reader-32": {
         "accuracy": 0.7542,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -43,12 +43,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0532,
+        "headroom": 0.0529,
         "zero_cause": "weak ranking"
       },
       "banking77-1000-reader-8": {
         "accuracy": 0.7614,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -65,12 +65,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0679,
+        "headroom": 0.0669,
         "zero_cause": "weak ranking"
       },
       "banking77-1000-vote-8": {
         "accuracy": 0.7386,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -91,8 +91,8 @@
         "zero_cause": "weak ranking"
       },
       "banking77-200-head": {
-        "accuracy": 0.5419,
-        "calib": 2998,
+        "accuracy": 0.5416,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -114,7 +114,7 @@
       },
       "banking77-200-reader-32": {
         "accuracy": 0.6799,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -131,12 +131,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0305,
+        "headroom": 0.0302,
         "zero_cause": "weak ranking"
       },
       "banking77-200-reader-8": {
         "accuracy": 0.6847,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -158,7 +158,7 @@
       },
       "banking77-200-vote-8": {
         "accuracy": 0.3367,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -180,11 +180,11 @@
       },
       "banking77-all-head": {
         "accuracy": 0.925,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.155,
+          "certifies": 0.145,
           "unsafe_on_test": 0.0
         },
         "B": {
@@ -202,7 +202,7 @@
       },
       "banking77-all-reader-32": {
         "accuracy": 0.8347,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -219,12 +219,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0789,
+        "headroom": 0.0802,
         "zero_cause": "weak ranking"
       },
       "banking77-all-reader-8": {
         "accuracy": 0.8536,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -241,17 +241,17 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.1487,
+        "headroom": 0.1484,
         "zero_cause": "weak ranking"
       },
       "banking77-all-vote-8": {
         "accuracy": 0.9032,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.005,
-          "unsafe_on_test": 0.005
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
@@ -260,15 +260,15 @@
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.005,
-          "unsafe_on_test": 0.005
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
         },
-        "headroom": 0.0,
-        "zero_cause": "residual errors"
+        "headroom": 0.1695,
+        "zero_cause": "weak ranking"
       },
       "banking77-reader-0": {
         "accuracy": 0.614,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -285,83 +285,81 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0305,
+        "headroom": 0.026,
         "zero_cause": "weak ranking"
       },
       "mtop-1000-head": {
-        "accuracy": 0.819,
-        "calib": 1203,
+        "accuracy": 0.8046,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.46,
           "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.27,
           "unsafe_on_test": 0.0
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.055,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.36,
-        "zero_cause": "weak ranking"
+        "headroom": 0.2369,
+        "zero_cause": "sample size"
       },
       "mtop-1000-reader-32": {
-        "accuracy": 0.8935,
-        "calib": 1203,
+        "accuracy": 0.8983,
+        "calib": 4000,
         "test": 4386,
         "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
+          "median_coverage": 0.2827,
+          "certifies": 1.0,
           "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.25,
           "unsafe_on_test": 0.0
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.34,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.6325,
-        "zero_cause": "weak ranking"
+        "headroom": 0.6051
       },
       "mtop-1000-reader-8": {
-        "accuracy": 0.8967,
-        "calib": 1203,
+        "accuracy": 0.8981,
+        "calib": 4000,
         "test": 4386,
         "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
+          "median_coverage": 0.304,
+          "certifies": 1.0,
           "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.16,
           "unsafe_on_test": 0.0
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.365,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.6115,
-        "zero_cause": "weak ranking"
+        "headroom": 0.6354
       },
       "mtop-1000-vote-8": {
-        "accuracy": 0.7585,
-        "calib": 1203,
+        "accuracy": 0.7405,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
+          "certifies": 0.005,
+          "unsafe_on_test": 0.005
         },
         "B": {
           "median_coverage": 0.0,
@@ -370,20 +368,20 @@
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
+          "certifies": 0.005,
+          "unsafe_on_test": 0.005
         },
         "headroom": 0.0,
         "zero_cause": "residual errors"
       },
       "mtop-200-head": {
-        "accuracy": 0.6968,
-        "calib": 1203,
+        "accuracy": 0.6954,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
+          "certifies": 0.005,
+          "unsafe_on_test": 0.005
         },
         "B": {
           "median_coverage": 0.0,
@@ -395,56 +393,54 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.1122,
+        "headroom": 0.1986,
         "zero_cause": "weak ranking"
       },
       "mtop-200-reader-32": {
-        "accuracy": 0.8502,
-        "calib": 1203,
+        "accuracy": 0.8575,
+        "calib": 4000,
         "test": 4386,
         "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
+          "median_coverage": 0.2557,
+          "certifies": 1.0,
           "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.24,
           "unsafe_on_test": 0.0
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.165,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.4567,
-        "zero_cause": "weak ranking"
+        "headroom": 0.5363
       },
       "mtop-200-reader-8": {
-        "accuracy": 0.8541,
-        "calib": 1203,
+        "accuracy": 0.8591,
+        "calib": 4000,
         "test": 4386,
         "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
+          "median_coverage": 0.286,
+          "certifies": 1.0,
           "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.145,
           "unsafe_on_test": 0.0
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.255,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.5422,
-        "zero_cause": "weak ranking"
+        "headroom": 0.5504
       },
       "mtop-200-vote-8": {
-        "accuracy": 0.6256,
-        "calib": 1203,
+        "accuracy": 0.6076,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
@@ -459,126 +455,123 @@
         "C": {
           "median_coverage": 0.0,
           "certifies": 0.0,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.1293,
+        "zero_cause": "weak ranking"
+      },
+      "mtop-all-head": {
+        "accuracy": 0.93,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.0,
+          "certifies": 0.26,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.175,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.0,
+          "certifies": 0.26,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.6733,
+        "zero_cause": "sample size"
+      },
+      "mtop-all-reader-32": {
+        "accuracy": 0.9323,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.393,
+          "certifies": 1.0,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.465,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.3211,
+          "certifies": 0.99,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.7647
+      },
+      "mtop-all-reader-8": {
+        "accuracy": 0.9289,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.358,
+          "certifies": 1.0,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.3,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.3292,
+          "certifies": 1.0,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.7681
+      },
+      "mtop-all-vote-8": {
+        "accuracy": 0.8607,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.0,
+          "certifies": 0.025,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.0,
+          "certifies": 0.025,
           "unsafe_on_test": 0.0
         },
         "headroom": 0.0,
         "zero_cause": "residual errors"
       },
-      "mtop-all-head": {
-        "accuracy": 0.9382,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.6781,
-        "zero_cause": "weak ranking"
-      },
-      "mtop-all-reader-32": {
-        "accuracy": 0.9337,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.7848,
-        "zero_cause": "sample size"
-      },
-      "mtop-all-reader-8": {
-        "accuracy": 0.93,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.7823,
-        "zero_cause": "sample size"
-      },
-      "mtop-all-vote-8": {
-        "accuracy": 0.8653,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.4492,
-        "zero_cause": "weak ranking"
-      },
       "mtop-reader-0": {
         "accuracy": 0.8098,
-        "calib": 1203,
+        "calib": 4000,
         "test": 4386,
         "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
+          "median_coverage": 0.2335,
+          "certifies": 0.87,
           "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.205,
           "unsafe_on_test": 0.0
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.125,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.401,
-        "zero_cause": "weak ranking"
+        "headroom": 0.4008
       }
     },
     "ic-ettin-32m-s6000-near": {
       "banking77-1000-head": {
         "accuracy": 0.8532,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -595,12 +588,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.388,
+        "headroom": 0.3893,
         "zero_cause": "sample size"
       },
       "banking77-1000-reader-32": {
         "accuracy": 0.6588,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -622,7 +615,7 @@
       },
       "banking77-1000-reader-8": {
         "accuracy": 0.6799,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -639,12 +632,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0133,
+        "headroom": 0.0127,
         "zero_cause": "weak ranking"
       },
       "banking77-1000-vote-8": {
         "accuracy": 0.7386,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -665,8 +658,8 @@
         "zero_cause": "weak ranking"
       },
       "banking77-200-head": {
-        "accuracy": 0.5419,
-        "calib": 2998,
+        "accuracy": 0.5416,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -688,7 +681,7 @@
       },
       "banking77-200-reader-32": {
         "accuracy": 0.5445,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -710,7 +703,7 @@
       },
       "banking77-200-reader-8": {
         "accuracy": 0.562,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -727,12 +720,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0198,
+        "headroom": 0.0201,
         "zero_cause": "weak ranking"
       },
       "banking77-200-vote-8": {
         "accuracy": 0.3367,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -754,11 +747,11 @@
       },
       "banking77-all-head": {
         "accuracy": 0.9253,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.155,
+          "certifies": 0.145,
           "unsafe_on_test": 0.0
         },
         "B": {
@@ -768,15 +761,15 @@
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.105,
+          "certifies": 0.11,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.5903,
+        "headroom": 0.5877,
         "zero_cause": "sample size"
       },
       "banking77-all-reader-32": {
         "accuracy": 0.8023,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -793,12 +786,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0662,
+        "headroom": 0.0669,
         "zero_cause": "weak ranking"
       },
       "banking77-all-reader-8": {
         "accuracy": 0.8049,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -815,17 +808,17 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0494,
+        "headroom": 0.049,
         "zero_cause": "weak ranking"
       },
       "banking77-all-vote-8": {
         "accuracy": 0.9032,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.005,
-          "unsafe_on_test": 0.005
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
@@ -834,15 +827,15 @@
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.005,
-          "unsafe_on_test": 0.005
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
         },
-        "headroom": 0.0,
-        "zero_cause": "residual errors"
+        "headroom": 0.1695,
+        "zero_cause": "weak ranking"
       },
       "banking77-reader-0": {
         "accuracy": 0.4893,
-        "calib": 2998,
+        "calib": 3000,
         "test": 3080,
         "A": {
           "median_coverage": 0.0,
@@ -863,30 +856,30 @@
         "zero_cause": "residual errors"
       },
       "mtop-1000-head": {
-        "accuracy": 0.819,
-        "calib": 1203,
+        "accuracy": 0.8046,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.46,
           "unsafe_on_test": 0.0
         },
         "B": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.27,
           "unsafe_on_test": 0.0
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.055,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.36,
-        "zero_cause": "weak ranking"
+        "headroom": 0.2369,
+        "zero_cause": "sample size"
       },
       "mtop-1000-reader-32": {
-        "accuracy": 0.8365,
-        "calib": 1203,
+        "accuracy": 0.8436,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
@@ -903,16 +896,16 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.3114,
-        "zero_cause": "weak ranking"
+        "headroom": 0.3541,
+        "zero_cause": "sample size"
       },
       "mtop-1000-reader-8": {
-        "accuracy": 0.8292,
-        "calib": 1203,
+        "accuracy": 0.8358,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
+          "certifies": 0.01,
           "unsafe_on_test": 0.0
         },
         "B": {
@@ -925,17 +918,17 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.3735,
+        "headroom": 0.1717,
         "zero_cause": "weak ranking"
       },
       "mtop-1000-vote-8": {
-        "accuracy": 0.7585,
-        "calib": 1203,
+        "accuracy": 0.7405,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
+          "certifies": 0.005,
+          "unsafe_on_test": 0.005
         },
         "B": {
           "median_coverage": 0.0,
@@ -944,20 +937,20 @@
         },
         "C": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
+          "certifies": 0.005,
+          "unsafe_on_test": 0.005
         },
         "headroom": 0.0,
         "zero_cause": "residual errors"
       },
       "mtop-200-head": {
-        "accuracy": 0.6968,
-        "calib": 1203,
+        "accuracy": 0.6954,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
+          "certifies": 0.005,
+          "unsafe_on_test": 0.005
         },
         "B": {
           "median_coverage": 0.0,
@@ -969,12 +962,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.1122,
+        "headroom": 0.1986,
         "zero_cause": "weak ranking"
       },
       "mtop-200-reader-32": {
-        "accuracy": 0.8032,
-        "calib": 1203,
+        "accuracy": 0.7941,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
@@ -991,12 +984,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0,
-        "zero_cause": "residual errors"
+        "headroom": 0.013,
+        "zero_cause": "weak ranking"
       },
       "mtop-200-reader-8": {
-        "accuracy": 0.7998,
-        "calib": 1203,
+        "accuracy": 0.7959,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
@@ -1013,12 +1006,12 @@
           "certifies": 0.0,
           "unsafe_on_test": 0.0
         },
-        "headroom": 0.0376,
+        "headroom": 0.0372,
         "zero_cause": "weak ranking"
       },
       "mtop-200-vote-8": {
-        "accuracy": 0.6256,
-        "calib": 1203,
+        "accuracy": 0.6076,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,
@@ -1033,102 +1026,102 @@
         "C": {
           "median_coverage": 0.0,
           "certifies": 0.0,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.1293,
+        "zero_cause": "weak ranking"
+      },
+      "mtop-all-head": {
+        "accuracy": 0.9289,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.0,
+          "certifies": 0.26,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.155,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.0,
+          "certifies": 0.26,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.6856,
+        "zero_cause": "sample size"
+      },
+      "mtop-all-reader-32": {
+        "accuracy": 0.9004,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.0,
+          "certifies": 0.095,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.0,
+          "certifies": 0.085,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.6044,
+        "zero_cause": "sample size"
+      },
+      "mtop-all-reader-8": {
+        "accuracy": 0.8785,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.0,
+          "certifies": 0.13,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.0,
+          "certifies": 0.025,
+          "unsafe_on_test": 0.0
+        },
+        "headroom": 0.5654,
+        "zero_cause": "sample size"
+      },
+      "mtop-all-vote-8": {
+        "accuracy": 0.8607,
+        "calib": 4000,
+        "test": 4386,
+        "A": {
+          "median_coverage": 0.0,
+          "certifies": 0.025,
+          "unsafe_on_test": 0.0
+        },
+        "B": {
+          "median_coverage": 0.0,
+          "certifies": 0.0,
+          "unsafe_on_test": 0.0
+        },
+        "C": {
+          "median_coverage": 0.0,
+          "certifies": 0.025,
           "unsafe_on_test": 0.0
         },
         "headroom": 0.0,
         "zero_cause": "residual errors"
       },
-      "mtop-all-head": {
-        "accuracy": 0.9364,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.6594,
-        "zero_cause": "weak ranking"
-      },
-      "mtop-all-reader-32": {
-        "accuracy": 0.9054,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.5869,
-        "zero_cause": "weak ranking"
-      },
-      "mtop-all-reader-8": {
-        "accuracy": 0.886,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.51,
-        "zero_cause": "weak ranking"
-      },
-      "mtop-all-vote-8": {
-        "accuracy": 0.8653,
-        "calib": 1203,
-        "test": 4386,
-        "A": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "B": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "C": {
-          "median_coverage": 0.0,
-          "certifies": 0.0,
-          "unsafe_on_test": 0.0
-        },
-        "headroom": 0.4492,
-        "zero_cause": "weak ranking"
-      },
       "mtop-reader-0": {
         "accuracy": 0.7159,
-        "calib": 1203,
+        "calib": 4000,
         "test": 4386,
         "A": {
           "median_coverage": 0.0,

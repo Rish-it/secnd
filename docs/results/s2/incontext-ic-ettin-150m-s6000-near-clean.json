@@ -16,8 +16,8 @@
   "budgets": {
     "banking77": {
       "reader-0": {
-        "accuracy": 0.6143,
-        "ece_test": 0.0285,
+        "accuracy": 0.614,
+        "ece_test": 0.0284,
         "temperature": 1.967,
         "certified_coverage_test": 0.0,
         "precision_auto_test": null,
@@ -111,8 +111,8 @@
       },
       "all": {
         "head": {
-          "accuracy": 0.9253,
-          "ece_test": 0.0162,
+          "accuracy": 0.925,
+          "ece_test": 0.0156,
           "temperature": 0.694,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
@@ -249,9 +249,9 @@
       },
       "all": {
         "head": {
-          "accuracy": 0.9289,
-          "ece_test": 0.0102,
-          "temperature": 0.751,
+          "accuracy": 0.93,
+          "ece_test": 0.0077,
+          "temperature": 0.749,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
           "cert_rows": 2000,
@@ -269,8 +269,8 @@
           "cert_cp_lower": 0.0
         },
         "reader-8": {
-          "accuracy": 0.9291,
-          "ece_test": 0.0131,
+          "accuracy": 0.9289,
+          "ece_test": 0.0133,
           "temperature": 1.251,
           "certified_coverage_test": 0.3689,
           "precision_auto_test": 0.9994,
@@ -282,7 +282,7 @@
           "accuracy": 0.9323,
           "ece_test": 0.009,
           "temperature": 1.194,
-          "certified_coverage_test": 0.3238,
+          "certified_coverage_test": 0.3235,
           "precision_auto_test": 1.0,
           "cert_rows": 2000,
           "cert_accepted": 640,

@@ -90,7 +90,7 @@
         },
         "reader-8": {
           "accuracy": 0.6799,
-          "ece_test": 0.0466,
+          "ece_test": 0.0465,
           "temperature": 1.538,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
@@ -111,8 +111,8 @@
       },
       "all": {
         "head": {
-          "accuracy": 0.925,
-          "ece_test": 0.0156,
+          "accuracy": 0.9253,
+          "ece_test": 0.0162,
           "temperature": 0.694,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
@@ -249,9 +249,9 @@
       },
       "all": {
         "head": {
-          "accuracy": 0.93,
-          "ece_test": 0.0077,
-          "temperature": 0.749,
+          "accuracy": 0.9289,
+          "ece_test": 0.0102,
+          "temperature": 0.751,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
           "cert_rows": 2000,
@@ -280,7 +280,7 @@
         },
         "reader-32": {
           "accuracy": 0.9004,
-          "ece_test": 0.0061,
+          "ece_test": 0.0063,
           "temperature": 1.244,
           "certified_coverage_test": 0.0,
           "precision_auto_test": null,
