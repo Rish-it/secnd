@@ -53,6 +53,42 @@ another four-CPU allocation, with 200-row history and retrieval included, gave
 one-second p95 with up to eight examples on both hosts; with 32 it depends on the
 host. The 32M reader stays under 233 ms p95 in every condition measured.
 
+### Meta teachers supply the reader's history
+
+The [teacher study](results/s2/teacher.md) uses the same frozen MTOP calibration
+and test sets. With 3,000 teacher-labelled history rows, no human history labels
+and 32 nearest examples per query, the reader measured **87.7% accuracy, 42.5%
+certified test coverage and 99.7% accepted precision**. The same 3,000 rows with
+gold labels measured 91.6% accuracy and 51.9% coverage. Gold labels remain required
+on calibration: zero human history labels does not mean zero labelled evaluation
+data. Meta models label history; Ren makes each decision.
+
+Muse Wonder also invented ten messages per label from the label names alone.
+On MTOP, that history measured **84.95% accuracy, 25.6% certified coverage and
+99.91% accepted precision** with 32 nearest examples, about equal to 200 human
+history labels in the matched setting. These are offline measured results,
+separate from the released encoder and live workspace measurements.
+[Invented-history card](results/s2/teacher-mtop-examples10.json) ·
+[3,000-row history card](results/s2/teacher-mtop-3000-w0.9.json).
+
+### Typed-decisions: two temperature operating points
+
+The [fixed ensemble protocol](results/s2/typed-ensemble-plan.md) averages all five
+registered members and fits one temperature per decision type on validation.
+Both operating points use the same members and test probabilities:
+
+| Temperature target | Test accuracy | Brier against teacher distributions | ECE against correctness |
+| --- | ---: | ---: | ---: |
+| Gold label, pre-registered | 0.8025 | 0.098 | 0.019 |
+| Teacher distribution, added after the first result | 0.8025 | 0.042 | 0.169 |
+
+The second fit improves agreement with the teacher's probability distributions
+while increasing calibration error against label correctness. It supplements
+the pre-registered point. Neither result changes the documented missing-intent
+false accepts or establishes a universal 99% guarantee.
+[Label-fit card](results/s2/typed-ensemble-5.json) ·
+[Teacher-fit card](results/s2/typed-ensemble-5-teacher.json).
+
 ## Why
 
 Ren is an independently released decision model built for Meta's platform. It
