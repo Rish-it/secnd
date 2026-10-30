@@ -1,0 +1,23 @@
+docs/results/s2/incontext-ic-ettin-150m-s6000-near-none-clean.json
+  s_99a14fdaab2d15::t_f9729e3e249578 1-294
+docs/results/s2/none-option.md
+  s_99a14fdaab2d15::t_ebfb86bc80bdd7 1-22
+docs/results/s3r/attacks-none.json
+  s_99a14fdaab2d15::t_0e4762313fbfa1 1-84286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "80b6b249a2e248b536864a7a898aca933d627988",
+  "prompts": {},
+  "sessions": {
+    "s_99a14fdaab2d15": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "927fa9d9-3fc6-4c38-96bc-197c84ebc632",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
