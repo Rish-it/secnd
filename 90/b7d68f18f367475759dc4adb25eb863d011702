@@ -1,0 +1,68 @@
+backend/workspace.py
+  s_a6c455fd9dad14::t_17549bc42429e8 140,252,271-272
+backend/reader_runtime.py
+  s_a6c455fd9dad14::t_c8c313b6145ea0 39-46,50-52,60-62,113-116
+  s_a6c455fd9dad14::t_e1a082b386ec38 6-10,14,22,26-38,47-49,53-59,63-71,118-121,151
+backend/reader_policy.py
+  s_a6c455fd9dad14::t_40630411a3a886 79-81,89,115,120-127,129-130
+backend/schemas.py
+  s_a6c455fd9dad14::t_1b488439c920c9 56-60,63,78
+.env.example
+  s_a6c455fd9dad14::t_09a531536aa03f 11
+Dockerfile
+  s_a6c455fd9dad14::t_251ffbec1c8827 29
+README.md
+  s_a6c455fd9dad14::t_ddf7f651aa5cc6 10-11,41,44,47-50,159
+backend/config.py
+  s_a6c455fd9dad14::t_6250779f5dd9a6 30
+backend/reader-manifest.json
+  s_a6c455fd9dad14::t_88b6440e88f9a1 2,13-14,16-18,29-30,32-34,41-42
+backend/reader_serving.py
+  s_a6c455fd9dad14::t_f2f2b3af9a5126 85
+backend/tests/http_reader.py
+  s_a6c455fd9dad14::t_e9ab5421effabc 116,184,193-197
+backend/tests/reader_demo.py
+  s_a6c455fd9dad14::t_ae338438cd382e 32
+backend/tests/test_reader_serving.py
+  s_a6c455fd9dad14::t_34c734c259ed9f 58,70,76,88,90,120-121,126-128,142,149,151,206,281-438
+compose.yaml
+  s_a6c455fd9dad14::t_2f8cd394e02dbd 6
+docs/api/openapi.json
+  s_a6c455fd9dad14::t_6477076252b0e6 1206,1209,1215,1217-1220,1238-1252,1266-1289,1315-1319,1321-1322,1488-1492
+docs/results/c3-serving/README.md
+  s_a6c455fd9dad14::t_3fddcbc6c7739f 3-6,8-14,16-26,28-34,36-39,43,46-52,56-62,64-66,68,70-75,77-80
+docs/results/c3-serving/browser-live-audited.json
+  s_a6c455fd9dad14::t_dbb16ae54b7d01 1-21
+docs/results/c3-serving/checks-audited.json
+  s_a6c455fd9dad14::t_5ae8ebfa58e9ab 1-24
+docs/results/s3r/attacks-floor-audited-400m.json
+  s_a6c455fd9dad14::t_c3dcc1eeac1889 1-84364
+docs/results/s3r/attacks-floor-audited.json
+  s_a6c455fd9dad14::t_fda900aab6d840 1-84367
+docs/results/s3r/floor-full-test.json
+  s_a6c455fd9dad14::t_a6e7101886aea2 1-60
+docs/serving.md
+  s_a6c455fd9dad14::t_0c257557581030 3-7,14,20-22,25-26,29,32,35-54,57,60-124,128-131,140-144,146
+frontend/reader-tests/serving.spec.ts
+  s_a6c455fd9dad14::t_909dc7c786739c 4,17-18,21-24,27,36,43-45
+frontend/src/ReaderStatus.tsx
+  s_a6c455fd9dad14::t_d0d77743624673 19,31-35,102-106,138-139,141,144,147-150,153-166
+docs/results/c3-serving/http-cpu-audited.json
+  s_a6c455fd9dad14::t_e49765a523876b 1-740
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "90b7d68f18f367475759dc4adb25eb863d011702",
+  "prompts": {},
+  "sessions": {
+    "s_a6c455fd9dad14": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
