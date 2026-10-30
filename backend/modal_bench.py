@@ -153,3 +153,50 @@ def typed(init: str = "ettin-150m", epochs: int = 8, seed: int = 0):
     path = ROOT / f"docs/results/s2/typed-{init}-e{epochs}-s{seed}.json"
     path.write_text(typed_run.remote(init, epochs, seed))
     print(f"saved {path}")
+
+
+@app.function(gpu="A10G", volumes={"/vol": volume}, timeout=2 * 3600)
+def teacher_run(args: list[str]) -> str:
+    """Score Ren on teacher-labelled history; the label caches are uploaded to the volume first."""
+    import torch
+
+    assert torch.cuda.is_available(), "no CUDA device: refusing to score on CPU"
+    run = Path("/vol/run")
+    (run / "docs/results/s2").mkdir(parents=True, exist_ok=True)
+    out = subprocess.run(
+        ["python", "-m", "backend.teacher", *args, "--eval"],
+        cwd=run,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    volume.commit()
+    return out
+
+
+@app.local_entrypoint()
+def teacher(dataset: str = "mtop", rows: int = 3000, below: float = 0.0, model: str = ""):
+    """`below` 0 scores Spark's labels alone; `model` empty uses the default reader."""
+    for cache in (ROOT / ".data/muse").glob(f"teach-*-{dataset}.json"):
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "modal",
+                "volume",
+                "put",
+                "--force",
+                "secnd-bench",
+                str(cache),
+                f"/data/muse/{cache.name}",
+            ],
+            check=True,
+        )
+    args = ["--dataset", dataset, "--rows", str(rows)]
+    args += ["--below", str(below)] if below else []
+    args += ["--model", model] if model else []
+    report = teacher_run.remote(args)
+    name = f"teacher-{dataset}-{rows}" + (f"-w{below}" if below else "")
+    name += f"-{model}" if model else ""
+    (ROOT / f"docs/results/s2/{name}.json").write_text(report[report.index("{") :])
+    print(report[-2000:])

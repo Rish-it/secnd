@@ -34,7 +34,7 @@ from backend.muse import MuseItem
 TEACHERS = {"spark": "baseten", "spark13": "meta", "wonder": "meta-wonder"}
 CAP = Decimal("20")
 # Baseten rate-limits past a few parallel calls; Meta's API allows 3,000 requests a minute.
-WORKERS = {"baseten": 3, "meta": 6, "meta-wonder": 6}
+WORKERS = {"baseten": 2, "meta": 8, "meta-wonder": 8}
 MODEL = "ic-ettin-150m-s6000-near"
 
 
@@ -114,6 +114,13 @@ def accuracy(task, rows, cache) -> dict:
     }
 
 
+def first_labels(data_dir, dataset) -> dict:
+    """Muse Spark's answers: open weights on Baseten where it answered, Spark 1.3 elsewhere."""
+    return load_cache(cache_path(data_dir, "spark13", dataset)) | load_cache(
+        cache_path(data_dir, "spark", dataset)
+    )
+
+
 def taught(task, rows, spark, wonder, below):
     """History relabelled by the teachers: Wonder's label where Spark was below `below`."""
     index = {name: i for i, name in enumerate(task.labels)}
@@ -138,7 +145,7 @@ def scored(model, tok, variants) -> dict:
 
 
 def evaluate(settings, task, rows, below, model_name) -> dict:
-    spark = load_cache(cache_path(settings.data_dir, "spark", task.name))
+    spark = first_labels(settings.data_dir, task.name)
     wonder = load_cache(cache_path(settings.data_dir, "wonder", task.name)) if below else {}
     ic.index([task])
     task = ic.capped(task, len(rows))
@@ -210,9 +217,14 @@ def main():
         (out / f"{name}.json").write_text(json.dumps(report, indent=2) + "\n")
         print(json.dumps(report, indent=2))
         return
+    if args.teacher == "spark13":
+        done = load_cache(cache_path(settings.data_dir, "spark", task.name))
+        rows = [r for r in rows if key(r[0]) not in done]
     if args.below is not None:
-        spark = load_cache(cache_path(settings.data_dir, "spark", task.name))
-        rows = [r for r in rows if spark[key(r[0])]["confidence"] < args.below]
+        spark = first_labels(settings.data_dir, task.name)
+        rows = [
+            r for r in rows if key(r[0]) in spark and spark[key(r[0])]["confidence"] < args.below
+        ]
     cache = label(settings, task, rows, args.teacher, paid=args.paid)
     result = {"dataset": args.dataset, "teacher": args.teacher, **accuracy(task, rows, cache)}
     print(json.dumps(result))

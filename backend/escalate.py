@@ -50,6 +50,7 @@ EXAMPLES = 8
 TEST_ROWS = 1000
 # Eight parallel calls hit the provider's rate limit after ~50 requests; two do not.
 WORKERS = 2
+STOP_AFTER = 20
 MODEL = "ic-ettin-150m-s6000-near"
 # Until a pilot has measured real usage, estimate each call conservatively.
 GUESS = Usage(prompt_tokens=2000, completion_tokens=2048)
@@ -139,6 +140,11 @@ def ask(
                         result = future.result()
                     except MuseError:
                         failures += 1
+                        # failed calls are booked at their full reservation: stop, don't burn it
+                        if failures >= STOP_AFTER and failures > n - failures:
+                            pool.shutdown(cancel_futures=True)
+                            print(f"  stopping: {failures} of {n} calls failed", flush=True)
+                            break
                         continue
                     cache[pending[future]] = result.model_dump(mode="json", include=set(fields))
                     if n % 50 == 0 or n == len(missing):

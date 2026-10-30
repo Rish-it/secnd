@@ -1,0 +1,74 @@
+{
+  "banking77-spark": {
+    "accuracy": 0.81,
+    "dataset": "banking77",
+    "mean_usage": {
+      "cached_tokens": 409.6,
+      "completion_tokens": 227.7,
+      "prompt_tokens": 635.3,
+      "reasoning_tokens": 202.1
+    },
+    "rows": 100,
+    "teacher": "spark"
+  },
+  "banking77-spark13": {
+    "accuracy": 0.78,
+    "dataset": "banking77",
+    "mean_usage": {
+      "cached_tokens": 206.6,
+      "completion_tokens": 294.6,
+      "prompt_tokens": 502.3,
+      "reasoning_tokens": 269.1
+    },
+    "rows": 100,
+    "teacher": "spark13"
+  },
+  "banking77-wonder": {
+    "accuracy": 0.8,
+    "dataset": "banking77",
+    "mean_usage": {
+      "cached_tokens": 360.8,
+      "completion_tokens": 223.0,
+      "prompt_tokens": 502.3,
+      "reasoning_tokens": 197.5
+    },
+    "rows": 100,
+    "teacher": "wonder"
+  },
+  "mtop-spark": {
+    "accuracy": 0.91,
+    "dataset": "mtop",
+    "mean_usage": {
+      "cached_tokens": 524.8,
+      "completion_tokens": 231.1,
+      "prompt_tokens": 728.2,
+      "reasoning_tokens": 207.4
+    },
+    "rows": 100,
+    "teacher": "spark"
+  },
+  "mtop-spark13": {
+    "accuracy": 0.92,
+    "dataset": "mtop",
+    "mean_usage": {
+      "cached_tokens": 288.3,
+      "completion_tokens": 281.1,
+      "prompt_tokens": 595.2,
+      "reasoning_tokens": 256.9
+    },
+    "rows": 100,
+    "teacher": "spark13"
+  },
+  "mtop-wonder": {
+    "accuracy": 0.93,
+    "dataset": "mtop",
+    "mean_usage": {
+      "cached_tokens": 500.0,
+      "completion_tokens": 175.8,
+      "prompt_tokens": 595.2,
+      "reasoning_tokens": 151.5
+    },
+    "rows": 100,
+    "teacher": "wonder"
+  }
+}
