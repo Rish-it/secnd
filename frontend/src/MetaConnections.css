@@ -1,0 +1,260 @@
+.meta-connections {
+  margin: 28px 0;
+  overflow-wrap: anywhere;
+}
+.meta-connections .section-heading {
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.connection-button {
+  padding: 10px 13px;
+  border: 1px solid #becbb2;
+  background: #fffefa;
+  border-radius: 6px;
+  min-height: 44px;
+  font-size: 12px;
+}
+.connector-notice {
+  color: #416632;
+  line-height: 1.7;
+  font-size: 12px;
+  margin: 14px 0;
+}
+.message-connections {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0 28px;
+}
+.message-connection {
+  border: 1px solid #d6dfce;
+  border-radius: 8px;
+  padding: 17px;
+  background: #f8faf4;
+  min-width: 0;
+}
+.message-connection h3 {
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.message-connection p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.message-connection span,
+.message-connection small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.7;
+  margin-top: 8px;
+  color: #526647;
+}
+.ads-heading {
+  border-top: 1px solid #d9e1d0;
+  padding-top: 25px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: start;
+  gap: 18px;
+}
+.ads-heading h3 {
+  font-family: Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+.ads-heading p,
+.connector-detail {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #5c6e51;
+  max-width: 530px;
+}
+.connector-detail {
+  margin: 12px 0;
+}
+.connector-state {
+  display: inline-flex;
+  font-size: 10px;
+  color: #546748;
+  background: #e8eedf;
+  border-radius: 5px;
+  padding: 6px 9px;
+}
+.ads-preference {
+  border: 1px solid #d2ddc6;
+  border-radius: 8px;
+  padding: 18px;
+  margin: 20px 0;
+}
+.ads-preference > label {
+  display: flex;
+  gap: 10px;
+  align-items: start;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.ads-preference input {
+  min-height: 20px;
+  min-width: 20px;
+  accent-color: #48613a;
+}
+.ads-preference p {
+  font-size: 11px;
+  color: #5f7352;
+  line-height: 1.7;
+  margin: 12px 0;
+}
+.ads-fetch {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 22px 0;
+}
+.ads-fetch label {
+  display: grid;
+  gap: 9px;
+  font-size: 12px;
+  min-width: 0;
+}
+.ads-fetch input,
+.ads-fetch select {
+  min-width: 0;
+  max-width: 100%;
+  padding: 12px;
+  background: #fffefa;
+  border: 1px solid #b9c8ab;
+  border-radius: 6px;
+}
+.ads-fetch .primary-button {
+  min-height: 44px;
+  font-size: 12px;
+}
+.ads-proposals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 14px;
+}
+.ads-proposal {
+  min-width: 0;
+  border: 1px solid #d9e1d1;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fffefa;
+}
+.ads-proposal > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.proposal-status {
+  color: #647558;
+  font-size: 11px;
+}
+.ads-proposal h4 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 17px 0 10px;
+}
+.ads-proposal p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #596d4e;
+}
+.ads-proposal .proposal-dates {
+  font-size: 11px;
+}
+.ads-proposal dl {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+}
+.ads-proposal dt {
+  font-size: 10px;
+  color: #5e7351;
+}
+.ads-proposal dd {
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+.ads-proposal .ren-proposal {
+  margin-bottom: 10px;
+}
+.ren-proposal strong {
+  color: #304f24;
+  background: #e9efdf;
+  padding: 4px 7px;
+  border-radius: 4px;
+}
+.ads-proposal button {
+  margin-top: 14px;
+}
+.ads-log {
+  margin: 25px 0;
+  padding: 17px 0;
+  border-top: 1px solid #d6dfcc;
+  border-bottom: 1px solid #d6dfcc;
+  font-size: 12px;
+}
+.ads-log summary {
+  min-height: 32px;
+  cursor: pointer;
+}
+.ads-log ol {
+  margin: 0;
+  padding-left: 20px;
+}
+.ads-log li {
+  padding: 12px 0;
+  border-bottom: 1px solid #e4e9de;
+}
+.ads-log li strong,
+.ads-log li span,
+.ads-log li time {
+  display: block;
+  line-height: 1.8;
+}
+.ads-log li time {
+  color: #65765a;
+  font-size: 10px;
+}
+@media (max-width: 800px) {
+  .message-connections {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 580px) {
+  .ads-fetch {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ads-fetch input,
+  .ads-fetch select {
+    width: 100%;
+  }
+  .ads-fetch .primary-button {
+    justify-content: center;
+  }
+  .ads-heading h3 {
+    font-size: 22px;
+  }
+  .meta-connections {
+    padding: 20px 16px;
+  }
+}
+
+.connector-demo {
+  padding: 14px;
+  margin: 15px 0;
+  border: 1px solid #d6c99d;
+  border-radius: 6px;
+  background: #f6eedb;
+  color: #675a34;
+  font-size: 12px;
+  line-height: 1.8;
+}
