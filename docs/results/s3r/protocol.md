@@ -92,3 +92,21 @@ The supplement was registered after the primary suite had started, when aggregat
 zero-shot counts were visible. Per-source predictions and gold labels were not
 inspected when authoring rewrites. The primary protocol preceded the primary run;
 the supplement preceded its own run. This clarification changes no experiments.
+
+## Amendment 2: support floor for missing intents (registered before its inference)
+
+The frozen audit accepted 4/9/9 wrong answers per 500 when the gold intent was absent.
+Add one rule on top of the unchanged gate. Support is the highest MiniLM cosine
+similarity between the message and any history row carrying the predicted intent.
+An answer is accepted only when confidence clears the frozen threshold and support
+clears the floor.
+
+The floor is fixed per shot count on calibration only, never on the attack: on the
+2,000 certification rows, remove each row's gold intent from the options and from
+retrieved history, run the reader, and keep the support of every answer the frozen
+gate would accept. The floor is the lowest value on a 0.01 grid at which at most
+0.2% of those rows (4 of 2,000) would still be accepted. Then apply temperature,
+threshold and floor unchanged to every registered attack on the same 500 test rows.
+Report, beside the unchanged gate: accepted, errors and coverage with the floor, the
+calibration coverage the floor costs on clean rows, and the floor itself. Target:
+at most 1 wrong accept per 500 missing-intent rows at every shot count.
