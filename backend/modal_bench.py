@@ -97,10 +97,11 @@ def budgets(out: str = "ic-ettin-32m-s6000-near"):
 
 
 @app.local_entrypoint()
-def reader(encoder: str = "ettin-32m", steps: int = 6000, none: bool = False):
+def reader(encoder: str = "ettin-32m", steps: int = 6000, none: bool = False, gpu: str = "A10G"):
+    """`gpu` A100 for readers whose activations do not fit an A10G's 24 GB."""
     name = f"ic-{encoder}-s{steps}-near" + ("-none" if none else "")
     out = ROOT / f"docs/results/s2/incontext-{name}.json"
-    out.write_text(incontext.remote(encoder, steps, none))
+    out.write_text(incontext.with_options(gpu=gpu).remote(encoder, steps, none))
     print(f"saved {out}")
 
 
