@@ -1,0 +1,88 @@
+backend/store.py
+  s_a6c455fd9dad14::t_68f65e3506b6c3 13,70-78,202-206,256-260,269-299,334,356,362-373,375,379-380,394,400
+frontend/src/api.ts
+  s_a6c455fd9dad14::t_533ad0595b8c63 141
+  s_a6c455fd9dad14::t_7cbc197f36bcdd 7,28-30,91-93,95-98,196-201
+  s_a6c455fd9dad14::t_102ac6b1e65178 79,130
+  s_6b0b1bb57c592c::t_af2b6cd263ddcb 94
+frontend/src/Companion.css
+  s_a6c455fd9dad14::t_4dbe5d7ba337fc 1-2,4-9,11-14,16-19,21-27,29-30,32,34-38,40-46,48,50-52,54-61,63-74,76-82,85,87-88,90-91,93-99,101-104,106-107,109,111-113,115,117,122-126,128-129,131-137,139-141,143-145,147-149,151-153,155-159,161,163-167,169-174,177-181,184-188,190-192,194-196,198-202,204-207,209,211-214,216-217,219-220,222-224,226,230,232-235,237-238,240-242,244-247,249-255,257-259,261-271,273,276,278-282,284-297,300-326,328-357
+  s_6b0b1bb57c592c::t_5c850e1ad9ed49 108
+backend/api.py
+  s_a6c455fd9dad14::t_533ad0595b8c63 279-285
+  s_a6c455fd9dad14::t_c4baeb554e18e3 51,301,363-394
+  s_a6c455fd9dad14::t_ffe1e4af2d0923 395
+docs/results/c1-inbox/README.md
+  s_a6c455fd9dad14::t_9d4b2c433ee4fc 1-21
+docs/api/README.md
+  s_a6c455fd9dad14::t_abefa25a95e595 221-245
+backend/tests/test_inbox.py
+  s_6b0b1bb57c592c::t_768e7f49136d6c 1-98,100-163
+  s_a6c455fd9dad14::t_d1d2702634a0f1 164-180
+  s_a6c455fd9dad14::t_d8e6f45eed5dec 99
+backend/tests/inbox_demo.py
+  s_6b0b1bb57c592c::t_768e7f49136d6c 1-64,66-72,74-83,85-95,97-98,100-117
+  s_6b0b1bb57c592c::t_125792886a9d37 65,73,84,96,99
+backend/workspace.py
+  s_a6c455fd9dad14::t_533ad0595b8c63 274-275
+  s_a6c455fd9dad14::t_c4baeb554e18e3 13,17,226,230-257,263-273,276-285
+  s_a6c455fd9dad14::t_2fcaf31397bf87 286
+backend/tests/test_store.py
+  s_a6c455fd9dad14::t_533ad0595b8c63 6,31,37,41
+frontend/src/App.tsx
+  s_6b0b1bb57c592c::t_a7115bd3f5ef2c 69,194,197,219,237-239
+.github/workflows/checks.yml
+  s_a6c455fd9dad14::t_9f6d2836e5195a 60-84
+backend/cold_start.py
+  s_a6c455fd9dad14::t_7cbc197f36bcdd 315-316
+.gitignore
+  s_a6c455fd9dad14::t_2dc79946d8e5fb 19-20
+backend/tests/test_cold_start.py
+  s_a6c455fd9dad14::t_d1d2702634a0f1 305-339
+backend/schemas.py
+  s_a6c455fd9dad14::t_68f65e3506b6c3 14,24,50-52,121-124
+  s_a6c455fd9dad14::t_c6b14815bd0854 125-126
+frontend/src/Companion.tsx
+  s_a6c455fd9dad14::t_4dbe5d7ba337fc 2,6-7,26-27,38,59-62,74-75,83,91,99,104-105,108,113,116-118,152-154,160-161,165,177-179,182-183,213-214
+  s_a6c455fd9dad14::t_2dc79946d8e5fb 9-24,28-32,39-40,53,63-71,77-82,86-90,94-97,106-107,109-112,119,130-131,134,137-138,143,146-149,155-157,162-164,167-174,180-181,185-195,197,202,205-206,209-211,217-220,222-300,302-311,313,315-343,345-395,398-421,424-427,429-487,490-512,514-516,518,520-529
+  s_a6c455fd9dad14::t_abefa25a95e595 41-52,175
+  s_a6c455fd9dad14::t_102ac6b1e65178 34,92
+  s_6b0b1bb57c592c::t_a7115bd3f5ef2c 56-57,84-85,184,215
+  s_6b0b1bb57c592c::t_912754ed8d163b 166,176
+docs/api/openapi.json
+  s_6b0b1bb57c592c::t_279981d2ba5603 335-347,352-364,416-432,1009-1025,1341-1356,1566-1659,2634-2721,3097-3209
+docs/results/c1-inbox/browser.json
+  s_6b0b1bb57c592c::t_e96ac1ac3cc672 1-61
+frontend/tests/inbox.spec.ts
+  s_a6c455fd9dad14::t_d0063638674934 1-146
+package-lock.json
+  s_6b0b1bb57c592c::t_3e89808c724624 14,460-475,1612-1640
+package.json
+  s_6b0b1bb57c592c::t_2a9a8ae7d42a74 17-18,21
+playwright.config.ts
+  s_6b0b1bb57c592c::t_2ce2b6a9238aa6 1-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c82ca6dd65b39e8632eeee425e947ad68f858dd1",
+  "prompts": {},
+  "sessions": {
+    "s_6b0b1bb57c592c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_a6c455fd9dad14": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18b5d-583d-7612-bb08-f1e2b91d4642",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
