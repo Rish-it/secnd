@@ -34,6 +34,47 @@ class Reasons(BaseModel):
     merchant_memory: bool = False
 
 
+class ReaderDecision(BaseModel):
+    model_id: str
+    revision: str
+    device: str
+    examples: int
+    support: Annotated[float, Field(ge=-1, le=1, allow_inf_nan=False)] | None
+    support_floor: Probability | None
+    temperature: NonNegative | None
+    policy_complete: bool
+    scope_authorized: bool
+
+
+class ReaderBenchmark(BaseModel):
+    dataset: str
+    history_rows: int
+    accuracy: Probability | None
+    confidence_only_coverage: Probability | None
+    confidence_only_precision: Probability | None
+    with_floor_coverage: Probability | None
+    with_floor_precision: Probability | None
+    with_floor_sample: int
+    evaluation_file: str
+    floor_result_file: str
+
+
+class ServingStatus(BaseModel):
+    backend: Literal["head", "reader"]
+    model_id: str
+    device: str
+    revision: str | None = None
+    examples: int | None = None
+    history_rows: int | None = None
+    temperature: NonNegative | None = None
+    threshold: Probability | None = None
+    support_floor: Probability | None = None
+    policy_complete: bool | None = None
+    scope_matches: bool | None = None
+    scope_note: str
+    benchmark: ReaderBenchmark | None = None
+
+
 class Decision(BaseModel):
     item_id: Identifier
     label: Label
@@ -45,6 +86,7 @@ class Decision(BaseModel):
     reasons: Reasons
     item: Item | None = None
     spot_check: bool = False
+    reader: ReaderDecision | None = None
 
     @model_validator(mode="after")
     def check_probabilities(self):
@@ -58,6 +100,16 @@ class Decision(BaseModel):
             raise ValueError("Top-k probabilities must sum to at most one.")
         if self.auto and (self.threshold is None or self.prob < self.threshold):
             raise ValueError("Automatic decisions require a threshold and enough confidence.")
+        if self.auto and self.reader is not None:
+            r = self.reader
+            if (
+                not r.policy_complete
+                or not r.scope_authorized
+                or r.support is None
+                or r.support_floor is None
+                or r.support < r.support_floor
+            ):
+                raise ValueError("Automatic reader decisions require authorized support evidence.")
         return self
 
 

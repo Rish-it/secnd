@@ -1,0 +1,18 @@
+{
+  "measured_at": "2026-10-30T09:44:18.321Z",
+  "mode": "real installed CPU reader; audited MTOP history; no stand-in",
+  "model": "ic-ettin-150m-s6000-near",
+  "desktop": {
+    "viewport": 1280,
+    "documentWidth": 1280
+  },
+  "mobile": {
+    "viewport": 390,
+    "documentWidth": 390
+  },
+  "scope_matches": true,
+  "page_errors": [],
+  "live_sends": 0,
+  "ad_changes": 0,
+  "paid_calls": 0
+}

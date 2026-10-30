@@ -1,0 +1,39 @@
+{
+  "source_commit": "6f192e0",
+  "models": {
+    "ic-ettin-150m-s6000-near": {
+      "revision": "b6521c3ffaa0aff9abb8eab96c3890ebd925ac3d8691c28f5602f5cee7ac5a15",
+      "checkpoint_sha256": {
+        "encoder/config.json": "bc59aa5a54aa20199c23b744fb989428a91eaf88349366ec459d3a0dd3b84299",
+        "encoder/model.safetensors": "74979ac6a04a2469805065fa2cc02b1172c188ee84bbb06142f835780e2fc918",
+        "encoder/tokenizer.json": "3b67e6b106786d2bd769675fd65b8b2f85a99bc045346afbdd7871d77f84b1c5",
+        "encoder/tokenizer_config.json": "fb54f027372062b2ca52282efb04d178a8b57167a00cd8f4e816515823a2c016",
+        "scorer.pt": "9cdaec36bde1a60bdb1c4ba89535ae0dc33eb2e59260fe45c777a92895ba018b"
+      },
+      "policy_file": "docs/results/s3r/attacks-floor.json",
+      "policy_sha256": "9b2403c14708f4b64b2cd46c1aadf045a261229d0bcf9dad0aac7988b5b18a44",
+      "evaluation_file": "docs/results/s2/incontext-ic-ettin-150m-s6000-near-clean.json",
+      "evaluation_sha256": "0abc3daf81d5cca451b2a84559e63432177ebfbd82eb9ba6d35104b40283ac66"
+    },
+    "ic-ettin-400m-s6000-near": {
+      "revision": "e8dc647d6ecc50e24d138084ea3aa0bf9d508c1ce88348dee880e2e22ef17594",
+      "checkpoint_sha256": {
+        "encoder/config.json": "d83663a6531e325591959e1902c4dad41744f3072dc723ca8a6f5d8bc2132622",
+        "encoder/model.safetensors": "79048572c8a6fa3577666b4b2164ca11bdcef81fb90661cd60c747200009fd0d",
+        "encoder/tokenizer.json": "3b67e6b106786d2bd769675fd65b8b2f85a99bc045346afbdd7871d77f84b1c5",
+        "encoder/tokenizer_config.json": "fb54f027372062b2ca52282efb04d178a8b57167a00cd8f4e816515823a2c016",
+        "scorer.pt": "d75cd2618328100caff2558acba7e4d0733d3010b86c29c9ec9c451fd6ab1bce"
+      },
+      "policy_file": "docs/results/s3r/attacks-floor-400m.json",
+      "policy_sha256": "c3e3eee0301d02b70c3dab66eea851bcfe503adad2776ea9049276a82447e723",
+      "evaluation_file": "docs/results/s2/incontext-ic-ettin-400m-s6000-near-clean.json",
+      "evaluation_sha256": "6f5b1aebf7c4808c134078c7a9dd77dada026013ee701980df20e839d07939f7"
+    }
+  },
+  "scope": {
+    "dataset": "MTOP",
+    "history_rows": 11667,
+    "history_sha256": "2694c491a9984e749c80e4e8ee57e2c0714016142bafd6b8f5f86da0628b92c1",
+    "split_sha256": "1cac4f23ac65a27f03abeaf794d57e33e4d81e4724b2cb52cddab491d0ae5c7e"
+  }
+}

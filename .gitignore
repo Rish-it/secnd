@@ -16,3 +16,6 @@ brag-output/
 .next/
 out/
 /plan.md
+
+playwright-report/
+test-results/

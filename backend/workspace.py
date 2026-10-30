@@ -39,6 +39,7 @@ class WorkspaceService:
         self._locks, self._loops, self._positions = {}, {}, {}
         self._pending, self._errors = set(), {}
         self.cold_start = None
+        self.readers = None
         # carmy: one process; use a durable worker queue before running multiple API processes.
         self._executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="workspace-answer")
 
@@ -102,11 +103,16 @@ class WorkspaceService:
     def has_model(self, workspace):
         if self.cold_start and self.cold_start.owns(workspace):
             return True
+        if self.readers and self.readers.enabled(workspace):
+            self.store.workspace(workspace)
+            return True
         return Registry(self.data_dir, workspace).current() is not None
 
     def card(self, workspace):
         if self.cold_start and self.cold_start.owns(workspace):
             return self.cold_start.card(workspace)
+        if self.readers and self.readers.enabled(workspace):
+            return self.readers.card(workspace)
         registry = Registry(self.data_dir, workspace)
         current = registry.current()
         return (
@@ -126,6 +132,13 @@ class WorkspaceService:
                     history=[],
                     guarded=False,
                     labels=len(self.cold_start.history(workspace)),
+                )
+            if self.readers and self.readers.enabled(workspace):
+                return dict(
+                    card=self.card(workspace),
+                    history=[],
+                    guarded=False,
+                    labels=len(self.readers.history(workspace)),
                 )
             registry = Registry(self.data_dir, workspace)
             history = []
@@ -220,6 +233,8 @@ class WorkspaceService:
         with self._lock(workspace):
             if self.cold_start and self.cold_start.owns(workspace):
                 return self.cold_start.route(workspace, frame)
+            if self.readers and self.readers.enabled(workspace):
+                return self.readers.route(workspace, frame)
             loop = self._runtime(workspace)
             decisions = [
                 Decision.model_validate(row).model_dump(mode="json") for row in loop.route(frame)

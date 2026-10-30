@@ -30,6 +30,7 @@ from backend.data import MAX_CSV_BYTES, CSVPreview, merchant_key, preview_csv
 from backend.evidence import Evidence
 from backend.meta_webhook import MetaWebhook
 from backend.meta_webhook import router as meta_router
+from backend.reader_runtime import ReaderRuntime
 from backend.reader_serving import ReaderUnavailable
 from backend.schemas import (
     Answer,
@@ -48,6 +49,7 @@ from backend.schemas import (
     Page,
     PredictRequest,
     Reasons,
+    ServingStatus,
     WorkspaceId,
 )
 from backend.workspace import WorkspaceExists, WorkspaceService
@@ -63,6 +65,7 @@ def create_app(
     *,
     workspace_service: WorkspaceService | None = None,
     cold_start_service: ColdStartService | None = None,
+    reader_factory=None,
 ) -> FastAPI:
     config = settings or Settings()
     evidence = Evidence(
@@ -77,9 +80,15 @@ def create_app(
             lambda: WorkspaceService(store.Store(config.database_path), config.data_dir)
         )
         app.state.workspaces = service
-        service.cold_start = cold_start_service or ColdStartService(service.store, config)
-        app.state.meta_webhook = MetaWebhook(config, service)
         try:
+            service.readers = ReaderRuntime(
+                service.store, config, **({"factory": reader_factory} if reader_factory else {})
+            )
+            await run_in_threadpool(service.readers.startup)
+            service.cold_start = cold_start_service or ColdStartService(
+                service.store, config, reader_pool=service.readers
+            )
+            app.state.meta_webhook = MetaWebhook(config, service)
             yield
         finally:
             await run_in_threadpool(service.close)
@@ -198,6 +207,29 @@ def create_app(
         except KeyError:
             return None
         return service
+
+    @contract.get(
+        "/serving",
+        response_model=ServingStatus,
+        description="Active serving configuration and separate published reader evidence.",
+    )
+    def serving(ws: WorkspaceId, response: Response):
+        service = app.state.workspaces
+        if stored_workspace(ws) is None:
+            raise HTTPException(404, "Workspace was not found.")
+        if service.cold_start and service.cold_start.owns(ws):
+            result = service.readers.status(ws, cold_history=service.cold_start.history(ws))
+        elif service.readers.enabled(ws):
+            result = service.readers.status(ws)
+        else:
+            result = {
+                "backend": "head",
+                "model_id": service.store.workspace(ws)["featurizer"],
+                "device": "cpu",
+                "scope_note": "Workspace classifier and calibration card.",
+            }
+        response.headers["X-Secnd-Mode"] = "live"
+        return result
 
     @contract.post(
         "/cold-start",

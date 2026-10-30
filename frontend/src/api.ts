@@ -84,7 +84,14 @@ export type ColdStartState = {
   cap_usd: string;
   demo: boolean;
 };
-const base = "/api/v1/workspaces/default";
+const selectedWorkspace =
+  new URLSearchParams(location.search).get("workspace") ?? "default";
+export const workspaceId = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(
+  selectedWorkspace,
+)
+  ? selectedWorkspace
+  : "default";
+const base = `/api/v1/workspaces/${encodeURIComponent(workspaceId)}`;
 
 async function request<T>(
   path: string,
