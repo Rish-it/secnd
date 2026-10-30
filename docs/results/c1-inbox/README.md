@@ -6,7 +6,8 @@ Run `npm ci`, `uv sync --locked`, `npx playwright install chromium`, then
 outbound messaging or ad API calls occur. Sources are illustrative badges;
 these screenshots do not demonstrate live Meta delivery or a Meta-traffic evaluation.
 
-[Recorded browser assertions and synthetic workspace card](browser.json).
+[Recorded browser assertions and synthetic workspace card](browser.json) ·
+[check results](checks.json).
 
 - [Desktop, pending](desktop.png)
 - [Desktop, automatic answer with saved evidence](automatic-evidence.png)
