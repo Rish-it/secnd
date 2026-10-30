@@ -324,6 +324,8 @@ class ColdStartService:
         rows = self.reader(workspace).predict(
             self.store.workspace(workspace)["labels"], self.history(workspace), frame
         )
+        for row, item in zip(rows, frame.to_dict("records"), strict=True):
+            row["source_app"] = item.get("source_app")
         self.store.record_predictions(workspace, json.loads(frame.to_json(orient="records")), rows)
         return rows
 

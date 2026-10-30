@@ -6,6 +6,7 @@ import type { EvalCard, Preview } from "./api";
 import Companion from "./Companion";
 import Metrics from "./Metrics";
 import ColdStart from "./ColdStart";
+import MetaConnections from "./MetaConnections";
 
 type View = "Teach" | "Companion" | "Metrics";
 type Connection = "connecting" | "online" | "offline";
@@ -65,9 +66,8 @@ function Icon({ kind }: { kind: View | "upload" | "arrow" }) {
 }
 
 export default function App() {
-  const [panelOpen, setPanelOpen] = useState(false);
   const [metricsRefresh, setMetricsRefresh] = useState(0);
-  const [view, setView] = useState<View>("Teach");
+  const [view, setView] = useState<View>("Companion");
   const [connection, setConnection] = useState<Connection>("connecting");
   const [retry, setRetry] = useState(0);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -192,12 +192,10 @@ export default function App() {
               key={item}
               className={`nav-item ${view === item ? "active" : ""}`}
               aria-current={view === item ? "page" : undefined}
-              onClick={() =>
-                item === "Companion" ? setPanelOpen(true) : setView(item)
-              }
+              onClick={() => setView(item)}
             >
               <Icon kind={item} />
-              <span>{item}</span>
+              <span>{item === "Companion" ? "Inbox" : item}</span>
               <span className="nav-number">0{index + 1}</span>
             </button>
           ))}
@@ -219,7 +217,7 @@ export default function App() {
         <header className="topbar">
           <span>
             YOUR WORKSPACE <span className="breadcrumb-slash">/</span>{" "}
-            <strong>{view}</strong>
+            <strong>{view === "Companion" ? "Inbox" : view}</strong>
           </span>
           <div className={`connection ${connection}`} role="status">
             <span />
@@ -237,6 +235,9 @@ export default function App() {
           </div>
         </header>
         <main id="main" tabIndex={-1}>
+          <div hidden={view !== "Companion"}>
+            <Companion onAnswer={() => setMetricsRefresh((value) => value + 1)} />
+          </div>
           {view === "Teach" && (
             <>
               <div className="page-heading">
@@ -276,6 +277,7 @@ export default function App() {
               <ColdStart
                 onChange={() => setMetricsRefresh((value) => value + 1)}
               />
+              <MetaConnections />
               <section className="teach-card" aria-labelledby="upload-title">
                 <div className="section-heading">
                   <div>
@@ -493,41 +495,6 @@ export default function App() {
             </>
           )}
 
-          {view === "Companion" && (
-            <>
-              <div className="page-heading">
-                <div>
-                  <p className="eyebrow">A LITTLE HELP WITH THE EVERYDAY</p>
-                  <h1>
-                    Your decisions,
-                    <br />
-                    <span>with a second pair of eyes.</span>
-                  </h1>
-                  <p className="intro">
-                    Automatic decisions and questions for you will live here.
-                  </p>
-                </div>
-              </div>
-              <section className="empty-card">
-                <div className="empty-icon">
-                  <Icon kind="Companion" />
-                </div>
-                <h2>Every good companion starts by listening.</h2>
-                <p>
-                  Once your first model is trained, Secnd will handle confident
-                  decisions and bring the uncertain ones to you.
-                </p>
-                <button
-                  className="primary-button"
-                  onClick={() => setView("Teach")}
-                >
-                  Start with your examples
-                  <Icon kind="arrow" />
-                </button>
-              </section>
-            </>
-          )}
-
           {view === "Metrics" && (
             <>
               <div className="page-heading">
@@ -553,12 +520,6 @@ export default function App() {
           </footer>
         </main>
       </div>
-      <Companion
-        open={panelOpen}
-        onOpen={() => setPanelOpen(true)}
-        onClose={() => setPanelOpen(false)}
-        onAnswer={() => setMetricsRefresh((value) => value + 1)}
-      />
     </div>
   );
 }

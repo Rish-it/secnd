@@ -1,0 +1,10 @@
+{
+  "scope": "Decision inbox checks; no model benchmark or live Meta traffic claim",
+  "checks": [
+    {"command": "npm run check", "status": "passed", "backend_tests": 226, "python_checks": "passed", "frontend_lint": "passed", "frontend_build": "passed"},
+    {"command": "npm run test:inbox", "status": "passed", "browser_scenarios": 1}
+  ],
+  "dockerfile_changed": false,
+  "paid_calls_added": false,
+  "screenshots": ["desktop.png", "automatic-evidence.png", "overridden.png", "mobile-390.png", "mobile-pending-390.png"]
+}

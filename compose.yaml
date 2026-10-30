@@ -1,6 +1,9 @@
 services:
   secnd:
     build: .
+    env_file:
+      - path: .env
+        required: false
     environment:
       SECND_FEATURIZER: ${SECND_FEATURIZER:-pt-minilm}
       SECND_SERVING_BACKEND: ${SECND_SERVING_BACKEND:-head}

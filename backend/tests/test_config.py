@@ -26,3 +26,19 @@ def test_budget_reads_environment_and_rejects_invalid_values(monkeypatch):
         monkeypatch.setenv("SECND_MUSE_BUDGET_USD", value)
         with pytest.raises(ValidationError):
             Settings(_env_file=None)
+
+
+def test_connector_switches_default_off_and_mapping_from_settings(monkeypatch):
+    for name in ("SECND_ADS_SEND_ENABLED", "SECND_WHATSAPP_SEND_ENABLED"):
+        monkeypatch.delenv(name, raising=False)
+    settings = Settings(_env_file=None)
+    assert not settings.ads_send_enabled and not settings.whatsapp_send_enabled
+    assert settings.meta_workspace_accounts == {} and settings.ads_sandbox_accounts == []
+    monkeypatch.setenv("SECND_META_WORKSPACE_ACCOUNTS", '{"instagram:123":"messages"}')
+    monkeypatch.setenv("SECND_ADS_WORKSPACE_ACCOUNTS", '{"ads":"act_900"}')
+    monkeypatch.setenv("SECND_ADS_SANDBOX_ACCOUNTS", '["act_900"]')
+    monkeypatch.setenv("SECND_ADS_TOKEN", "private-ads-token")
+    settings = Settings(_env_file=None)
+    assert settings.meta_workspace_accounts["instagram:123"] == "messages"
+    assert settings.ads_workspace_accounts["ads"] in settings.ads_sandbox_accounts
+    assert "private-ads-token" not in repr(settings) + settings.model_dump_json()

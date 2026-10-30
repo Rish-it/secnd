@@ -1,0 +1,61 @@
+{
+  "scenario": "Synthetic messages; real char_tfidf CPU inference and fixed synthetic calibration. No providers or live Meta calls.",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1100
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "document_width": 390
+    }
+  ],
+  "pending": 4,
+  "automatic": 4,
+  "nearest_examples": 3,
+  "pagination_items": 27,
+  "checked": [
+    "confirm",
+    "correct",
+    "undo confirm",
+    "undo correction",
+    "override view",
+    "source groups",
+    "tab arrow keys",
+    "evidence",
+    "pagination",
+    "workspace isolation",
+    "no horizontal overflow"
+  ],
+  "synthetic_workspace_card": {
+    "model_version": "ren-1.4",
+    "accuracy": 0.9333333333333333,
+    "macro_f1": null,
+    "nll": 0.11162341036717997,
+    "brier": null,
+    "ece": 0.005435654451753358,
+    "classwise_ece": {},
+    "aurc": null,
+    "threshold": 0.9995984256737842,
+    "coverage": 0.9,
+    "precision": 1,
+    "cp_lower_bound": 0.9963083958810852,
+    "robustness_pass_rate": null,
+    "seen_merchant": null,
+    "unseen_merchant": null,
+    "worst_classes": {},
+    "featurize_ms": null,
+    "predict_ms": null,
+    "retrain_ms": 20.5,
+    "peak_rss_bytes": null,
+    "artifact_bytes": null,
+    "image_bytes": null,
+    "cost_per_1000_usd": null,
+    "data_hash": null,
+    "split_hash": null,
+    "featurizer_id": "char_tfidf",
+    "seed": 0,
+    "git_sha": null
+  }
+}

@@ -302,3 +302,38 @@ def test_all_workspaces_together_stay_within_the_server_cap(live):
     begin(client, ["Rent", "Fuel"], workspace="second")
     assert finish(cold, "second")["status"] == "stopped"
     assert cold.spent() == spent and cold.spent("second") == 0
+
+
+def test_reader_answer_undo_restores_history_without_teacher_calls(live):
+    client, cold, calls = live
+    assert begin(client).status_code == 200
+    finish(cold)
+    original = cold.history("default")
+    count = len(calls)
+    predicted = client.post(
+        API + "/predict",
+        json={
+            "items": [{"item_id": "undo-reader", "text": "train fare", "source_app": "whatsapp"}]
+        },
+    )
+    assert predicted.status_code == 200
+    assert client.get(API + "/queue").json()["items"][0]["source_app"] == "whatsapp"
+    assert (
+        client.post(
+            API + "/answers",
+            json={"item_id": "undo-reader", "label": "Food"},
+            headers={"Idempotency-Key": "reader-answer"},
+        ).status_code
+        == 200
+    )
+    assert len(cold.history("default")) == len(original) + 1
+    assert (
+        client.post(
+            API + "/answers:undo",
+            json={"idempotency_key": "reader-answer"},
+        ).status_code
+        == 200
+    )
+    assert cold.history("default") == original
+    assert len(client.get(API + "/queue").json()["items"]) == 1
+    assert len(calls) == count

@@ -28,6 +28,9 @@ from backend.cold_start import ColdStartConflict, ColdStartService, imported_lab
 from backend.config import Settings
 from backend.data import MAX_CSV_BYTES, CSVPreview, merchant_key, preview_csv
 from backend.evidence import Evidence
+from backend.logging_filters import redact_access_logs
+from backend.meta_ads import AdsService
+from backend.meta_ads import router as ads_router
 from backend.meta_webhook import MetaWebhook
 from backend.meta_webhook import router as meta_router
 from backend.reader_runtime import ReaderRuntime
@@ -50,6 +53,7 @@ from backend.schemas import (
     PredictRequest,
     Reasons,
     ServingStatus,
+    UndoAnswer,
     WorkspaceId,
 )
 from backend.workspace import WorkspaceExists, WorkspaceService
@@ -68,6 +72,7 @@ def create_app(
     reader_factory=None,
 ) -> FastAPI:
     config = settings or Settings()
+    redact_access_logs()
     evidence = Evidence(
         config.data_dir,
         config.evaluation_dir,
@@ -89,12 +94,14 @@ def create_app(
                 service.store, config, reader_pool=service.readers
             )
             app.state.meta_webhook = MetaWebhook(config, service)
+            app.state.meta_ads = AdsService(config, service)
             yield
         finally:
             await run_in_threadpool(service.close)
 
     app = FastAPI(title="Secnd", version="0.1.0", lifespan=lifespan)
     app.include_router(meta_router(config))
+    app.include_router(ads_router())
 
     @app.exception_handler(StarletteHTTPException)
     async def http_error(request: Request, error: StarletteHTTPException):
@@ -307,6 +314,13 @@ def create_app(
     def workspace_mode(ws, response, service):
         response.headers["X-Secnd-Mode"] = "live" if service.has_model(ws) else "fixture"
 
+    @contract.get("/labels", response_model=list[str], description="All allowed workspace labels.")
+    def labels(ws: WorkspaceId, response: Response):
+        if service := stored_workspace(ws):
+            workspace_mode(ws, response, service)
+            return service.store.workspace(ws)["labels"]
+        return ["Travel", "Software"]
+
     @contract.post(
         "/predict",
         response_model=list[Decision],
@@ -322,6 +336,7 @@ def create_app(
                         "amount": item.amount,
                         "date": item.date.isoformat() if item.date else None,
                         "merchant_key": merchant_key(item.text),
+                        "source_app": item.source_app,
                     }
                     for item in body.items
                 ]
@@ -382,6 +397,39 @@ def create_app(
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
     ):
         return workspace_page(ws, "queue", response, cursor, limit)
+
+    @contract.get(
+        "/overridden",
+        response_model=Page[Decision],
+        description="Decisions whose latest active human answer differs from Ren's prediction.",
+    )
+    def overridden(
+        ws: WorkspaceId,
+        response: Response,
+        cursor: Annotated[str | None, Query(max_length=512)] = None,
+        limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    ):
+        if not stored_workspace(ws):
+            return Page[Decision](items=[])
+        return workspace_page(ws, "overridden", response, cursor, limit)
+
+    @contract.post(
+        "/answers:undo",
+        response_model=AnswerResult,
+        description="Retract the most recent active human answer; retain its audit record.",
+    )
+    def undo_answer(ws: WorkspaceId, body: UndoAnswer, response: Response):
+        service = stored_workspace(ws)
+        if service is None:
+            raise HTTPException(404, "Workspace was not found.")
+        try:
+            result = service.undo_answer(ws, body.idempotency_key)
+        except KeyError as error:
+            raise HTTPException(404, "Answer was not found in this workspace.") from error
+        except store.IdempotencyConflict as error:
+            raise HTTPException(409, str(error)) from error
+        workspace_mode(ws, response, service)
+        return result
 
     @contract.post(
         "/answers",

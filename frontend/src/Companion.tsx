@@ -1,69 +1,122 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { api, percent } from "./api";
+import { api, percent, workspaceId } from "./api";
 import type { Decision, Page } from "./api";
 import "./Companion.css";
 
-type Props = {
-  open: boolean;
-  onOpen: () => void;
-  onClose: () => void;
-  onAnswer: () => void;
-};
+type Tab = "Pending" | "Answered automatically" | "Overridden";
+type Undo = { key: string; label: string };
 const empty: Page<Decision> = { items: [], next_cursor: null };
+const sources = [
+  "whatsapp",
+  "messenger",
+  "instagram",
+  "ads",
+  "workspace",
+] as const;
+const names = {
+  whatsapp: "WhatsApp",
+  messenger: "Messenger",
+  instagram: "Instagram",
+  ads: "Ads",
+  workspace: "Workspace",
+};
+const measured = (value: number | null | undefined) =>
+  value == null ? "Unavailable" : `${Math.floor(value * 10000) / 100}%`;
 
-export default function Companion({ open, onOpen, onClose, onAnswer }: Props) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const [tab, setTab] = useState<"Questions" | "Handled" | "Ask Muse">(
-    "Questions",
-  );
-  const [queue, setQueue] = useState(empty);
-  const [feed, setFeed] = useState(empty);
+export default function Companion({ onAnswer }: { onAnswer: () => void }) {
+  const [tab, setTab] = useState<Tab>("Pending");
+  const [pages, setPages] = useState<Record<Tab, Page<Decision>>>({
+    Pending: empty,
+    "Answered automatically": empty,
+    Overridden: empty,
+  });
   const [fixture, setFixture] = useState(false);
+  const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [busy, setBusy] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [undo, setUndo] = useState<Undo[]>(() => {
+    try {
+      const saved: unknown = JSON.parse(
+        sessionStorage.getItem(`inbox-undo-${workspaceId}`) ?? "[]",
+      );
+      return Array.isArray(saved)
+        ? saved.filter(
+            (row): row is Undo =>
+              typeof row?.key === "string" && typeof row?.label === "string",
+          )
+        : [];
+    } catch {
+      return [];
+    }
+  });
   const [other, setOther] = useState<string | null>(null);
   const [otherLabel, setOtherLabel] = useState("");
-  const [why, setWhy] = useState<string | null>(null);
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<{ role: string; text: string }[]>(
-    [],
-  );
+  const [labels, setLabels] = useState<string[]>([]);
+  const paged = useRef(false);
   const keys = useRef(new Map<string, string>());
+  const revision = useRef(0);
+  const mutating = useRef(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const tabButtons = useRef<(HTMLButtonElement | null)[]>([]);
+  useEffect(() => {
+    sessionStorage.setItem(`inbox-undo-${workspaceId}`, JSON.stringify(undo));
+  }, [undo]);
+  const fetchPage = (value: Tab, cursor?: string) =>
+    value === "Pending"
+      ? api.queue(cursor)
+      : value === "Overridden"
+        ? api.overridden(cursor)
+        : api.feed(cursor);
 
   const load = useCallback(async () => {
+    if (mutating.current) return;
+    const request = ++revision.current;
     try {
-      const [questions, handled] = await Promise.all([api.queue(), api.feed()]);
-      setError("");
-      setQueue(questions.data);
-      setFeed(handled.data);
-      setFixture(questions.fixture || handled.fixture);
+      const [pending, automatic, overridden, labelList] = await Promise.all([
+        api.queue(),
+        api.feed(),
+        api.overridden(),
+        api.labels(),
+      ]);
+      if (request !== revision.current || mutating.current) return;
+      paged.current = false;
+      setLabels(labelList.data);
+      setPages({
+        Pending: pending.data,
+        "Answered automatically": automatic.data,
+        Overridden: overridden.data,
+      });
+      setFixture(pending.fixture || automatic.fixture);
+      setDemo(pending.demo);
     } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "Could not load your decisions.",
-      );
+      if (request === revision.current)
+        setError(
+          cause instanceof Error ? cause.message : "Could not load decisions.",
+        );
     } finally {
-      setLoading(false);
+      if (request === revision.current) setLoading(false);
     }
   }, []);
   useEffect(() => {
     void load();
-    if (!open) return;
-    const timer = window.setInterval(() => void load(), 2000);
-    return () => window.clearInterval(timer);
-  }, [load, open]);
-  useEffect(() => {
-    const node = dialog.current;
-    if (open && !node?.open) node?.showModal();
-    else if (!open && node?.open) node.close();
-  }, [open]);
+    const timer = window.setInterval(() => {
+      // Leave pagination and expanded forms stable while the person reviews them.
+      if (document.visibilityState === "visible" && !other && !paged.current)
+        void load();
+    }, 10000);
+    return () => {
+      window.clearInterval(timer);
+      revision.current++;
+    };
+  }, [load, other]);
 
   async function answer(item: Decision, label: string) {
-    if (busy) return;
-    setBusy(item.item_id);
+    if (mutating.current) return;
+    mutating.current = true;
+    revision.current++;
+    setBusy(true);
     setError("");
     setNotice("");
     const action = `${item.item_id}\0${label}`;
@@ -74,443 +127,405 @@ export default function Companion({ open, onOpen, onClose, onAnswer }: Props) {
       keys.current.delete(action);
       setNotice(
         result.fixture
-          ? "Example answer checked. Your answer has not been saved."
-          : result.data.retrain === "history_updated"
-            ? "Answer saved to Ren’s history."
-            : "Answer saved. Ren is checking the next model version.",
+          ? "Preview only. Answer has not been saved."
+          : `Saved ${label} to Ren’s history.`,
       );
+      if (!result.fixture) {
+        setUndo((previous) => [...previous, { key, label }]);
+        onAnswer();
+      }
       setOther(null);
       setOtherLabel("");
-      if (!result.fixture) {
-        onAnswer();
-        await load();
-      }
     } catch (cause) {
       setError(
         cause instanceof Error
           ? cause.message
-          : "Could not save this answer. Try again.",
+          : "Could not save answer. Try again.",
       );
     } finally {
-      setBusy(null);
+      mutating.current = false;
+      setBusy(false);
+      await load();
+      heading.current?.focus();
     }
   }
-  async function chat(event: React.SubmitEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!question.trim() || busy) return;
-    const text = question.trim();
-    setBusy("chat");
+  async function undoLast() {
+    const last = undo.at(-1);
+    if (!last || mutating.current) return;
+    mutating.current = true;
+    revision.current++;
+    setBusy(true);
     setError("");
     try {
-      const reply = await api.chat(text);
-      setMessages((current) => [
-        ...current,
-        { role: "You", text },
-        {
-          role: reply.fixture ? "Muse preview" : "Muse",
-          text: reply.data.answer,
+      await api.undo(last.key);
+      setUndo((previous) => previous.slice(0, -1));
+      setNotice(
+        `Undid ${last.label}. Previous answer restored; Ren’s history updated.`,
+      );
+      onAnswer();
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not undo answer.",
+      );
+    } finally {
+      mutating.current = false;
+      setBusy(false);
+      await load();
+      heading.current?.focus();
+    }
+  }
+  async function more() {
+    if (mutating.current || !pages[tab].next_cursor) return;
+    revision.current++;
+    mutating.current = true;
+    setBusy(true);
+    try {
+      const next = await fetchPage(tab, pages[tab].next_cursor!);
+      paged.current = true;
+      setPages((previous) => ({
+        ...previous,
+        [tab]: {
+          ...next.data,
+          items: [
+            ...previous[tab].items,
+            ...next.data.items.filter(
+              (row) =>
+                !previous[tab].items.some((old) => old.item_id === row.item_id),
+            ),
+          ],
         },
-      ]);
-      setQuestion("");
+      }));
     } catch (cause) {
       setError(
         cause instanceof Error
           ? cause.message
-          : "Muse could not answer. Try again.",
+          : "Could not load more decisions.",
       );
     } finally {
-      setBusy(null);
+      mutating.current = false;
+      setBusy(false);
     }
   }
-  function choices(item: Decision) {
-    return Object.entries(item.probabilities)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
+  function changeTab(value: Tab) {
+    setTab(value);
+    setOther(null);
   }
-  function otherForm(item: Decision) {
+  function card(item: Decision) {
+    const source = item.source_app ?? item.item?.source_app ?? "workspace";
+    const choices = labels.length ? labels : Object.keys(item.probabilities);
     return (
-      other === item.item_id && (
-        <form
-          className="other-label"
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (otherLabel.trim()) void answer(item, otherLabel.trim());
-          }}
-        >
-          <label>
-            Correct category
-            <input
-              autoFocus
-              required
-              maxLength={128}
-              value={otherLabel}
-              onChange={(event) => setOtherLabel(event.target.value)}
-            />
-          </label>
-          <button className="primary-button" disabled={busy !== null}>
-            Save answer
-          </button>
-        </form>
-      )
-    );
-  }
-
-  return (
-    <>
-      <button
-        className={`companion-dot ${queue.items.length ? "has-questions" : ""}`}
-        onClick={onOpen}
-        aria-haspopup="dialog"
-        aria-controls="companion-panel"
-        aria-expanded={open}
+      <article
+        className="inbox-card"
+        key={item.item_id}
+        aria-label={item.item?.text || item.item_id}
       >
-        <span className="orb" aria-hidden="true">
-          s
-        </span>
-        <span>
-          <strong>Your second pair of eyes</strong>
-          <small>
-            {loading
-              ? "Checking in…"
-              : error
-                ? "Connection needs attention"
-                : `${fixture ? 0 : feed.items.length}${!fixture && feed.next_cursor ? "+" : ""} handled · ${queue.items.length}${queue.next_cursor ? "+" : ""} ${fixture ? "sample " : ""}${queue.items.length === 1 ? "question" : "questions"}`}
-          </small>
-        </span>
-      </button>
-      <dialog
-        id="companion-panel"
-        className="companion-panel"
-        ref={dialog}
-        onCancel={(event) => {
-          event.preventDefault();
-          onClose();
-        }}
-        onClose={onClose}
-        aria-labelledby="companion-title"
-      >
-        <header className="panel-heading">
-          <div>
-            <p className="eyebrow">A LITTLE MORE HEADSPACE</p>
-            <h2 id="companion-title">Your companion.</h2>
-          </div>
-          <button
-            className="close-panel"
-            onClick={onClose}
-            aria-label="Close companion"
-          >
-            ×
-          </button>
-        </header>
-        {fixture && (
-          <p className="preview-banner">
-            Preview workspace · These are sample decisions. Answers are not
-            saved yet.
+        <div className="decision-meta">
+          <span className={`source-badge source-${source}`}>
+            {names[source]}
+          </span>
+          <span>
+            {item.spot_check
+              ? "Spot-check"
+              : tab === "Pending"
+                ? "Needs your judgment"
+                : item.model_version}
+          </span>
+        </div>
+        <h3>{item.item?.text || item.item_id}</h3>
+        {item.item?.amount != null && (
+          <p className="decision-amount">
+            Amount: {item.item.amount.toLocaleString()}
+            {item.item.date && ` · ${item.item.date}`}
           </p>
         )}
-        <nav className="panel-tabs" aria-label="Companion sections">
-          {(["Questions", "Handled", "Ask Muse"] as const).map((value) => (
+        <div className="inbox-proposal">
+          <span>{tab === "Overridden" ? "Your answer" : "Ren suggests"}</span>
+          <strong>{item.answer_label ?? item.label}</strong>
+          {tab !== "Overridden" && <span>{percent(item.prob)} confidence</span>}
+        </div>
+        {tab === "Overridden" && (
+          <p className="original-answer">
+            Ren originally suggested {item.label}. Your correction is in its
+            history.
+          </p>
+        )}
+        {tab === "Answered automatically" && (
+          <dl className="certification">
+            <div>
+              <dt>Certified threshold</dt>
+              <dd>{measured(item.threshold)}</dd>
+            </div>
+            <div>
+              <dt>Precision lower bound</dt>
+              <dd>{measured(item.cp_lower_bound)}</dd>
+            </div>
+          </dl>
+        )}
+        {tab === "Answered automatically" && (
+          <p className="evidence-note">
+            One-sided 95% calibration bound; target 99%. Applies to this saved
+            model, not a guarantee for every new message.
+          </p>
+        )}
+        <details className="inbox-evidence">
+          <summary>Evidence · nearest past decisions</summary>
+          {item.reasons.neighbours.length ? (
+            <ol>
+              {item.reasons.neighbours.map((row) => (
+                <li key={row.item_id}>
+                  <p>{row.text}</p>
+                  <span>
+                    {row.label} · {percent(row.similarity)} similarity
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>No past-decision evidence saved for this prediction.</p>
+          )}
+          <p className="evidence-note">
+            Similar examples provide context. Ren makes the decision; Muse may
+            write starting history.
+          </p>
+        </details>
+        <div className="inbox-actions">
+          {tab === "Pending" && (
+            <button
+              className="primary-button"
+              disabled={busy}
+              onClick={() => void answer(item, item.label)}
+            >
+              Confirm {item.label}
+            </button>
+          )}
+          <button
+            className="secondary-button"
+            disabled={busy}
+            aria-expanded={other === item.item_id}
+            onClick={() => {
+              setOther(other === item.item_id ? null : item.item_id);
+              setOtherLabel(
+                choices.find((x) => x !== (item.answer_label ?? item.label)) ??
+                  choices[0],
+              );
+            }}
+          >
+            Pick another label
+          </button>
+        </div>
+        {other === item.item_id && (
+          <form
+            className="inbox-correction"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (otherLabel) void answer(item, otherLabel);
+            }}
+          >
+            <label>
+              Choose label
+              <select
+                autoFocus
+                value={otherLabel}
+                onChange={(event) => setOtherLabel(event.target.value)}
+                disabled={busy}
+              >
+                {choices.map((label) => (
+                  <option key={label}>{label}</option>
+                ))}
+              </select>
+            </label>
+            <p className="evidence-note">
+              Every label in this workspace is available.
+            </p>
+            <button className="primary-button" disabled={busy || !otherLabel}>
+              Save correction
+            </button>
+          </form>
+        )}
+      </article>
+    );
+  }
+  return (
+    <section className="decision-inbox" aria-labelledby="inbox-title">
+      <div className="inbox-heading">
+        <div>
+          <p className="eyebrow">REN FOR YOUR META APPS</p>
+          <h1 id="inbox-title" ref={heading} tabIndex={-1}>
+            Your decision inbox.
+          </h1>
+          <p>Ren handles certified decisions. You make the rest.</p>
+        </div>
+        <button
+          className="secondary-button"
+          disabled={busy}
+          onClick={() => {
+            setError("");
+            void load();
+          }}
+        >
+          Refresh inbox
+        </button>
+      </div>
+      <form className="workspace-picker" method="get">
+        <label htmlFor="workspace-id">Workspace</label>
+        <input
+          id="workspace-id"
+          name="workspace"
+          defaultValue={workspaceId}
+          required
+          pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}"
+          maxLength={64}
+        />
+        <button className="secondary-button">Open workspace</button>
+      </form>
+      {fixture && (
+        <p className="preview-banner">
+          Preview · illustrative decisions. Answers are not saved. Teach this
+          workspace to start.
+        </p>
+      )}
+      {demo && (
+        <p className="preview-banner">
+          Synthetic demo · illustrative messages, local answers only.
+          Certification below uses synthetic calibration data, not Meta traffic.
+        </p>
+      )}
+      <div className="inbox-tabs" role="tablist" aria-label="Decision status">
+        {(["Pending", "Answered automatically", "Overridden"] as const).map(
+          (value, index) => (
             <button
               key={value}
-              aria-pressed={tab === value}
-              onClick={() => setTab(value)}
+              ref={(node) => {
+                tabButtons.current[index] = node;
+              }}
+              role="tab"
+              id={`inbox-tab-${index}`}
+              aria-controls={`inbox-panel-${index}`}
+              aria-selected={tab === value}
+              tabIndex={tab === value ? 0 : -1}
+              onClick={() => changeTab(value)}
+              onKeyDown={(event) => {
+                let next = index;
+                if (event.key === "ArrowRight") next = (index + 1) % 3;
+                else if (event.key === "ArrowLeft") next = (index + 2) % 3;
+                else if (event.key === "Home") next = 0;
+                else if (event.key === "End") next = 2;
+                else return;
+                event.preventDefault();
+                changeTab(
+                  (
+                    ["Pending", "Answered automatically", "Overridden"] as const
+                  )[next],
+                );
+                tabButtons.current[next]?.focus();
+              }}
             >
               {value}
-              {value === "Questions" && queue.items.length
-                ? ` (${queue.items.length})`
-                : ""}
+              <span>
+                {pages[value].items.length}
+                {pages[value].next_cursor ? "+" : ""}
+              </span>
             </button>
-          ))}
-        </nav>
-        <div className="panel-content">
-          {loading && <p role="status">Gathering your decisions…</p>}
-          {error && (
-            <div className="error-message" role="alert">
-              <p>{error}</p>
-              <button
-                onClick={() => {
-                  setLoading(true);
-                  void load();
-                }}
-              >
-                Try again
-              </button>
-            </div>
-          )}
-          {notice && (
-            <p className="answer-notice" role="status">
-              {notice}
-            </p>
-          )}
-          {!loading && tab === "Questions" && (
-            <>
-              <p className="panel-intro">
-                A small question. A better next decision.
-              </p>
-              {!queue.items.length && (
-                <div className="panel-empty">
-                  <h3>All caught up.</h3>
-                  <p>
-                    When Ren needs your judgment, the question will appear here.
-                  </p>
-                </div>
-              )}
-              {queue.items.map((item) => (
-                <article
-                  className="question-card"
-                  key={item.item_id}
-                  aria-busy={busy === item.item_id}
-                >
-                  <div className="decision-meta">
-                    <span>
-                      {item.spot_check
-                        ? "Spot-check · help verify an automatic answer"
-                        : fixture
-                          ? "Illustrative question"
-                          : "A question for you"}
-                    </span>
-                    <span>{percent(item.prob)} sure</span>
-                  </div>
-                  <h3>{item.item?.text || "Decision without a description"}</h3>
-                  {item.item?.amount != null && (
-                    <p className="decision-amount">
-                      Amount: {item.item.amount.toLocaleString()}{" "}
-                      {item.item.date ? `· ${item.item.date}` : ""}
-                    </p>
-                  )}
-                  <p className="question-prompt">
-                    Which category would you choose?
-                  </p>
-                  <div className="answer-options">
-                    {choices(item).map(([label, probability]) => (
-                      <button
-                        key={label}
-                        disabled={busy !== null}
-                        onClick={() => void answer(item, label)}
-                      >
-                        <span>{label}</span>
-                        <small>{percent(probability)}</small>
-                      </button>
-                    ))}
-                    <button
-                      disabled={busy !== null}
-                      onClick={() => {
-                        setOther(item.item_id);
-                        setOtherLabel("");
-                      }}
-                    >
-                      Other category
-                    </button>
-                  </div>
-                  {otherForm(item)}
-                  <small className="version-caption">
-                    {fixture ? "Sample model" : item.model_version}
-                  </small>
-                </article>
-              ))}
-              {queue.next_cursor && (
-                <button
-                  className="text-button"
-                  disabled={loading}
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      const next = await api.queue(queue.next_cursor!);
-                      setQueue((previous) => ({
-                        ...next.data,
-                        items: [...previous.items, ...next.data.items],
-                      }));
-                    } catch (cause) {
-                      setError(
-                        cause instanceof Error
-                          ? cause.message
-                          : "Could not load more questions.",
-                      );
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                >
-                  More questions
-                </button>
-              )}
-            </>
-          )}
-          {!loading && tab === "Handled" && (
-            <>
-              <p className="panel-intro">
-                Every automatic decision, with its reasons.
-              </p>
-              {!feed.items.length && (
-                <div className="panel-empty">
-                  <h3>Answers nothing yet.</h3>
-                  <p>
-                    Until there is enough evidence for the precision target,
-                    decisions stay with you.
-                  </p>
-                </div>
-              )}
-              {feed.items.map((item) => (
-                <article className="question-card" key={item.item_id}>
-                  <div className="decision-meta">
-                    <span>
-                      {fixture ? "Illustrative decision" : "Handled by Ren"}
-                    </span>
-                    <span>{percent(item.prob)}</span>
-                  </div>
-                  <h3>{item.item?.text || item.item_id}</h3>
-                  <p className="handled-label">{item.label}</p>
-                  <button
-                    className="text-button"
-                    aria-expanded={why === item.item_id}
-                    onClick={() =>
-                      setWhy(why === item.item_id ? null : item.item_id)
-                    }
-                  >
-                    Why this decision? <span aria-hidden="true">↗</span>
-                  </button>
-                  {why === item.item_id && (
-                    <div className="decision-evidence">
-                      <p>
-                        {fixture
-                          ? "Sample probabilities"
-                          : "Calibrated probabilities"}
-                      </p>
-                      {choices(item).map(([label, probability]) => (
-                        <p key={label}>
-                          {label}
-                          <strong>{percent(probability)}</strong>
-                        </p>
-                      ))}
-                      <p>
-                        Threshold<strong>{percent(item.threshold)}</strong>
-                      </p>
-                      <small>
-                        {fixture ? "Sample model" : item.model_version}
-                      </small>
-                      <h4>Nearest past decisions</h4>
-                      {item.reasons.neighbours.length ? (
-                        item.reasons.neighbours.map((row) => (
-                          <p key={row.item_id}>
-                            {row.text} · {row.label} · {percent(row.similarity)}{" "}
-                            similarity
-                          </p>
-                        ))
-                      ) : (
-                        <p>No past-decision evidence available.</p>
-                      )}
-                      {item.reasons.merchant_memory && (
-                        <p>
-                          A previous merchant decision contributed to the
-                          prediction.
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  <div className="correction-options">
-                    <span>Needs a correction?</span>
-                    {choices(item)
-                      .filter(([label]) => label !== item.label)
-                      .map(([label]) => (
-                        <button
-                          key={label}
-                          disabled={busy !== null}
-                          onClick={() => void answer(item, label)}
-                        >
-                          Change to {label}
-                        </button>
-                      ))}
-                    <button
-                      disabled={busy !== null}
-                      onClick={() => {
-                        setOther(item.item_id);
-                        setOtherLabel("");
-                      }}
-                    >
-                      Choose another
-                    </button>
-                  </div>
-                  {otherForm(item)}
-                </article>
-              ))}
-              {feed.next_cursor && (
-                <button
-                  className="text-button"
-                  onClick={async () => {
-                    try {
-                      const next = await api.feed(feed.next_cursor!);
-                      setFeed((previous) => ({
-                        ...next.data,
-                        items: [...previous.items, ...next.data.items],
-                      }));
-                    } catch (cause) {
-                      setError(
-                        cause instanceof Error
-                          ? cause.message
-                          : "Could not load more decisions.",
-                      );
-                    }
-                  }}
-                >
-                  More decisions
-                </button>
-              )}
-            </>
-          )}
-          {tab === "Ask Muse" && (
-            <section className="muse-chat">
-              <p className="panel-intro">
-                Ask Muse about your decisions, counts, or corrections.
-              </p>
-              {!messages.length && (
-                <div className="panel-empty">
-                  <span className="muse-mark">✳</span>
-                  <h3>Put your history into words.</h3>
-                  <p>
-                    {fixture
-                      ? "Muse is not connected in this preview. Try a question to see the conversation."
-                      : "Muse reads your decision history when it needs evidence. The decision model still makes your predictions."}
-                  </p>
-                </div>
-              )}
-              <div className="chat-messages" aria-live="polite">
-                {messages.map((message, index) => (
-                  <article
-                    className={`chat-message ${message.role === "You" ? "from-you" : ""}`}
-                    key={index}
-                  >
-                    <small>{message.role}</small>
-                    <p>{message.text}</p>
-                  </article>
-                ))}
-              </div>
-              <form
-                className="chat-form"
-                onSubmit={(event) => void chat(event)}
-              >
-                <label className="visually-hidden" htmlFor="muse-question">
-                  Ask Muse
-                </label>
-                <textarea
-                  id="muse-question"
-                  placeholder="How many decisions needed a correction?"
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  maxLength={4000}
-                  required
-                  rows={3}
-                />
-                <button
-                  className="primary-button"
-                  disabled={busy !== null || !question.trim()}
-                >
-                  {busy === "chat" ? "Muse is thinking…" : "Ask Muse ↗"}
-                </button>
-              </form>
-            </section>
-          )}
+          ),
+        )}
+      </div>
+      <div className="inbox-feedback">
+        <p role="status" aria-live="polite">
+          {notice || (loading ? "Loading your decisions…" : "")}
+        </p>
+        {undo.length > 0 && (
+          <button
+            className="secondary-button"
+            disabled={busy}
+            onClick={() => void undoLast()}
+          >
+            Undo last answer
+          </button>
+        )}
+      </div>
+      {error && (
+        <div className="error-message" role="alert">
+          <p>{error}</p>
+          <button
+            className="secondary-button"
+            disabled={busy}
+            onClick={() => {
+              setError("");
+              void load();
+            }}
+          >
+            Try again
+          </button>
         </div>
-      </dialog>
-    </>
+      )}
+      {(["Pending", "Answered automatically", "Overridden"] as const).map(
+        (value, index) => (
+          <div
+            role="tabpanel"
+            id={`inbox-panel-${index}`}
+            aria-labelledby={`inbox-tab-${index}`}
+            key={value}
+            hidden={tab !== value}
+            aria-busy={busy}
+          >
+            {tab === value && !loading && (
+              <>
+                {!pages[value].items.length && (
+                  <div className="inbox-empty">
+                    <h2>
+                      {value === "Pending"
+                        ? "All caught up."
+                        : value === "Overridden"
+                          ? "No corrections yet."
+                          : "Nothing automatic yet."}
+                    </h2>
+                    <p>
+                      {value === "Pending"
+                        ? "New questions from your connected apps will appear here."
+                        : value === "Overridden"
+                          ? "Pick another label on a decision to teach Ren your preference."
+                          : "Until the gate certifies enough evidence, decisions wait for you."}
+                    </p>
+                  </div>
+                )}
+                {sources.map((source) => {
+                  const items = pages[value].items.filter(
+                    (item) =>
+                      (item.source_app ??
+                        item.item?.source_app ??
+                        "workspace") === source,
+                  );
+                  return items.length ? (
+                    <section
+                      className="inbox-source"
+                      aria-label={`${names[source]} decisions`}
+                      key={source}
+                    >
+                      <h2>
+                        {names[source]}
+                        <span>{items.length}</span>
+                      </h2>
+                      <div className="inbox-cards">{items.map(card)}</div>
+                    </section>
+                  ) : null;
+                })}
+                {pages[value].next_cursor && (
+                  <button
+                    className="secondary-button load-more"
+                    disabled={busy}
+                    onClick={() => void more()}
+                  >
+                    Load more decisions
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        ),
+      )}
+      <p className="inbox-footnote">
+        Built for Meta’s platform by Secnd. Independently developed.
+      </p>
+    </section>
   );
 }

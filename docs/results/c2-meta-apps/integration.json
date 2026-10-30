@@ -1,0 +1,15 @@
+{
+  "scope": "Detached preview containing the inbox and connector patches. No pull request merged. Synthetic insights and mocked HTTP only.",
+  "base_commit": "7ac340b",
+  "inbox_commit": "a55965a",
+  "checks": [
+    {"command": "npm run check", "status": "passed", "backend_tests": 265, "python_checks": "passed", "frontend_lint": "passed", "frontend_build": "passed"},
+    {"command": "npm run test:inbox", "status": "passed", "browser_scenarios": 1},
+    {"command": "npm run test:meta", "status": "passed", "browser_scenarios": 2, "skipped": 0}
+  ],
+  "verified_inbox_sources": ["WhatsApp", "Messenger", "Instagram", "Ads"],
+  "mobile_document_width": 390,
+  "screenshots": ["integration-desktop.png", "integration-mobile-390.png"],
+  "live_connector_calls": 0,
+  "model_evaluation": false
+}

@@ -11,6 +11,7 @@ NonNegative = Annotated[float, Field(ge=0, allow_inf_nan=False)]
 Identifier = Annotated[str, Field(min_length=1, max_length=128)]
 WorkspaceId = Annotated[str, Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$")]
 Label = Annotated[str, Field(min_length=1, max_length=128)]
+SourceApp = Literal["whatsapp", "messenger", "instagram", "ads"]
 
 
 class Item(BaseModel):
@@ -20,6 +21,7 @@ class Item(BaseModel):
     text: Annotated[str, Field(min_length=1, max_length=10000)]
     amount: Annotated[float, Field(allow_inf_nan=False)] | None = None
     date: Date | None = None
+    source_app: SourceApp | None = None
 
 
 class Neighbour(BaseModel):
@@ -92,6 +94,9 @@ class Decision(BaseModel):
     item: Item | None = None
     spot_check: bool = False
     reader: ReaderDecision | None = None
+    source_app: SourceApp | None = None
+    cp_lower_bound: Probability | None = None
+    answer_label: Label | None = None
 
     @model_validator(mode="after")
     def check_probabilities(self):
@@ -168,6 +173,12 @@ class Answer(BaseModel):
 
     item_id: Identifier
     label: Label
+
+
+class UndoAnswer(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    idempotency_key: Annotated[str, Field(min_length=1, max_length=256)]
 
 
 class Page[T](BaseModel):

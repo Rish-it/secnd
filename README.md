@@ -118,11 +118,15 @@ curl --fail-with-body -sS "$API/models"
 ## Meta messages and the learning loop
 
 The [WhatsApp Business Cloud API and Messenger integration](docs/integrations/meta.md)
+also supports Instagram messages, requires receiving-account workspace mappings,
 verifies the GET handshake and raw-body HMAC-SHA256 signatures, deduplicates message
 IDs across restarts, then routes supported text through the workspace's Loop.
 Uncertain messages enter the same human queue. Replies are dry-run by default;
 real WhatsApp sends require both a token and `SECND_WHATSAPP_SEND_ENABLED=true`.
-Messenger outbound replies remain previews. Compose forwards these settings from
+Messenger and Instagram outbound replies remain previews. Sandbox Ads insights
+become typed Ren proposals; account changes additionally require current certification,
+workspace auto-act and the default-off Ads execution switch. Proposals and attempts
+remain in the workspace action log. Compose forwards these settings from
 `.env`; no secret enters frontend code or image layers.
 
 The [cold-start protocol and curve](docs/results/s5/README.md#reproduce-the-cold-start-handoff)

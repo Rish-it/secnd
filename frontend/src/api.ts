@@ -4,6 +4,7 @@ export type Item = {
   text: string;
   amount?: number | null;
   date?: string | null;
+  source_app?: "whatsapp" | "messenger" | "instagram" | "ads" | null;
 };
 export type Decision = {
   item_id: string;
@@ -24,6 +25,9 @@ export type Decision = {
   };
   item?: Item | null;
   spot_check: boolean;
+  source_app?: Item["source_app"];
+  cp_lower_bound?: number | null;
+  answer_label?: string | null;
 };
 export type EvalCard = {
   featurizer_id?: string | null;
@@ -72,7 +76,7 @@ export type Preview = {
   row_count: number;
   rows: Record<string, string>[];
 };
-export type Result<T> = { data: T; fixture: boolean };
+export type Result<T> = { data: T; fixture: boolean; demo: boolean };
 export type InventedExample = { id: string; label: string; text: string };
 export type ColdStartState = {
   workspace_id: string;
@@ -123,6 +127,7 @@ async function request<T>(
   return {
     data: data as T,
     fixture: response.headers.get("X-Secnd-Mode") === "fixture",
+    demo: response.headers.get("X-Secnd-Demo") === "synthetic",
   };
 }
 function json(body: unknown): RequestInit {
@@ -133,6 +138,7 @@ function json(body: unknown): RequestInit {
   };
 }
 export const api = {
+  labels: () => request<string[]>(`${base}/labels`),
   coldState: () => request<ColdStartState>(`${base}/cold-start`),
   coldStart: (labels: string[]) =>
     request<ColdStartState>(`${base}/cold-start`, json({ labels, paid: true })),
@@ -187,6 +193,12 @@ export const api = {
     request<Page<Decision>>(
       `${base}/queue${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
     ),
+  overridden: (cursor?: string) =>
+    request<Page<Decision>>(
+      `${base}/overridden${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
+    ),
+  undo: (key: string) =>
+    request(`${base}/answers:undo`, json({ idempotency_key: key })),
   metrics: (dataset?: Dataset) =>
     request<Metrics>(`${base}/metrics${dataset ? `?dataset=${dataset}` : ""}`),
   models: () => request<Page<ModelVersion>>(`${base}/models`),
