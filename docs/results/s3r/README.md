@@ -80,7 +80,7 @@ The [split audit](split-audit.json) found 500 unique exact and normalized source
 
 ## Natural paraphrases: separate 50-source supplement
 
-The [frozen rewrites](paraphrases.json) were authored by Codex from the first 50 primary source texts without inspecting per-source predictions or gold labels. The supplement was registered after the primary run had begun and aggregate zero-shot counts were visible, before supplement inference. This is a small authored sample, without independent annotation or broad paraphrase coverage.
+The [frozen rewrites](paraphrases.json) were written by an AI coding assistant from the first 50 primary source texts without inspecting per-source predictions or gold labels. The supplement was registered after the primary run had begun and aggregate zero-shot counts were visible, before supplement inference. This is a small authored sample, without independent annotation or broad paraphrase coverage.
 
 | Examples | Variant | Accepted / 50 | Errors | Accepted precision (95% interval) | Prediction flips | Acceptance flips |
 | ---: | --- | ---: | ---: | --- | ---: | ---: |
@@ -106,7 +106,7 @@ Both models use a Modal `cpu=4`, 16 GiB allocation, four torch threads, FP32 and
 | 32M | 8 | 116.8 | 128.2 | 1.780 | 492–596 | yes |
 | 32M | 32 | 179.1 | 206.2 | 1.780 | 689–980 | yes |
 
-The 150M reader passes the requested one-second p95 budget at all three context sizes under these measured conditions. CPU reader latency does not force a switch to 32M. The 32M alternative is faster; these measurements alone do not compare quality at a chosen workspace operating point.
+The 150M reader passes the requested one-second p95 budget at all three context sizes under these measured conditions. A [separate measurement](../s8/latency-reader.md) on another allocation, with retrieval included, measured 1,346 ms p95 at 32 examples, so the 32-example result depends on the host; with up to eight examples both measurements pass. The 32M alternative is faster; these measurements alone do not compare quality at a chosen workspace operating point.
 
 Peak RSS is the cumulative Linux process high-water mark, including model loading, checkpoint hashing, the retrieval embedder/index and temporary initialization buffers. It is neither incremental reader memory nor a full API service memory budget. Model/tokenizer load times were 3.30 s (150M) and 3.63 s (32M). PyTorch is `2.15.0+cpu`. Raw timings, token lengths, environment, split hash and checkpoint file hashes are in the cards. This is a warm sequential benchmark, not a throughput or concurrent-load test and not an end-to-end one-second API guarantee.
 

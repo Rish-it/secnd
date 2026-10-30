@@ -84,7 +84,7 @@ using GPU timing to infer CPU speed.
 
 ## Authorship clarification
 
-The natural rewrites were authored by Codex, not by a human annotator or an
+The natural rewrites were written by an AI coding assistant, not by a human annotator or an
 independent reviewer. This wording correction changes no source IDs, rewrites,
 thresholds, exclusions or measurements. The frozen manifest hash above is unchanged.
 

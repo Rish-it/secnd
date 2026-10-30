@@ -45,10 +45,13 @@ an explicit option-set and distribution limit on the claim.
 On a four-CPU Modal allocation, the 150M reader measured p50/p95 of **325/347 ms**
 with no examples, **401/451 ms** with eight, and **610/677 ms** with 32; process
 peak RSS was **2.42 GiB**, including the retrieval index and initialization.
-All pass the requested one-second reader p95 budget. Timings cover single-request
-CPU FP32 tokenization through softmax, excluding retrieval and API overhead;
-[raw measurements and the 32M comparison](results/s3r/README.md#cpu-serving-single-requests-113-options)
-record scope and limits.
+Timings cover single-request CPU FP32 tokenization through softmax, excluding
+retrieval and API overhead; [raw measurements and the 32M comparison](results/s3r/README.md#cpu-serving-single-requests-113-options)
+record scope and limits. A [separate measurement](results/s8/latency-reader.md) on
+another four-CPU allocation, with 200-row history and retrieval included, gave
+**644 / 764 / 1,346 ms** p95 at 0 / 8 / 32 examples. The 150M reader meets a
+one-second p95 with up to eight examples on both hosts; with 32 it depends on the
+host. The 32M reader stays under 233 ms p95 in every condition measured.
 
 ## Why
 
