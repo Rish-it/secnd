@@ -1,0 +1,14 @@
+docs/results/s2/incontext-ic-ettin-400m-s6000-near-clean.json
+  h_0e3d6b6eb02b89 1-294
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fb8da8b3b970a7a9bec0849437e0967e1baccae0",
+  "prompts": {},
+  "humans": {
+    "h_0e3d6b6eb02b89": {
+      "author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
