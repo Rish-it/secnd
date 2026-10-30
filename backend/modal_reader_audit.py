@@ -16,6 +16,7 @@ image = (
     .add_local_file(
         str(ROOT / "docs/results/s3r/paraphrases.json"), "/audit-paraphrases.json", copy=True
     )
+    .add_local_file(str(ROOT / "docs/results/s3r/model-audit.json"), "/model-audit.json", copy=True)
 )
 volume = modal.Volume.from_name("secnd-bench")
 app = modal.App("secnd-reader-audit")
@@ -46,28 +47,49 @@ gpu_image = image.run_commands(
 
 
 @app.function(image=gpu_image, gpu="A10G", volumes={"/vol": volume}, timeout=7200)
-def attacks(natural: bool = False, model_name: str = "ic-ettin-150m-s6000-near"):
+def attacks(
+    natural: bool = False,
+    model_name: str = "ic-ettin-150m-s6000-near",
+    floor=False,
+    audited=False,
+):
     from backend.reader_audit import run
 
-    name = "paraphrase-results" if natural else "attacks"
-    return persist(run(Path("/vol/data"), natural=natural, model_name=model_name), name)
+    name = "paraphrase-results" if natural else "attacks-floor" if floor else "attacks"
+    changed = (
+        json.loads(Path("/model-audit.json").read_text())["mtop"]["changed"] if audited else None
+    )
+    report = run(
+        Path("/vol/data"), natural=natural, model_name=model_name, floor=floor, audit=changed
+    )
+    return persist(report, name + "-audited" if audited else name)
 
 
 @app.local_entrypoint()
 def main(
-    latency: bool = False, natural: bool = False, model_name: str = "ic-ettin-150m-s6000-near"
+    latency: bool = False,
+    natural: bool = False,
+    model_name: str = "ic-ettin-150m-s6000-near",
+    floor: bool = False,
+    audited: bool = False,
 ):
     # Snapshot provenance before dispatch; later doc edits cannot change a run's identity.
     protocol_hash = hashlib.sha256((ROOT / "docs/results/s3r/protocol.md").read_bytes()).hexdigest()
     runner_hash = hashlib.sha256((ROOT / "backend/reader_audit.py").read_bytes()).hexdigest()
-    report = json.loads(cpu.remote(model_name) if latency else attacks.remote(natural, model_name))
+    report = json.loads(
+        cpu.remote(model_name) if latency else attacks.remote(natural, model_name, floor, audited)
+    )
     report["protocol_sha256"] = protocol_hash
     report["runner_sha256"] = runner_hash
     name = (
         ("cpu" if "150m" in model_name else "cpu-32m")
         if latency
-        else ("paraphrase-results" if natural else "attacks")
+        else ("paraphrase-results" if natural else "attacks-floor" if floor else "attacks")
     )
+    if audited:
+        name += "-audited"
+    if "400m" in model_name:
+        name += "-400m"
     if model_name.endswith("-none"):
         name += "-none"
     path = ROOT / "docs/results/s3r" / f"{name}.json"

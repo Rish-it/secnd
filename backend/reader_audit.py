@@ -17,6 +17,24 @@ from backend import incontext as ic
 from backend.calibrate import choose_threshold, fit_temperature, scale
 
 MODEL = "ic-ettin-150m-s6000-near"
+FLOOR_GRID = np.round(np.arange(0, 1.0001, 0.01), 2)
+MISSING_RATE = 0.002
+
+
+def choose_floor(supports, n):
+    """Lowest grid floor that leaves at most MISSING_RATE * n missing-intent answers accepted."""
+    supports = np.asarray(supports, dtype=float)
+    # 1.01 accepts nothing: duplicate texts under another intent can sit at similarity 1.0
+    return float(next((f for f in FLOOR_GRID if (supports >= f).sum() <= MISSING_RATE * n), 1.01))
+
+
+def apply_audit(task, changed):
+    """Move audited calibration labels in place; test labels are never touched."""
+    for change in changed:
+        i = int(change["id"][1:])
+        text, label = task.calib[i]
+        assert text == change["message"] and task.labels[label] == change["old"], change["id"]
+        task.calib[i] = (text, task.labels.index(change["new"]))
 
 
 def digest(value):
@@ -33,7 +51,7 @@ def typo(text):
 
 
 @torch.inference_mode()
-def run(data_dir, latency=False, natural=False, model_name=MODEL):
+def run(data_dir, latency=False, natural=False, model_name=MODEL, floor=False, audit=None):
     torch.set_num_threads(4)
     dev = "cpu" if latency else ic.device()
     folder = data_dir / "encoders" / model_name
@@ -46,6 +64,8 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
     tok = AutoTokenizer.from_pretrained(folder / "encoder")
     load_seconds = time.perf_counter() - start
     task = ic.held_out(data_dir)["mtop"]
+    if audit:
+        apply_audit(task, audit)
     ic.index([task])
     options = list(range(len(task.labels)))
     assert len(options) == 113
@@ -68,6 +88,7 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
         torch=str(torch.__version__),
         platform=platform.platform(),
         threads=4,
+        audited_calib_labels=len(audit or ()),
         results={},
     )
     if Path("/proc/cpuinfo").exists():
@@ -127,6 +148,13 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
 
     repo, revision = EMBEDDERS["minilm"]
     embedder = SentenceTransformer(repo, revision=revision, device=dev)
+    history_labels = torch.tensor([r[1] for r in task.train], device=task.train_vecs.device)
+
+    def support(query, label):
+        # Highest similarity between the message and any history row carrying `label`.
+        sims = (task.train_vecs @ query)[history_labels == label]
+        return float(sims.max()) if len(sims) else -1.0
+
     for shots in (0, 8, 32):
         pc = ic._predict(model, tok, task, "calib", shots, bool(shots), 0, 32)
         yc = ic.labels_of(task.calib)
@@ -134,6 +162,36 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
         fit, cert = half[: len(yc) // 2], half[len(yc) // 2 :]
         temperature = fit_temperature(yc[fit], pc[fit])
         tau, _, _, _ = choose_threshold(yc[cert], scale(pc[cert], temperature)[:, : len(options)])
+        cut, fitted = 0.0, None
+        if floor and tau is not None:
+            missed = []
+            for j in cert:
+                text, gold = task.calib[j]
+                opts = [o for o in options if o != gold]
+                query = task.calib_vecs[j]
+                context = (
+                    ic.nearest(task, query, shots, allowed=set(opts), skip=text) if shots else []
+                )
+                p = scale(infer(text, opts, context)[0], temperature)[0][: len(opts)]
+                if p.max() >= tau:
+                    missed.append(support(query, opts[int(p.argmax())]))
+            cut = choose_floor(missed, len(cert))
+            clean = scale(pc[cert], temperature)[:, : len(options)]
+            kept = clean.max(axis=1) >= tau
+            clean_support = np.array(
+                [
+                    support(task.calib_vecs[j], int(a))
+                    for j, a in zip(cert, clean.argmax(axis=1), strict=True)
+                ]
+            )
+            fitted = dict(
+                floor=cut,
+                calib_missing_accepted=len(missed),
+                calib_missing_accepted_with_floor=int((np.array(missed) >= cut).sum()),
+                calib_clean_accepted=int(kept.sum()),
+                calib_clean_accepted_with_floor=int((kept & (clean_support >= cut)).sum()),
+            )
+            print(shots, fitted, flush=True)
         conditions = {}
         attack_names = (
             ("baseline", "natural")
@@ -171,12 +229,15 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
                 # a NONE column shares the temperature but is never an answer
                 p = scale(p, temperature)[0][: len(opts)]
                 pred = opts[int(p.argmax())]
+                accepted = bool(tau is not None and p.max() >= tau)
+                if floor:
+                    accepted = accepted and support(query, pred) >= cut
                 records.append(
                     dict(
                         source=int(j),
                         prediction=pred,
                         correct=bool(pred == gold),
-                        accepted=bool(tau is not None and p.max() >= tau),
+                        accepted=accepted,
                         unchanged=text == original,
                         tokens=length,
                     )
@@ -212,6 +273,6 @@ def run(data_dir, latency=False, natural=False, model_name=MODEL):
                 )
             print(shots, attack, n, precision, flush=True)
         report["results"][str(shots)] = dict(
-            temperature=temperature, threshold=tau, attacks=conditions
+            temperature=temperature, threshold=tau, floor=fitted, attacks=conditions
         )
     return report

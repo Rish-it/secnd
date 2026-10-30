@@ -99,7 +99,7 @@ def test_valid_or_semantic_or_auth_result_never_falls_back(tmp_path, status, con
 
 def test_prices_caps_and_provider_config(tmp_path):
     usage = Usage(prompt_tokens=1_000_000, completion_tokens=1_000_000)
-    for provider, cap in (("meta", 30), ("baseten", 30), ("nebius", 25)):
+    for provider, cap in (("meta", 40), ("baseten", 33), ("nebius", 25)):
         assert usage_cost(usage, provider) == Decimal("5.50")
         configured = provider_settings(settings(), provider)
         assert "test" not in repr(configured)

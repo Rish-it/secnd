@@ -16,7 +16,7 @@ import torch
 
 from backend import incontext as ic
 
-MODELS = ("ic-ettin-150m-s6000-near", "ic-ettin-32m-s6000-near")
+MODELS = ("ic-ettin-150m-s6000-near", "ic-ettin-32m-s6000-near", "ic-ettin-400m-s6000-near")
 WARMUPS = 20
 REQUESTS = 100
 SEED = 20261030
@@ -55,14 +55,14 @@ def task_and_history(data_dir):
 
 
 @torch.inference_mode()
-def run(data_dir: Path, model_name: str) -> dict:
+def run(data_dir: Path, model_name: str, int8: bool = False, dev: str = "cpu") -> dict:
     from sentence_transformers import SentenceTransformer
     from transformers import AutoTokenizer
 
     from backend.features import EMBEDDERS
 
     if model_name not in MODELS:
-        raise ValueError("Use one of the two fixed reader checkpoints.")
+        raise ValueError("Use one of the fixed reader checkpoints.")
     torch.set_num_threads(4)
     torch.set_num_interop_threads(1)
     started = datetime.now(UTC).isoformat()
@@ -75,20 +75,23 @@ def run(data_dir: Path, model_name: str) -> dict:
     ).half()
     folder = data_dir / "encoders" / model_name
     load = time.perf_counter()
-    model = ic.Reader(str(folder / "encoder")).to("cpu").eval()
+    model = ic.Reader(str(folder / "encoder")).to(dev).eval()
     model.scorer.load_state_dict(
-        torch.load(folder / "scorer.pt", map_location="cpu", weights_only=True)
+        torch.load(folder / "scorer.pt", map_location=dev, weights_only=True)
     )
     tokenizer = AutoTokenizer.from_pretrained(folder / "encoder")
-    load_seconds = time.perf_counter() - load
-    assert next(model.parameters()).device.type == "cpu"
     assert next(model.parameters()).dtype == torch.float32
+    if int8:
+        # Dynamic int8: Linear weights stored int8, activations quantized per request.
+        model = torch.ao.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
+    load_seconds = time.perf_counter() - load
+    assert all(p.device.type == dev for p in model.parameters())
     options = list(range(113))
     selected = np.random.default_rng(SEED).permutation(len(task.test))[: WARMUPS + REQUESTS]
     conditions = {}
     for shots in (0, 8, 32):
         durations = {name: [] for name in ("reader", "embed", "search", "retrieval", "request")}
-        token_lengths = []
+        token_lengths, hits = [], []
         for i, source in enumerate(selected):
             text = task.test[int(source)][0]
             request_start = time.perf_counter()
@@ -103,8 +106,9 @@ def run(data_dir: Path, model_name: str) -> dict:
                 search_ms = 1000 * (search_end - embed_end)
             reader_start = time.perf_counter()
             ids = ic.render(tokenizer, task, text, options, context)
-            packed = ic.batch(tokenizer, [(ids, 0)], "cpu")
-            probabilities = torch.softmax(model(*packed[:4]).float(), -1)
+            packed = ic.batch(tokenizer, [(ids, 0)], dev)
+            with torch.autocast(dev, dtype=torch.bfloat16, enabled=dev == "cuda"):
+                probabilities = torch.softmax(model(*packed[:4]).float(), -1)
             _ = float(probabilities.max())
             finished = time.perf_counter()
             if i >= WARMUPS:
@@ -115,6 +119,7 @@ def run(data_dir: Path, model_name: str) -> dict:
                     durations["search"].append(search_ms)
                     durations["retrieval"].append(embed_ms + search_ms)
                 token_lengths.append(len(ids))
+                hits.append(int(probabilities.argmax()) == task.test[int(source)][1])
         request_stats = statistics(durations["request"])
         conditions[str(shots)] = {
             "examples": shots,
@@ -126,14 +131,15 @@ def run(data_dir: Path, model_name: str) -> dict:
             "passes_p95_1s": request_stats["p95_ms"] <= 1000,
             "process_peak_memory_bytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024,
             "tokens": token_lengths,
+            "accuracy": float(np.mean(hits)),
             "source_rows": selected[WARMUPS:].tolist(),
         }
         print(model_name, shots, request_stats["p95_ms"], flush=True)
     cpuinfo = Path("/proc/cpuinfo").read_text()
     return {
         "model": model_name,
-        "device": "cpu",
-        "dtype": "float32",
+        "device": dev,
+        "dtype": "int8-dynamic" if int8 else "float32",
         "batch_size": 1,
         "history_rows": len(task.train),
         "options": len(options),
@@ -164,7 +170,7 @@ def run(data_dir: Path, model_name: str) -> dict:
         "memory_scope": "Linux process peak RSS; includes reader, MiniLM, index and setup; "
         "cumulative across shot conditions within this model's own process.",
         "request_scope": "Sequential batch-one warm requests: MiniLM embedding and search "
-        "when examples are used, then tokenization, packing, FP32 forward and "
+        "when examples are used, then tokenization, packing, forward and "
         "softmax. Excludes HTTP, queueing and cold model/index loading.",
         "retrieval_model": {"repo": repo, "revision": revision},
         "conditions": conditions,

@@ -92,3 +92,72 @@ The supplement was registered after the primary suite had started, when aggregat
 zero-shot counts were visible. Per-source predictions and gold labels were not
 inspected when authoring rewrites. The primary protocol preceded the primary run;
 the supplement preceded its own run. This clarification changes no experiments.
+
+## Amendment 2: support floor for missing intents (registered before its inference)
+
+The frozen audit accepted 4/9/9 wrong answers per 500 when the gold intent was absent.
+Add one rule on top of the unchanged gate. Support is the highest MiniLM cosine
+similarity between the message and any history row carrying the predicted intent.
+An answer is accepted only when confidence clears the frozen threshold and support
+clears the floor.
+
+The floor is fixed per shot count on calibration only, never on the attack: on the
+2,000 certification rows, remove each row's gold intent from the options and from
+retrieved history, run the reader, and keep the support of every answer the frozen
+gate would accept. The floor is the lowest value on a 0.01 grid at which at most
+0.2% of those rows (4 of 2,000) would still be accepted. Then apply temperature,
+threshold and floor unchanged to every registered attack on the same 500 test rows.
+Report, beside the unchanged gate: accepted, errors and coverage with the floor, the
+calibration coverage the floor costs on clean rows, and the floor itself. Target:
+at most 1 wrong accept per 500 missing-intent rows at every shot count.
+
+## Amendment 3: human audit of calibration labels (registered before any labeller result)
+
+Reason: the frozen gate needs zero errors among its first 427 answers, and the rows that break it
+for the 400M reader look like wrong labels. That is a hypothesis, so people test it.
+
+Audit only calibration rows; test labels are never audited or changed. Rows: every confident
+disagreement between a reader and its label, plus random confident rows where they agree, as
+controls. Three independent labellers per row see the message and two options in random order, and
+are not told which is the label. A label changes only when at least 2 of 3 pick the other option.
+
+Agreeing rows are audited because fixing only disagreements could only flatter the model. If the
+majority overturns more than 2% of controls, the audit is reported as biased and not used. All
+labels the audit changes are published with their votes. The gate is then refit on calibration,
+and the result is reported on both label sets, including precision against unaudited test labels,
+which can fall below 99% because those labels keep their errors. Any certified claim states this.
+
+## Amendment 4: model panel replaces people in the audit (registered before any vote)
+
+Reason: no human labellers are available before the freeze. Amendment 3 stays as written except
+that three language models replace the three people. This is a model audit, not a human audit, and
+every result from it says so. Agreement between models is not proof that a label is right.
+
+Panel: `openai/gpt-6-luna`, `google/gemini-3.5-flash-lite`, `qwen/qwen3.8-flash`, through one
+routing API, with one independent request per row and no shared conversation. None of them wrote
+the Meta-app tasks below, and none is the teacher used in training. Each sees the message and the
+options, with option order shuffled per model, and is not told which is the label. Answers are
+option A, option B, "Both fit equally" or "Neither fits". A row that still has no valid answer
+after three tries counts as no vote.
+
+The 2 of 3 rule and the 2% control rule from Amendment 3 are unchanged. Test labels are still never
+audited or changed. Inputs are fixed by SHA-256:
+
+- MTOP, 26 disagreements and 100 controls:
+  `3163ac7eea02b64ec67d6b89798eb5eaee9dd2e3dadc27d9d1e98cb54351e27b`
+- BANKING77, 13 disagreements and 60 controls:
+  `92e62e30efb07ac334b354ed6486f5d5ddb6864c0490bbdca14d772c3441d619`
+
+The same panel labels a blind 150-row sample of Meta-app tasks, 50 per decision type, with sources
+removed: `74b28c16db32712b6837ed54d2a0feabf79895134c5d15514b53e3ed86194053`. Answers are the task's
+options or "insufficient information". A row gets a label when at least 2 of 3 agree; otherwise it
+has none. These tasks are written, not collected, and these labels are model labels, so no accuracy
+measured on them is reported as accuracy on real data.
+
+Spend is capped at $1, checked before every request.
+
+### Support floors after the model audit (registered before their inference)
+
+Thresholds change with the audited labels, so floors are refit by the Amendment 2 method, unchanged,
+on the audited MTOP calibration labels, and the 500-row attack set is rerun once. Test labels stay
+unchanged. Only values from this run ship with the refit gate.

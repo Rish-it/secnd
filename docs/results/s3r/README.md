@@ -131,3 +131,48 @@ labels; accepted/error totals, exact-repeat identity, shared split/checkpoint
 hashes, unchanged temperatures/thresholds and latency quantiles were checked
 against the raw cards. `npm run check` passed with 202 tests, frontend lint and
 build; lint reports two existing React effect warnings.
+
+## Support floor for missing intents (Amendment 2)
+
+Registered before inference in [protocol.md](protocol.md). The floor is fixed per shot count on
+the 2,000 calibration certification rows with the gold intent removed: the lowest 0.01 step at
+which at most 4 of 2,000 of those rows are still accepted. Temperature and threshold are unchanged.
+Same checkpoint, same 500 test rows. Results: [attacks-floor.json](attacks-floor.json).
+
+| Examples | Floor | Missing intent: wrong accepts / 500 | Clean accepted / 500 (errors) | Calibration clean accepts kept |
+| ---: | ---: | --- | --- | --- |
+| 0 | 0.84 | 4 → **0** | 115 (0) → 61 (0) | 232 / 451 |
+| 8 | 0.80 | 9 → **1** | 189 (1) → 110 (0) | 401 / 706 |
+| 32 | 0.83 | 9 → **1** | 167 (0) → 87 (0) | 330 / 640 |
+
+Every other registered attack has zero accepted errors with the floor. The floor meets the
+target of at most one wrong accept per 500 missing-intent requests and costs roughly 45% of
+automatic answers; those requests go to the person instead.
+
+## Model audit of calibration labels
+
+Three language models replaced human labellers under Amendment 4 of the protocol. This is a model
+audit, not a human audit. Full votes, changed labels and results are in `model-audit.json`.
+
+- MTOP: 0 of 100 controls overturned. 12 of 26 confident disagreements changed label.
+- BANKING77: 2 of 60 controls overturned, above the 2% rule, so that audit is not used and its
+  labels and gate stay as they were.
+
+The gate was refit on audited MTOP calibration labels and scored once from saved probabilities.
+Precision is measured against unchanged test labels, which keep any errors they contain. The 400M
+reader now certifies in every MTOP condition. Those coverage figures assume the right intent is
+always among the options.
+
+Support floors refit on the audited labels guard against a missing intent, and they cost most of
+that coverage. All 4,386 MTOP test rows at full history, gate and floor fixed on calibration:
+
+| Reader | Examples | Answered alone | Errors | 95% low | Wrong accepts, intent removed (of 500) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 400M | 0 | 14.4% | 0 | 99.42% | 1 |
+| 400M | 8 | 13.9% | 0 | 99.40% | 1 |
+| 400M | 32 | 7.3% | 0 | 98.86% | 0 |
+| 150M | 0 | 11.7% | 0 | 99.28% | 0 |
+| 150M | 8 | 10.9% | 0 | 99.23% | 2 |
+| 150M | 32 | 16.1% | 0 | 99.48% | 1 |
+
+Files: `attacks-floor-audited.json`, `attacks-floor-audited-400m.json`, `floor-full-test.json`.
