@@ -1,0 +1,35 @@
+{
+  "members": [
+    "typed-ic-ettin-400m-s6000-near-e8-s0"
+  ],
+  "temperature_target": "hybrid",
+  "temperatures": {
+    "choice": 1.106,
+    "noul": 1.234,
+    "score": 0.441
+  },
+  "val": {
+    "decisions": 600,
+    "accuracy": 0.8083,
+    "per_type": {
+      "choice": 0.8056,
+      "noul": 0.8389,
+      "score": 0.7875
+    },
+    "brier": 0.0542,
+    "soft_accuracy": 0.5682,
+    "ece": 0.1097
+  },
+  "test": {
+    "decisions": 2000,
+    "accuracy": 0.795,
+    "per_type": {
+      "choice": 0.7633,
+      "noul": 0.8467,
+      "score": 0.78
+    },
+    "brier": 0.0439,
+    "soft_accuracy": 0.5667,
+    "ece": 0.0902
+  }
+}

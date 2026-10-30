@@ -143,14 +143,15 @@ def correct(d: Decision, p: np.ndarray) -> bool:
 
 def temperatures(ds, probs, target: str = "label") -> dict[str, float]:
     """One temperature per type, fit on validation to the gold label's NLL, or with target
-    "teacher" to the cross-entropy against the teacher distribution that Brier is scored on."""
+    "teacher" to the cross-entropy against the teacher distribution that Brier is scored on.
+    "hybrid" fits teacher for choice and noul, label for score, which Brier does not score."""
     out = {}
     for kind in ("choice", "noul", "score"):
         mine = [(d, p) for d, p in zip(ds, probs, strict=True) if d.kind == kind]
         p = pad([p for _, p in mine])
         out[kind] = (
             fit_temperature(np.array([d.label for d, _ in mine]), p)
-            if target == "label"
+            if target == "label" or (target == "hybrid" and kind == "score")
             else fit_temperature_soft(pad([d.gold for d, _ in mine]), p)
         )
     return out
@@ -289,7 +290,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=8)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--ensemble", nargs="+", type=Path, help="saved runs to average")
-    parser.add_argument("--fit", choices=("label", "teacher"), default="label")
+    parser.add_argument("--fit", choices=("label", "teacher", "hybrid"), default="label")
     args = parser.parse_args()
     data_dir = Settings().data_dir
     if args.ensemble:
