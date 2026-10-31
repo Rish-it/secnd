@@ -1,0 +1,20 @@
+frontend/tests/harness.spec.ts
+  s_9245a16bb07969::t_5b3a4044a52e14 19
+  s_9245a16bb07969::t_8f3acafce0455d 32,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2c04df40b8b4975eda983f9d367a3c7cbd3210da",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
