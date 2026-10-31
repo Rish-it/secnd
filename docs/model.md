@@ -4,7 +4,7 @@
 
 The [wider-pool round](results/s2/wide-round.md) retrained the 400M reader without changing any
 evaluation set. The best pool that can ship adds 23 written fine-grained taxonomies to licensed
-public decision data. Its ship candidate, seed 1, was chosen on calibration. With eight nearest examples it measured
+public decision data. Its [released reader](https://huggingface.co/Secnd-AI/ren/tree/v1.1.0), seed 1, was chosen on calibration. With eight nearest examples it measured
 **92.38%** on MTOP and **89.90%** on BANKING77; with no examples, **75.99%** and **68.99%**. Earlier pools that scored higher on MTOP used
 a dataset with no licence or rows traced to real posts, and are not shipped.
 
@@ -16,7 +16,12 @@ logistic head beats the reader on both sets (93.00% and 92.50%); with 200 labels
 13.0 and 21.2 points.
 
 Typed-decisions seeds across these pools measured 78.80% to 80.90% on the fixed 2,000-row test, with
-a ±1.7 point margin; validation picks 79.70% for the ship candidate. These weights are not yet released.
+a ±1.7 point margin; validation picks 79.70% for this reader.
+
+With the gate and support floor refit on model-audited calibration labels, it answers
+[21.04% of all MTOP test rows alone](results/s3r/README.md#released-reader-amendment-6), 923 accepted with 1 error, at
+eight examples. Older weights recorded 13.89%. One run does not establish that gain. Serving uses the reader below 1,000
+history rows and the logistic head from there up.
 
 ## 150M reader: clean split and corrected certification
 

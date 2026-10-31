@@ -67,20 +67,21 @@ confirmation. Stopping requires an operator reset before actions resume.
 
 ## Evidence, kept separate from your business
 
-The fixed public-history evaluation for `ic-ettin-400m-s6000-near`, with eight
-examples and the support floor, recorded **13.89% coverage**, **609 accepted
-answers with zero errors** and a **99.40% lower confidence bound** over **4,386**
-unchanged MTOP test rows. Source: `docs/results/s3r/floor-full-test.json`.
+The fixed public-history evaluation for the [released reader](https://huggingface.co/Secnd-AI/ren/tree/v1.1.0), with eight
+examples and the support floor, recorded **21.04% coverage**, **923 accepted
+answers with 1 error** and a **99.40% lower confidence bound** over **4,386**
+unchanged MTOP test rows. Source: `docs/results/s3r/floor-full-test-400m-fine-seed1.json`.
 Calibration labels were audited by models, not humans. These results require the
 full fixed public history and do not certify a new business or future traffic.
-The separate missing-intent audit contains a wrong acceptance for this condition.
+The separate missing-intent audit accepted 2 wrong answers per 500 for this condition,
+above its target of 1.
 Source: `docs/results/s3r/README.md`.
 
-The latest retraining added wider, licence-checked data. Its ship candidate measured
+The released weights come from wider, licence-checked data. They measured
 **89.90%** on BANKING77 and **92.38%** on MTOP with eight examples, and **68.99%** and
-**75.99%** with none. At the 99% bar, MTOP certifies **33.22%** on raw labels and
-BANKING77 certifies none, even after a model audit. MTOP coverage moved 19 points between
-seeds of one pool, so one run cannot prove a coverage gain. These weights are not released yet.
+**75.99%** with none. BANKING77 certifies none at the 99% bar, even after a model audit.
+MTOP coverage moved 19 points between seeds of one earlier pool, so one run cannot prove a
+coverage gain.
 [Wider training pools](docs/results/s2/wide-round.md).
 
 Personal reviews are labelled “Measured on your own reviews”. Audited public

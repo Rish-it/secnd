@@ -3,9 +3,8 @@
 from pathlib import Path
 
 import modal
-from dotenv import dotenv_values
 
-image = modal.Image.debian_slim(python_version="3.12").pip_install("huggingface_hub==1.0.1")
+image = modal.Image.debian_slim(python_version="3.12").pip_install("huggingface_hub==2.3.0")
 volume = modal.Volume.from_name("secnd-bench")
 app = modal.App("secnd-hf-reader")
 REPO = "Secnd-AI/ren"
@@ -37,6 +36,8 @@ def upload(reader: str, decisions: str, card: str, tag: str) -> str:
 
 @app.local_entrypoint()
 def main(reader: str, decisions: str, card: str, tag: str):
+    from dotenv import dotenv_values
+
     token = dotenv_values(".env").get("HF_TOKEN")
     assert token, "HF_TOKEN missing from .env"
     with_token = upload.with_options(secrets=[modal.Secret.from_dict({"HF_TOKEN": token})])

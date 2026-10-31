@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     reader_endpoint_url: str = ""
     reader_endpoint_token: SecretStr = SecretStr("")
     reader_endpoint_revision: str = ""
-    reader_endpoint_timeout_seconds: float = Field(default=10, gt=0, le=120)
+    reader_endpoint_timeout_seconds: float = Field(default=30, gt=0, le=120)
 
     meta_app_secret: SecretStr = SecretStr("")
     meta_app_id: str = ""

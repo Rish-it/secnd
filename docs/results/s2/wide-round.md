@@ -15,7 +15,7 @@ with 6,000 steps, unless a seed is named.
 | [clean](incontext-ic-ettin-400m-s6000-near-wide-clean.json) | 15 | 407,727 | Yes | Those sets and rows removed |
 | [fine](incontext-ic-ettin-400m-s6000-near-wide-fine.json) | 38 | 422,906 | Yes | Clean, plus 23 written fine-grained taxonomies |
 
-**Ship candidate: fine, [seed 1](incontext-ic-ettin-400m-s6000-near-wide-fine-seed1.json).** It certified
+**Released: fine, [seed 1](incontext-ic-ettin-400m-s6000-near-wide-fine-seed1.json), [`v1.1.0`](https://huggingface.co/Secnd-AI/ren/tree/v1.1.0).** It certified
 624 calibration rows at 8 nearest against seed 0's 564, and 920 at 32 against 0. Test sets chose nothing.
 
 The fine pool adds 15,179 customer messages across 1,380 intents in 23 industries, written by
@@ -54,8 +54,8 @@ no-example MTOP accuracy against seed 0.
 data, because a single wrong answer stops the threshold walk. Coverage on BANKING77 is zero in
 every row at the 99% bar.
 
-These numbers use raw labels. The 13.89% result in [S3R](../s3r/README.md) uses model-audited
-calibration labels and a support floor, so the two are not directly comparable.
+These numbers use raw labels. [With model-audited calibration labels and a support floor](../s3r/README.md#released-reader-amendment-6),
+seed 1 answers 21.04% at 8 nearest and 14.46% at 32 on all MTOP test rows, against 13.89% and 7.3% for older weights.
 
 ## How much history a person needs
 
@@ -132,5 +132,17 @@ across seeds, never by test.
 ## Limits
 
 The fixed test sets were read after every round, so comparisons between pools are descriptive.
-The fine pool has two seeds. Written rows come from one model and carry its style. A release needs
-more seeds, audited-floor refits and a model card tied to the exact weights.
+The fine pool has two seeds. Written rows come from one model and carry its style.
+
+## Meta decisions
+
+The released `meta/` checkpoint fine-tunes this reader on 1,469 labelled written Meta-app tasks, none traced to real posts.
+Agreement on fresh written tasks, not accuracy on real data:
+
+| Labelled by | All | Account | Ad | Inbox | Always most common |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Three-model panel, 342 rows | 84.8% | 95.8% | 70.3% | 87.4% | 44.4% |
+| Muse Spark 1.3, 338 rows | 76.0% | 95.7% | 54.3% | 78.5% | 49.7% |
+
+Ad decisions are the weakest. An earlier reader tuned on rows including real posts scored 83.6% and 79.9%, so this is
+not a clear improvement: it gains on the panel and loses on Muse Spark.

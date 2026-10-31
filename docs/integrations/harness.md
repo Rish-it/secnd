@@ -197,7 +197,8 @@ MiniLM retrieval cache under `/vol/hf`. The endpoint requires `Authorization: Be
 returns model id, fingerprint and option probabilities. Its JSON request contains `item_id`,
 `text`, `decision_type` (`ad`, `inbox`, `account`), `keys`, `meanings`, and `history` rows with
 `id`, `text`, `label`. It never executes an action. The optional Modal SDK is an operator tool,
-not an app runtime dependency. No deployment or GPU serving measurement was performed here.
+not an app runtime dependency. [Measured over HTTP](../results/s8/load-gpu-secnd-ren-1.json): 17.5 s cold start, then
+3.68 requests a second with four clients. The client waits 30 seconds by default, so a cold start still gets an answer.
 See Modal's [web application](https://modal.com/docs/guide/webhooks) and
 [scaling](https://modal.com/docs/guide/scale) configuration.
 

@@ -29,21 +29,23 @@ checkpoint is not loaded. Reviews and undo use the local SQLite database.
 The running identifier is shown as `synthetic-scripted-demo` (`README.md`).
 No paid calls, live OAuth, message delivery or ad changes are part of that demo.
 
-The recorded public-history result for the 400M model with eight examples and a
-support floor is **13.89% coverage**, with **609 accepted answers, zero errors**
+The recorded public-history result for the released 400M reader with eight examples and a
+support floor is **21.04% coverage**, with **923 accepted answers, 1 error**
 and a **99.40% lower confidence bound** across **4,386 fixed MTOP test rows**
-(`docs/results/s3r/floor-full-test.json`). Calibration labels were audited by models,
+(`docs/results/s3r/floor-full-test-400m-fine-seed1.json`). Calibration labels were audited by models,
 not humans; test labels were unchanged. This operating point requires the full
 fixed public history and does not establish performance on a new business.
-The separate missing-intent audit includes a wrong acceptance at this operating
-point (`docs/results/s3r/README.md`).
+The separate missing-intent audit accepted 2 wrong answers per 500 at this operating
+point, above its target of 1 (`docs/results/s3r/README.md`).
 
-The latest retraining on licence-checked data measured **92.38%** on MTOP and **89.90%**
-on BANKING77 with eight examples (`docs/results/s2/wide-round.md`). Those weights are not
-the ones behind the 13.89% result, and they are not yet released. BANKING77 certifies no
+These weights trained on licence-checked data and are public at
+[https://huggingface.co/Secnd-AI/ren/tree/v1.1.0](https://huggingface.co/Secnd-AI/ren/tree/v1.1.0). They measured **92.38%** on MTOP and **89.90%**
+on BANKING77 with eight examples (`docs/results/s2/wide-round.md`). BANKING77 certifies no
 automatic coverage at the 99% bar.
 
-Measured 400M latency for the submitted product build: **TBD**.
+Measured 400M reader over HTTP on one A10G, written tasks: 17.5 s cold start, 3.68 requests a
+second with four clients, 441 ms p95 for one client, from India to us-east
+(`docs/results/s8/load-gpu-secnd-ren-1.json`). The synthetic demo does not call it.
 Measured customer time saved or advertising lift: **TBD**.
 Live Meta sign-in ran on 2026-10-31: it connected, listed and saved one ad account, and read its
 insights, which were empty because the account has no campaigns (`docs/submission/verification.md`).

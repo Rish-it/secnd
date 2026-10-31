@@ -22,6 +22,7 @@ volume = modal.Volume.from_name("secnd-bench")
 @app.cls(
     image=image,
     gpu="A10G",
+    cpu=4,
     volumes={"/vol": volume},
     secrets=[modal.Secret.from_name("secnd-reader")],
     min_containers=0,
@@ -29,6 +30,7 @@ volume = modal.Volume.from_name("secnd-bench")
     buffer_containers=0,
     scaledown_window=60,
     timeout=120,
+    startup_timeout=300,
 )
 @modal.concurrent(max_inputs=1)
 class ReaderEndpoint:
@@ -39,7 +41,7 @@ class ReaderEndpoint:
         from backend.reader_serving import SavedDecisionReader
 
         folder = Path(os.environ["SECND_READER_MODEL_PATH"]).resolve()
-        if not folder.is_relative_to(Path("/vol")):
+        if not folder.is_relative_to(Path("/vol").resolve()):
             raise ValueError("Reader model must be on secnd-bench under /vol.")
         self.reader = SavedDecisionReader(
             folder, os.environ["SECND_READER_MODEL_ID"], device="cuda"

@@ -23,11 +23,11 @@ active model identifier and limitations are documented in `README.md`. The video
 makes no model-quality, speed, customer-impact or live-integration claims.
 
 If a measured-result caption is required, use only:
-“Fixed MTOP public-history evaluation: 13.89% coverage; 99.40% lower confidence
+“Fixed MTOP public-history evaluation: 21.04% coverage, 1 error in 923; 99.40% lower confidence
 bound. Eight examples, full fixed history, model-audited calibration.”
-Source filename on screen: `docs/results/s3r/floor-full-test.json`.
+Source filename on screen: `docs/results/s3r/floor-full-test-400m-fine-seed1.json`.
 Keep the limitations on screen too: unchanged test labels, no new-business
-certification, and a wrong acceptance in the separate missing-intent audit
+certification, and 2 wrong acceptances per 500 in the separate missing-intent audit
 (`docs/results/s3r/README.md`). Do not put this caption beside synthetic business
 review counts.
 
