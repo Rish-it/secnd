@@ -32,4 +32,4 @@ certification, and a wrong acceptance in the separate missing-intent audit
 review counts.
 
 Final video URL: **TBD**. Measured end-to-end 400M latency for this product build:
-**TBD**. Live OAuth verification: **TBD**. Do not substitute estimates.
+**TBD**. Live OAuth: verified, see `verification.md`. Do not substitute estimates.
