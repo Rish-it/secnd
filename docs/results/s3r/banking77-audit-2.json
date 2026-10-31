@@ -1,0 +1,217 @@
+{
+ "kind": "model audit, not a human audit",
+ "panel": [
+  "muse-wonder-1.0",
+  "openai/gpt-6.1-sol",
+  "anthropic/claude-sonnet-5.5"
+ ],
+ "reader": "ic-ettin-400m-s6000-near-wide-fine-seed1",
+ "test_labels": "unchanged; precision is measured against them",
+ "tally": {
+  "changed": [
+   {
+    "id": "b2687",
+    "kind": "disagreement",
+    "old": "pending transfer",
+    "votes": [
+     "transfer not received by recipient",
+     "transfer not received by recipient",
+     "transfer not received by recipient"
+    ],
+    "message": "Could you please help me figure out why the seller has not received their money after I sent it.",
+    "new": "transfer not received by recipient"
+   },
+   {
+    "id": "b1698",
+    "kind": "disagreement",
+    "old": "declined cash withdrawal",
+    "votes": [
+     "pin blocked",
+     "pin blocked",
+     "pin blocked"
+    ],
+    "message": "i entered my pin in wrong and got it frozen. how many tries do i have",
+    "new": "pin blocked"
+   },
+   {
+    "id": "b602",
+    "kind": "disagreement",
+    "old": "pending top up",
+    "votes": [
+     "top up failed",
+     "top up failed",
+     "top up failed"
+    ],
+    "message": "The top-up is broken.",
+    "new": "top up failed"
+   },
+   {
+    "id": "b1738",
+    "kind": "control",
+    "old": "transfer not received by recipient",
+    "votes": [
+     "pending transfer",
+     "pending transfer",
+     "pending transfer"
+    ],
+    "message": "I'm still expecting the transaction to be finished",
+    "new": "pending transfer"
+   },
+   {
+    "id": "b537",
+    "kind": "disagreement",
+    "old": "card not working",
+    "votes": [
+     "declined card payment",
+     "declined card payment",
+     "declined card payment"
+    ],
+    "message": "When I was in a restaurant today my card was declined and payment wouldn't go through and I need help. Can you fix this?",
+    "new": "declined card payment"
+   },
+   {
+    "id": "b1904",
+    "kind": "control",
+    "old": "disposable card limits",
+    "votes": [
+     "card acceptance",
+     "disposable card limits",
+     "card acceptance"
+    ],
+    "message": "Are there any places that I can't use the disposable cards at?",
+    "new": "card acceptance"
+   },
+   {
+    "id": "b1741",
+    "kind": "disagreement",
+    "old": "top up failed",
+    "votes": [
+     "declined card payment",
+     "declined card payment",
+     "declined card payment"
+    ],
+    "message": "My credit card transaction was declined for a loan payment.  Can you tell me why?",
+    "new": "declined card payment"
+   },
+   {
+    "id": "b488",
+    "kind": "disagreement",
+    "old": "top up failed",
+    "votes": [
+     "Both fit equally",
+     "top up reverted",
+     "top up reverted"
+    ],
+    "message": "Looks like my top-up has been cancelled",
+    "new": "top up reverted"
+   },
+   {
+    "id": "b2944",
+    "kind": "disagreement",
+    "old": "beneficiary not allowed",
+    "votes": [
+     "failed transfer",
+     "failed transfer",
+     "failed transfer"
+    ],
+    "message": "My transfer to an account failed.",
+    "new": "failed transfer"
+   }
+  ],
+  "controls": 100,
+  "controls_overturned": 2,
+  "biased": false
+ },
+ "spent": 0.64837,
+ "dataset_labels": {
+  "accuracy": 0.8987,
+  "ece_test": 0.0098,
+  "temperature": 2.144,
+  "certified_coverage_test": 0.0,
+  "precision_auto_test": null,
+  "cert_rows": 1500,
+  "cert_accepted": 0,
+  "cert_cp_lower": 0.0
+ },
+ "audited_calib_labels": {
+  "accuracy": 0.8987,
+  "ece_test": 0.0098,
+  "temperature": 2.144,
+  "certified_coverage_test": 0.0,
+  "precision_auto_test": null,
+  "cert_rows": 1500,
+  "cert_accepted": 0,
+  "cert_cp_lower": 0.0
+ },
+ "bars": {
+  "dataset_labels": {
+   "first_wrong_ranks": [
+    200,
+    221,
+    320,
+    331,
+    358,
+    439
+   ],
+   "0.99": {
+    "cert_accepted": 0,
+    "cert_lower": 0.0,
+    "coverage_test": 0.0,
+    "precision_test": null
+   },
+   "0.98": {
+    "cert_accepted": 200,
+    "cert_lower": 0.9851,
+    "coverage_test": 0.1256,
+    "precision_test": 0.9974
+   },
+   "0.95": {
+    "cert_accepted": 1097,
+    "cert_lower": 0.9538,
+    "coverage_test": 0.7416,
+    "precision_test": 0.9658
+   },
+   "0.9": {
+    "cert_accepted": 1435,
+    "cert_lower": 0.9034,
+    "coverage_test": 0.9627,
+    "precision_test": 0.9157
+   }
+  },
+  "audited_calib_labels": {
+   "first_wrong_ranks": [
+    254,
+    358,
+    440,
+    515,
+    630,
+    650
+   ],
+   "0.99": {
+    "cert_accepted": 0,
+    "cert_lower": 0.0,
+    "coverage_test": 0.0,
+    "precision_test": null
+   },
+   "0.98": {
+    "cert_accepted": 254,
+    "cert_lower": 0.9883,
+    "coverage_test": 0.1731,
+    "precision_test": 0.9981
+   },
+   "0.95": {
+    "cert_accepted": 1139,
+    "cert_lower": 0.9535,
+    "coverage_test": 0.7724,
+    "precision_test": 0.9609
+   },
+   "0.9": {
+    "cert_accepted": 1448,
+    "cert_lower": 0.9035,
+    "coverage_test": 0.9672,
+    "precision_test": 0.9144
+   }
+  }
+ },
+ "surest_half_test_accuracy": 0.9877
+}
