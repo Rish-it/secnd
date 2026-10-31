@@ -99,3 +99,59 @@ def test_demo_fallback_never_reaches_signed_in_workspaces(tmp_path):
         assert client.get("/api/v1/workspaces/private/queue").status_code == 404
         assert client.get("/api/v1/workspaces/default/queue").status_code == 200
         assert "private" not in client.get("/api/v1/workspaces").json()["items"]
+
+
+def test_login_limits_name_and_address_without_account_disclosure(secured, monkeypatch):
+    from backend.auth import Auth
+
+    monkeypatch.setattr(Auth, "password", staticmethod(lambda value, salt: value))
+    assert register(secured).status_code == 200
+    for name in ("PERSON-ONE", "missing-name"):
+        responses = [
+            secured.post(
+                "/api/v1/auth/login", json={"username": name, "password": "wrong-password"}
+            )
+            for _ in range(6)
+        ]
+        assert [r.status_code for r in responses] == [401] * 5 + [429]
+        assert "retry" in responses[-1].json()["message"].lower()
+        assert int(responses[-1].headers["Retry-After"]) > 0
+    for i in range(10):
+        assert (
+            secured.post(
+                "/api/v1/auth/login",
+                json={"username": f"rotated-{i}", "password": "wrong-password"},
+            ).status_code
+            == 401
+        )
+    assert (
+        secured.post(
+            "/api/v1/auth/login", json={"username": "new-name", "password": "wrong-password"}
+        ).status_code
+        == 429
+    )
+    # Forwarded headers cannot choose a new rate-limit address.
+    assert (
+        secured.post(
+            "/api/v1/auth/login",
+            headers={"X-Forwarded-For": "192.0.2.4"},
+            json={"username": "fresh-name", "password": "wrong-password"},
+        ).status_code
+        == 429
+    )
+
+
+def test_registration_limits_persist_in_sqlite_and_expire(secured, monkeypatch):
+    import backend.auth as module
+    from backend.auth import Auth
+
+    monkeypatch.setattr(Auth, "password", staticmethod(lambda value, salt: value))
+    clock = [1000.0]
+    monkeypatch.setattr(module.time, "time", lambda: clock[0])
+    for i in range(5):
+        assert register(secured, f"person-{i}").status_code == 200
+    assert register(secured, "blocked").status_code == 429
+    secured.app.state.auth = Auth(secured.app.state.auth.store, secured.app.state.auth.settings)
+    assert register(secured, "still-blocked").status_code == 429
+    clock[0] += 3601
+    assert register(secured, "unblocked").status_code == 200

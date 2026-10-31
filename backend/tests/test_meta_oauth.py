@@ -23,6 +23,8 @@ def oauth(tmp_path):
     def transport(request):
         calls.append(request)
         path = request.url.path
+        if path.endswith("/subscribed_apps"):
+            return httpx.Response(200, json={"success": True})
         if path.endswith("oauth/access_token"):
             return httpx.Response(
                 200, json={"access_token": "private-long-token", "expires_in": 5184000}
@@ -144,7 +146,7 @@ def test_encrypted_tokens_never_in_responses_or_logs_and_selected_assets(oauth, 
     assert client.put(BASE + "/accounts", json={"assets": ["ads:act_999"]}).status_code == 422
     assert client.get(BASE + "/status").json()["accounts"]["messenger"] == ["20"]
     assert all("private" not in str(r.url) for r in calls)
-    assert client.post("/api/v1/meta/disconnect").json() == {"connected": False}
+    assert not client.post("/api/v1/meta/disconnect").json()["connected"]
     with client.app.state.workspaces.store.connect() as db:
         assert db.execute("SELECT count(*) FROM meta_connections").fetchone()[0] == 0
         assert db.execute("SELECT count(*) FROM meta_assets").fetchone()[0] == 0
@@ -235,3 +237,162 @@ def test_browser_denial_returns_to_connection_screen_without_provider_details(oa
     )
     assert response.status_code == 303
     assert response.headers["location"] == "/?workspace=mine&meta_error=refused"
+
+
+def test_subscriptions_success_partial_failure_and_disconnect(oauth):
+    client, calls = oauth
+    assert connect(client).status_code == 303
+    manager = client.app.state.meta_oauth
+    original = manager.transport
+    fail_whatsapp = [True]
+
+    def respond(request):
+        if request.url.path.endswith("/subscribed_apps"):
+            calls.append(request)
+            if "/50/" in request.url.path and fail_whatsapp[0]:
+                return httpx.Response(403, json={"error": {"message": "private-token"}})
+            return httpx.Response(200, json={"success": True})
+        return original.handle_request(request)
+
+    manager.transport = httpx.MockTransport(respond)
+    selection = ["messenger:20", "instagram:30", "whatsapp:60"]
+    result = client.put(BASE + "/accounts", json={"assets": selection})
+    assert result.status_code == 200
+    assert set(result.json()["selected"]) == set(selection)
+    reports = {r["asset"]: r for r in result.json()["subscriptions"]}
+    assert reports["messenger:20"]["status"] == "subscribed"
+    assert reports["instagram:30"]["status"] == "subscribed"
+    assert reports["whatsapp:60"]["status"] == "failed"
+    assert "private" not in result.text
+    subscriptions = [r for r in calls if r.url.path.endswith("/subscribed_apps")]
+    assert {r.url.path for r in subscriptions} == {
+        "/v25.0/20/subscribed_apps",
+        "/v25.0/50/subscribed_apps",
+    }
+    assert all("/30/" not in r.url.path and "/60/" not in r.url.path for r in subscriptions)
+    assert b"messages" in subscriptions[0].content
+    assert subscriptions[0].headers["Authorization"] == "Bearer private-page-token"
+    fail_whatsapp[0] = False
+    retried = client.put(BASE + "/accounts", json={"assets": selection})
+    assert all(r["status"] == "subscribed" for r in retried.json()["subscriptions"])
+    response = client.post("/api/v1/meta/disconnect")
+    assert response.status_code == 200
+    assert {r.url.path for r in calls if r.method == "DELETE"} == {
+        "/v25.0/20/subscribed_apps",
+        "/v25.0/50/subscribed_apps",
+    }
+    assert all(r["status"] == "unsubscribed" for r in response.json()["subscriptions"])
+
+
+def test_deletion_quotes_schema_identifiers(oauth):
+    client, _ = oauth
+    assert connect(client).status_code == 303
+    store = client.app.state.workspaces.store
+    with store.connect(write=True) as db:
+        db.execute('CREATE TABLE "extension""rows" (workspace_id TEXT, value TEXT)')
+        db.execute('INSERT INTO "extension""rows" VALUES (?,?)', ("mine", "private"))
+    payload = (
+        base64.urlsafe_b64encode(
+            json.dumps({"algorithm": "HMAC-SHA256", "user_id": "123"}).encode()
+        )
+        .decode()
+        .rstrip("=")
+    )
+    signature = (
+        base64.urlsafe_b64encode(hmac.new(b"app-secret", payload.encode(), hashlib.sha256).digest())
+        .decode()
+        .rstrip("=")
+    )
+    assert (
+        client.post(
+            "/api/v1/meta/data-deletion", data={"signed_request": signature + "." + payload}
+        ).status_code
+        == 200
+    )
+    with store.connect() as db:
+        assert db.execute('SELECT COUNT(*) FROM "extension""rows"').fetchone()[0] == 0
+
+
+def test_oauth_cannot_save_after_session_is_revoked(oauth):
+    client, _ = oauth
+    manager = client.app.state.meta_oauth
+    original = manager.transport
+
+    def revoked(request):
+        if request.url.path.endswith("/me"):
+            with manager.service.store.connect(write=True) as db:
+                db.execute("DELETE FROM sessions")
+        return original.handle_request(request)
+
+    manager.transport = httpx.MockTransport(revoked)
+    assert connect(client).status_code == 403
+    with manager.service.store.connect() as db:
+        assert db.execute("SELECT COUNT(*) FROM meta_connections").fetchone()[0] == 0
+
+
+def test_deleted_workspace_rejects_stale_runtime_work(oauth):
+    client, _ = oauth
+    assert connect(client).status_code == 303
+    service = client.app.state.workspaces
+    service._errors["mine"] = RuntimeError("private training data")
+    service.autonomy._checks[("mine", "reader", "revision")] = {"private-item": True}
+    payload = (
+        base64.urlsafe_b64encode(
+            json.dumps({"algorithm": "HMAC-SHA256", "user_id": "123"}).encode()
+        )
+        .decode()
+        .rstrip("=")
+    )
+    sig = (
+        base64.urlsafe_b64encode(hmac.new(b"app-secret", payload.encode(), hashlib.sha256).digest())
+        .decode()
+        .rstrip("=")
+    )
+    assert (
+        client.post(
+            "/api/v1/meta/data-deletion", data={"signed_request": sig + "." + payload}
+        ).status_code
+        == 200
+    )
+    assert "mine" not in service._errors
+    assert not any(k[0] == "mine" for k in service.autonomy._checks)
+    with pytest.raises(KeyError):
+        with service._lock("mine"):
+            pytest.fail("A stale request could reintroduce deleted workspace data")
+
+
+def test_disconnect_cleans_up_previously_selected_assets(oauth):
+    client, calls = oauth
+    assert connect(client).status_code == 303
+    assert client.put(BASE + "/accounts", json={"assets": ["messenger:20"]}).status_code == 200
+    assert client.put(BASE + "/accounts", json={"assets": []}).status_code == 200
+    assert client.post("/api/v1/meta/disconnect").status_code == 200
+    assert any(r.method == "DELETE" and r.url.path.endswith("/20/subscribed_apps") for r in calls)
+
+
+def test_tampered_credentials_fail_closed_and_disconnect_erases_them(oauth):
+    from backend.meta_ads import AdsUnavailable
+
+    client, _ = oauth
+    assert connect(client).status_code == 303
+    assert client.put(BASE + "/accounts", json={"assets": ["messenger:20"]}).status_code == 200
+    manager = client.app.state.meta_oauth
+    with manager.service.store.connect(write=True) as db:
+        db.execute("UPDATE meta_connections SET token_blob=?", (b"invalid-ciphertext",))
+    with pytest.raises(AdsUnavailable, match="Reconnect Meta"):
+        manager.token("mine", "messenger", "20")
+    result = client.post("/api/v1/meta/disconnect")
+    assert result.status_code == 200
+    assert result.json()["subscriptions"] == [{"asset": "messenger:20", "status": "failed"}]
+    with manager.service.store.connect() as db:
+        assert db.execute("SELECT COUNT(*) FROM meta_connections").fetchone()[0] == 0
+        assert db.execute("SELECT COUNT(*) FROM meta_assets").fetchone()[0] == 0
+
+
+def test_reconnect_removes_old_subscriptions_before_replacing_credentials(oauth):
+    client, calls = oauth
+    assert connect(client).status_code == 303
+    assert client.put(BASE + "/accounts", json={"assets": ["messenger:20"]}).status_code == 200
+    assert connect(client).status_code == 303
+    assert any(r.method == "DELETE" and r.url.path.endswith("/20/subscribed_apps") for r in calls)
+    assert client.get(BASE + "/connection").json()["selected"] == []

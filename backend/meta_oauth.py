@@ -7,6 +7,8 @@ import json
 import secrets
 import shutil
 import time
+from functools import wraps
+from threading import RLock
 from urllib.parse import urlencode
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -25,6 +27,19 @@ REFUSED = (
 )
 
 
+def serialized_connection(method):
+    @wraps(method)
+    def run(self, *args, **kwargs):
+        with self._connection_lock:
+            return method(self, *args, **kwargs)
+
+    return run
+
+
+def quoted_identifier(value):
+    return '"' + value.replace('"', '""') + '"'
+
+
 class Selection(BaseModel):
     assets: list[str] = Field(max_length=100)
 
@@ -32,6 +47,7 @@ class Selection(BaseModel):
 class MetaOAuth:
     def __init__(self, settings, service, transport=None):
         self.settings, self.service, self.transport = settings, service, transport
+        self._connection_lock = RLock()
         with service.store.connect(write=True) as db:
             db.execute("""CREATE TABLE IF NOT EXISTS meta_oauth_states (
                 session_id TEXT PRIMARY KEY, state_hash TEXT NOT NULL, workspace_id TEXT NOT NULL,
@@ -44,6 +60,9 @@ class MetaOAuth:
             db.execute("""CREATE TABLE IF NOT EXISTS meta_assets (
                 kind TEXT NOT NULL, asset_id TEXT NOT NULL, workspace_id TEXT NOT NULL,
                 user_id TEXT NOT NULL, PRIMARY KEY(kind, asset_id))""")
+            db.execute("""CREATE TABLE IF NOT EXISTS meta_subscriptions (
+                user_id TEXT NOT NULL, asset_key TEXT NOT NULL, status TEXT NOT NULL,
+                PRIMARY KEY(user_id,asset_key))""")
             db.execute("""CREATE TABLE IF NOT EXISTS meta_deletions (
                 code TEXT PRIMARY KEY, completed BOOLEAN NOT NULL)""")
 
@@ -93,6 +112,7 @@ class MetaOAuth:
             }
         )
 
+    @serialized_connection
     def callback(self, user, session, state, code, error):
         # Consume once, including on denial or mismatch, under the same write transaction.
         with self.service.store.connect(write=True) as db:
@@ -136,7 +156,17 @@ class MetaOAuth:
             meta_user = client.request("GET", "me", params={"fields": "id"})["id"]
             assets, tokens = self.inventory(client)
             blob = self.cipher().encrypt(encode({"user": token, "assets": tokens}).encode())
+            self.disconnect(user)
             with self.service.store.connect(write=True) as db:
+                valid = db.execute(
+                    "SELECT 1 FROM sessions s JOIN workspace_owners o "
+                    "ON o.user_id=s.user_id WHERE s.id=? AND s.user_id=? "
+                    "AND s.expires>? AND o.workspace_id=?",
+                    (session, user, time.time(), row["workspace_id"]),
+                ).fetchone()
+                if not valid:
+                    raise HTTPException(403, "Sign in and connect Meta again.")
+                db.execute("DELETE FROM meta_subscriptions WHERE user_id=?", (user,))
                 # Reconnection invalidates previous selections; user must pick assets again.
                 db.execute("INSERT OR REPLACE INTO meta_identities VALUES (?,?)", (user, meta_user))
                 db.execute("DELETE FROM meta_assets WHERE user_id=?", (user,))
@@ -173,13 +203,15 @@ class MetaOAuth:
     def inventory(self, client):
         assets, tokens = [], {}
 
-        def add(kind, identifier, name, token=None):
+        def add(kind, identifier, name, token=None, subscription_id=None):
             identifier = str(identifier)
             raw = identifier.removeprefix("act_") if kind == "ads" else identifier
             if not raw.isdigit() or len(raw) > 32:
                 raise ValueError("Invalid asset id")
             key = f"{kind}:{identifier}"
             assets.append({"key": key, "kind": kind, "id": identifier, "name": str(name)[:500]})
+            if kind != "ads":
+                assets[-1]["subscription_id"] = str(subscription_id or identifier)
             if token:
                 tokens[key] = token
 
@@ -191,7 +223,13 @@ class MetaOAuth:
             add("messenger", row["id"], row.get("name", "Page"), row.get("access_token"))
             ig = row.get("instagram_business_account")
             if ig:
-                add("instagram", ig["id"], ig.get("username", "Instagram"), row.get("access_token"))
+                add(
+                    "instagram",
+                    ig["id"],
+                    ig.get("username", "Instagram"),
+                    row.get("access_token"),
+                    row["id"],
+                )
         for business in self.rows(client, "me/businesses", "id"):
             if not str(business["id"]).isdigit():
                 raise ValueError("Invalid business id")
@@ -201,7 +239,12 @@ class MetaOAuth:
                 if not str(waba["id"]).isdigit():
                     raise ValueError("Invalid business id")
                 for number in self.rows(client, f"{waba['id']}/phone_numbers", "id,verified_name"):
-                    add("whatsapp", number["id"], number.get("verified_name", "WhatsApp"))
+                    add(
+                        "whatsapp",
+                        number["id"],
+                        number.get("verified_name", "WhatsApp"),
+                        subscription_id=waba["id"],
+                    )
         return assets, tokens
 
     def status(self, user, workspace):
@@ -213,13 +256,24 @@ class MetaOAuth:
                 "SELECT kind,asset_id FROM meta_assets WHERE user_id=? AND workspace_id=?",
                 (user, workspace),
             ).fetchall()
+        with self.service.store.connect() as db:
+            reports = {
+                r["asset_key"]: r["status"]
+                for r in db.execute("SELECT * FROM meta_subscriptions WHERE user_id=?", (user,))
+            }
         return {
+            "subscriptions": [
+                {"asset": f"{r[0]}:{r[1]}", "status": reports.get(f"{r[0]}:{r[1]}", "pending")}
+                for r in selected
+                if r[0] != "ads"
+            ],
             "connected": bool(row and row["expires"] > time.time()),
             "assets": json.loads(row["assets_json"]) if row else [],
             "selected": [f"{r[0]}:{r[1]}" for r in selected],
             "access_note": REFUSED,
         }
 
+    @serialized_connection
     def select(self, user, workspace, keys):
         status = self.status(user, workspace)
         allowed = {row["key"] for row in status["assets"]}
@@ -253,6 +307,7 @@ class MetaOAuth:
                 "INSERT INTO meta_assets VALUES (?,?,?,?)",
                 [(*k.split(":", 1), workspace, user) for k in keys],
             )
+        self.subscribe(user, keys)
         return self.status(user, workspace)
 
     def owned(self, workspace):
@@ -298,8 +353,79 @@ class MetaOAuth:
         except (InvalidToken, ValueError, KeyError):
             raise AdsUnavailable("Reconnect Meta to refresh this workspace's access.") from None
 
-    def disconnect(self, user):
+    def subscribe(self, user, keys, *, remove=False):
+        with self.service.store.connect() as db:
+            row = db.execute("SELECT * FROM meta_connections WHERE user_id=?", (user,)).fetchone()
+        if not row:
+            return []
+        assets = {a["key"]: a for a in json.loads(row["assets_json"])}
+        reports, targets = [], {}
+        try:
+            tokens = json.loads(self.cipher().decrypt(row["token_blob"]))
+        except (InvalidToken, ValueError, KeyError, HTTPException):
+            tokens = None
+        for key in keys:
+            asset = assets.get(key, {})
+            if asset.get("kind") == "ads":
+                continue
+            target = asset.get("subscription_id")
+            # Old connections lack parent IDs; reconnect rather than guessing the IG/WABA target.
+            if not target and asset.get("kind") == "messenger":
+                target = asset["id"]
+            group = ("waba" if asset.get("kind") == "whatsapp" else "page", target)
+            if group not in targets:
+                status = "failed"
+                if target and tokens:
+                    try:
+                        token = tokens["assets"].get(key, tokens["user"])
+                        data = (
+                            {}
+                            if group[0] == "waba" or remove
+                            else {
+                                "subscribed_fields": (
+                                    "messages,messaging_postbacks,message_deliveries,message_reads"
+                                )
+                            }
+                        )
+                        result = self.client(token).request(
+                            "DELETE" if remove else "POST", f"{target}/subscribed_apps", data=data
+                        )
+                        if result.get("success") is True:
+                            status = "unsubscribed" if remove else "subscribed"
+                    except (AdsUnavailable, KeyError, TypeError):
+                        pass
+                targets[group] = status
+            reports.append({"asset": key, "status": targets[group]})
         with self.service.store.connect(write=True) as db:
+            db.executemany(
+                "INSERT OR REPLACE INTO meta_subscriptions VALUES (?,?,?)",
+                [(user, r["asset"], r["status"]) for r in reports],
+            )
+        return reports
+
+    @serialized_connection
+    def disconnect(self, user):
+        with self.service.store.connect() as db:
+            keys = [
+                f"{r[0]}:{r[1]}"
+                for r in db.execute(
+                    "SELECT kind,asset_id FROM meta_assets WHERE user_id=?", (user,)
+                )
+            ]
+            keys = sorted(
+                set(keys)
+                | {
+                    r[0]
+                    for r in db.execute(
+                        "SELECT asset_key FROM meta_subscriptions WHERE user_id=? "
+                        "AND status!='unsubscribed'",
+                        (user,),
+                    )
+                }
+            )
+        reports = self.subscribe(user, keys, remove=True)
+        with self.service.store.connect(write=True) as db:
+            db.execute("DELETE FROM meta_subscriptions WHERE user_id=?", (user,))
             db.execute("DELETE FROM meta_assets WHERE user_id=?", (user,))
             db.execute("DELETE FROM meta_connections WHERE user_id=?", (user,))
             db.execute(
@@ -307,8 +433,9 @@ class MetaOAuth:
                 "sessions WHERE user_id=?)",
                 (user,),
             )
-        return {"connected": False}
+        return {"connected": False, "subscriptions": reports}
 
+    @serialized_connection
     def delete(self, signed):
         try:
             signature, payload = signed.split(".", 1)
@@ -372,12 +499,23 @@ class MetaOAuth:
                         for t in tables
                         if t not in ordered + ["workspaces", "workspace_owners"]
                         and "workspace_id"
-                        in {r[1] for r in db.execute(f'PRAGMA table_info("{t}")')}
+                        in {r[1] for r in db.execute(f"PRAGMA table_info({quoted_identifier(t)})")}
                     ]
                     for table in other + ordered + ["workspaces", "workspace_owners"]:
-                        db.execute(f'DELETE FROM "{table}" WHERE workspace_id=?', (ws,))
+                        db.execute(
+                            f"DELETE FROM {quoted_identifier(table)} WHERE workspace_id=?", (ws,)
+                        )
                     self.service._loops.pop(ws, None)
                     self.service._positions.pop(ws, None)
+                    self.service._errors.pop(ws, None)
+                    self.service._deleted.add(ws)
+                    self.service.autonomy._checks = {
+                        k: v for k, v in self.service.autonomy._checks.items() if k[0] != ws
+                    }
+                    if self.service.readers:
+                        self.service.readers._checks = {
+                            k: v for k, v in self.service.readers._checks.items() if k[0] != ws
+                        }
                 shutil.rmtree(self.settings.data_dir / "workspaces" / ws, ignore_errors=True)
         with self.service.store.connect(write=True) as db:
             db.execute("DELETE FROM meta_identities WHERE meta_user_id=?", (meta_user,))

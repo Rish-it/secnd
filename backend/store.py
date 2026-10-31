@@ -239,6 +239,39 @@ class Store:
             ).fetchall()
         return [json.loads(row[0]) for row in rows]
 
+    def update_decisions(self, workspace, decisions):
+        with self.connect(write=True) as db:
+            for decision in decisions:
+                db.execute(
+                    "UPDATE predictions SET auto=?,spot_check=?,threshold=?,decision_json=? "
+                    "WHERE workspace_id=? AND id=(SELECT id FROM predictions WHERE workspace_id=? "
+                    "AND item_id=? ORDER BY created_at DESC,id DESC LIMIT 1)",
+                    (
+                        decision["auto"],
+                        decision.get("spot_check", False),
+                        decision.get("threshold"),
+                        encode(decision),
+                        workspace,
+                        workspace,
+                        decision["item_id"],
+                    ),
+                )
+
+    def replay_answer(self, workspace, item_id, label, key):
+        with self.connect() as db:
+            row = db.execute(
+                "SELECT a.*,u.idempotency_key AS undone FROM answers a "
+                "LEFT JOIN answer_undos u ON u.workspace_id=a.workspace_id "
+                "AND u.idempotency_key=a.idempotency_key WHERE a.workspace_id=? "
+                "AND a.idempotency_key=?",
+                (workspace, key),
+            ).fetchone()
+        if row is None:
+            return None
+        if (row["item_id"], row["label"]) != (item_id, label) or row["undone"]:
+            raise IdempotencyConflict("This key belongs to a different or undone answer.")
+        return json.loads(row["result_json"])
+
     def answer(
         self, workspace, item_id, label, idempotency_key, result, source="answer", *, review=None
     ):
@@ -267,9 +300,9 @@ class Store:
                 (workspace, item_id, label, idempotency_key, label_id, encode(result), timestamp()),
             )
             if review is not None:
-                decision_type, confirmed, confidence = review
+                decision_type, confirmed, confidence, *identity = review
                 db.execute(
-                    "INSERT OR IGNORE INTO autonomy_reviews VALUES (?,?,?,?,?,?,?)",
+                    "INSERT OR IGNORE INTO autonomy_reviews VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (
                         workspace,
                         idempotency_key,
@@ -278,6 +311,7 @@ class Store:
                         confirmed,
                         confidence,
                         timestamp(),
+                        *identity,
                     ),
                 )
         return result, True

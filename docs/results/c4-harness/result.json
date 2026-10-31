@@ -2,82 +2,81 @@
   "branch": "stage/c4-harness",
   "base": "origin/main",
   "commits": [],
-  "commit_status": "blocked: sandbox refuses the shared worktree index lock",
+  "commit_status": "blocked: sandbox refuses shared worktree index lock; changes remain in working tree",
   "checkpoints": [
     {
       "item": 1,
-      "intent": "Preserve the spot-check guard on answer undo",
-      "commit": "blocked_index_write"
+      "result": "Owned workspace bounds can authorize Act independently; owner/type/model evidence isolation, basis metadata, spot checks and action gates retained."
     },
     {
       "item": 2,
-      "intent": "Require sessions and workspace ownership",
-      "commit": "blocked_index_write"
+      "result": "Optional saved Meta decision reader reuses loader and typed renderer, nearest-eight history and immediate corrections; model identity recorded."
     },
     {
       "item": 3,
-      "intent": "Add encrypted business OAuth and selected asset mappings",
-      "commit": "blocked_index_write"
+      "result": "SQLite failed-login limits by username/address and registration limit by address; generic retry response."
     },
     {
       "item": 4,
-      "intent": "Schedule workspace work with durable controls",
-      "commit": "blocked_index_write"
+      "result": "Asset subscriptions, partial failure reports, retries and best-effort disconnect/reconnect cleanup through mocked transport."
     },
     {
       "item": 5,
-      "intent": "Gate autonomy on workspace reviews and support ad undo",
-      "commit": "blocked_index_write"
+      "result": "Optional Modal GPU endpoint, authenticated HTTP reader client with human fallback, and fixed-rate load probe; no deployment or load run."
     },
     {
       "item": 6,
-      "intent": "Record and export seven-day ad observations",
-      "commit": "blocked_index_write"
+      "result": "Security/concurrency review with regressions for origins, OAuth revocation, deletion, stale decisions, stop checks, undo claims and durable metadata."
     },
     {
       "item": 7,
-      "intent": "Share opt-in aggregate counts only",
-      "commit": "blocked_index_write"
-    },
-    {
-      "item": 8,
-      "intent": "Reuse reviewed history, promotion checks and rollback",
-      "commit": "blocked_index_write"
-    },
-    {
-      "item": 9,
-      "intent": "Build sign-in, account selection, inbox, autonomy and activity screens",
-      "commit": "blocked_index_write"
-    },
-    {
-      "item": 10,
-      "intent": "Verify with mocked Meta transport and save the result",
-      "commit": "blocked_index_write"
+      "result": "Cached-package npm run check passed; OpenAPI snapshot and setup guide refreshed."
     }
   ],
   "verification": {
-    "npm_run_check": "passed with cached Python environment",
-    "python_tests_passed": 340,
-    "python_test_seconds": 56.12,
+    "npm_run_check": "passed with cached packages",
+    "python_tests_passed": 369,
+    "python_tests_added": 29,
     "ruff_check": "passed",
     "ruff_format": "passed",
-    "frontend_lint": "passed with warnings",
-    "frontend_lint_warnings": 6,
+    "frontend_lint": "passed with 6 existing warnings; frontend source unchanged",
     "frontend_typescript_and_production_build": "passed",
+    "git_diff_check": "passed",
     "environment": {
       "UV_NO_SYNC": "true",
-      "UV_CACHE_DIR": "writable temporary cache",
+      "UV_CACHE_DIR": "/private/tmp/secnd-uv-cache",
       "HF_HUB_OFFLINE": "1",
       "TRANSFORMERS_OFFLINE": "1"
     },
-    "uv_sync_locked": "blocked: default cache is not writable; writable-cache retry crashes in macOS system configuration",
-    "npm_ci": "passed offline after repairing missing lockfile download metadata from cached tarballs",
-    "browser": "blocked: local server bind and browser launch denied; browser tool requires approval under never policy",
-    "live_meta_verification": "not run; integration tests use mocked transports",
-    "protected_model_files_and_existing_gate": "unchanged"
+    "dependencies": "Existing cached environment reused; dependencies and lockfiles unchanged.",
+    "model_tests": "Mocked models/tokenizers/embeddings; no weights loaded.",
+    "meta_tests": "Mocked transport only; no live Meta or paid requests.",
+    "modal_deployment": "not performed",
+    "load_test": "not run",
+    "browser_and_live_oauth": "not run",
+    "protected_files_gate_frontend_submission_seeded_demo": "unchanged",
+    "python_test_seconds": 55.23
   },
   "regression_first": {
-    "undo_guard_test": "failed before fix; passed after fix"
+    "owned_bound_authorizes_without_model_certificate": "failed before fix; passed after fix",
+    "owner_and_model_evidence_isolation": "failed before fix; passed after fix",
+    "ad_execution_on_workspace_evidence": "failed before fix; passed after fix",
+    "meta_reader_and_live_corrections": "failed before implementation; passed after implementation",
+    "login_and_registration_limits": "failed before fix; passed after fix",
+    "asset_subscriptions_and_partial_failure": "failed before implementation; passed after implementation",
+    "reader_timeout_human_fallback": "failed before implementation; passed after implementation",
+    "origin_scheme": "failed before fix; passed after fix",
+    "kill_blocks_undo_and_snapshot_race": "failed before fix; passed after fix",
+    "atomic_undo_claim": "failed before fix; passed after fix",
+    "all_decision_metadata_persists": "failed before fix; passed after fix",
+    "stale_automatic_message": "failed before fix; passed after fix",
+    "deletion_quotes_schema_identifiers": "failed before fix; passed after fix",
+    "oauth_session_revoked_during_exchange": "failed before fix; passed after fix",
+    "deletion_runtime_cleanup_and_stale_work": "failed before fix; passed after fix",
+    "unsubscribe_previously_selected_assets_and_reconnect": "failed before fix; passed after fix",
+    "meta_serving_status_and_retired_cold_reader": "failed before fix; passed after fix",
+    "remote_correction_recency": "failed before fix; passed after fix",
+    "signed_in_api_earns_act_after_history_changes": "passed with mocked model; model revision change removes evidence"
   },
   "no_correction_unlock_cases": [
     {
@@ -106,22 +105,30 @@
     }
   ],
   "shortcuts_and_limits": [
-    "Local password accounts and opaque sessions; no email verification or password recovery flow.",
-    "The review window is fixed at the latest 1000 distinct eligible decisions.",
-    "Workspace evidence adds a requirement; existing model certification and the reader exact-history restriction remain.",
-    "Ads use a workspace with the existing four-action label schema; inbox templates use separate workspaces.",
-    "Customer replies use approved short response-label text verbatim; no freeform reply generator was added.",
-    "Meta asset webhook subscriptions are configured manually in Meta setup tools.",
-    "WhatsApp discovery enumerates business-owned numbers and Instagram discovery follows linked Pages.",
-    "Disconnect erases local credentials and mappings; it does not provision or revoke Meta-side app roles.",
-    "No Meta account-management writes are implemented.",
-    "Observed outcomes require human review before training; hindsight reviews cannot unlock Act.",
-    "Delivered messages have no app-side undo; supported Ads undo refuses intervening changes.",
-    "The worker remains one in-process thread with SQLite, as requested. Global stop cannot cancel already submitted provider requests.",
-    "Python checks used cached packages through a local environment; the added encryption dependency lock metadata came from an existing pinned local lock.",
-    "Missing npm download metadata was repaired from cached tarball integrity without changing package versions.",
-    "No live OAuth or browser layout/accessibility execution was completed in this sandbox.",
-    "All checkpoints and this measured result file remain uncommitted because Git index writes are denied."
+    "One API process with SQLite and an in-process worker; no distributed worker or shared in-memory locks.",
+    "Local password accounts have no email verification or password recovery.",
+    "Login limits use the transport client address and ignore forwarded headers; shared proxy addresses share a limit.",
+    "Workspace bounds use the latest 1000 distinct eligible reviews, isolated by owner, workspace, decision type and model identity; legacy unproven reviews do not unlock owned workspaces.",
+    "Spot-check counters remain in-process, as before; review evidence, history, switches, action claims and audit records persist.",
+    "Local reader files must be immutable while running and require restart after replacement; fingerprints cover every saved file.",
+    "Remote requests contain at most 1000 current history rows before endpoint nearest-eight retrieval; corrections move to the recent end. Revision pinning is optional; an unpinned changed revision needs new evidence.",
+    "An unresolved remote revision cannot use evidence until a successful response supplies its identity. Network failures never authorize an automatic action.",
+    "Typed readers have no inherited public benchmark certificate. The existing 99% promotion gate is unchanged.",
+    "Separate Ads workspaces use the existing four-action labels; inbox options remain approved verbatim response templates, without freeform generation.",
+    "Only operator-allowed sandbox Ads accounts are supported. No Meta account-management writes are implemented.",
+    "Meta app-level webhook setup and permissions remain operator tasks; asset subscription failures preserve selections. Old inventories missing parent IDs require reconnecting.",
+    "Unsubscribe is best effort; local credentials/mappings are erased on disconnect even when provider cleanup fails. Meta app roles are not revoked.",
+    "Observed outcomes still need human review before training; hindsight reviews do not unlock Act and observations do not establish causation.",
+    "Answer undo cannot retract delivered messages. Ads undo refuses intervening target changes, claims atomically and leaves ambiguous results for manual review.",
+    "Global stop cannot cancel a provider request already submitted. Stops are rechecked after Ads snapshot reads and before undo claims.",
+    "Deleted workspace names remain blocked for the process lifetime to reject stale requests; choose a new name or restart.",
+    "The Modal SDK is an optional operator tool, outside app runtime dependencies. The GPU image follows the existing pinned Torch image pattern; no GPU deployment/runtime or latency verification was performed.",
+    "The load probe was not run. It uses fixed arrivals and concurrent requests, nearest-rank latency over all attempts, and no retries; no capacity measurement is claimed.",
+    "Cached packages were used with UV_NO_SYNC=true; no dependency install, lockfile change or Dockerfile change was needed.",
+    "No live OAuth, Meta delivery, browser or GPU execution was performed; no paid calls. Runtime tests use mocked models and transports.",
+    "Frontend, submission docs and seeded demo are owned elsewhere and were not edited; the frontend owner must consume the new basis/subscription metadata. Six existing frontend lint warnings remain."
   ],
-  "run_settings_document": "docs/integrations/harness.md"
+  "run_settings_document": "docs/integrations/harness.md",
+  "starting_commit": "2c04df40b8b4975eda983f9d367a3c7cbd3210da",
+  "prior_harness_commit": "95987e53878f57ea96f553e516fed6976249145a"
 }

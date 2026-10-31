@@ -101,6 +101,7 @@ def test_opt_in_aggregate_is_counts_only_and_cannot_unlock(autonomy):
         )
         a.review(ws, "x", "keep", "k", {"label": "keep", "prob": 0.99, "source_app": "ads"})
     assert all(r["proposals"] == 0 for r in a.aggregate()["counts"])
+
     h.configure("one", share_counts=True)
     result = a.aggregate()
     row = result["counts"][0]
@@ -115,3 +116,104 @@ def test_opt_in_aggregate_is_counts_only_and_cannot_unlock(autonomy):
     assert not a.allowed("two", "ad")
     h.configure("one", share_counts=False)
     assert all(r["proposals"] == 0 for r in a.aggregate()["counts"])
+
+
+def owned_evidence(a, monkeypatch, *, owner="person", model="ren-v1"):
+    monkeypatch.setattr(a, "owner", lambda ws: owner if ws == "one" else "", raising=False)
+    a.service.decision_identity = lambda ws, decision_type: (model, "revision-1")
+    a.service.automatic_guarded = lambda ws: False
+    return a
+
+
+def test_owned_bound_can_authorize_uncertified_reader(autonomy, monkeypatch):
+    a = owned_evidence(autonomy, monkeypatch)
+    a.configure("one", "ad", Policy(level="act", bar=90))
+    reviews(a, 29)
+    decision = dict(
+        item_id="next",
+        label="keep",
+        prob=0.95,
+        auto=False,
+        threshold=None,
+        spot_check=False,
+        source_app="ads",
+        model_id="ren-v1",
+        model_revision="revision-1",
+        model_version="history-changed",
+        reasons={},
+    )
+    monkeypatch.setattr(a, "sample", lambda *args: False, raising=False)
+    result = a.apply("one", [decision])[0]
+    assert result["auto"]
+    assert result["automatic_basis"] == "workspace_bound"
+    assert result["autonomy"]["reviewed"] == 29
+    assert result["autonomy"]["lower_bound"] >= 0.9
+    assert result["threshold"] == 0.9
+    a.service.automatic_guarded = lambda ws: True
+    assert not a.apply("one", [dict(decision, auto=False)])[0]["auto"]
+
+
+def test_bound_is_isolated_by_person_model_and_type(autonomy, monkeypatch):
+    a = owned_evidence(autonomy, monkeypatch)
+    a.configure("one", "ad", Policy(level="act", bar=90))
+    reviews(a, 29)
+    assert a.status("one", "ad")["unlocked"]
+    assert not a.status("one", "inbox")["unlocked"]
+    owned_evidence(a, monkeypatch, owner="another-person")
+    assert a.status("one", "ad")["reviewed"] == 0
+    owned_evidence(a, monkeypatch, model="ren-v2")
+    assert a.status("one", "ad")["reviewed"] == 0
+
+
+def test_unowned_bound_cannot_elevate_decisions(autonomy):
+    a = autonomy
+    a.configure("one", "ad", Policy(level="act", bar=90))
+    reviews(a, 29)
+    d = dict(
+        item_id="next",
+        label="keep",
+        prob=0.99,
+        auto=False,
+        threshold=None,
+        spot_check=False,
+        source_app="ads",
+    )
+    assert not a.apply("one", [d])[0]["auto"]
+
+
+def test_workspace_bound_spot_checks_and_low_confidence_still_ask(autonomy, monkeypatch):
+    a = owned_evidence(autonomy, monkeypatch)
+    a.configure("one", "ad", Policy(level="act", bar=90))
+    reviews(a, 29)
+    d = dict(
+        item_id="next",
+        label="keep",
+        prob=0.95,
+        auto=False,
+        threshold=None,
+        spot_check=False,
+        source_app="ads",
+        model_id="ren-v1",
+        model_revision="revision-1",
+    )
+    monkeypatch.setattr(a, "sample", lambda *args: True)
+    result = a.apply("one", [dict(d)])[0]
+    assert result["spot_check"] and not result["auto"]
+    assert not a.apply("one", [dict(d, prob=0.89)])[0]["auto"]
+    a.observe("one", "failed-check", "pause", dict(d, spot_check=True))
+    monkeypatch.setattr(a, "sample", lambda *args: False)
+    assert not a.apply("one", [dict(d)])[0]["auto"]
+
+
+def test_legacy_model_prediction_is_not_credited_to_new_model(autonomy, monkeypatch):
+    a = owned_evidence(autonomy, monkeypatch)
+    a.configure("one", "ad", Policy(level="act", bar=90))
+    for i in range(29):
+        a.review(
+            "one",
+            str(i),
+            "keep",
+            str(i),
+            dict(label="keep", prob=0.99, source_app="ads", model_version="old-head"),
+        )
+    assert a.status("one", "ad")["reviewed"] == 0

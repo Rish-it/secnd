@@ -497,6 +497,33 @@
             "title": "Auto",
             "type": "boolean"
           },
+          "automatic_basis": {
+            "anyOf": [
+              {
+                "enum": [
+                  "workspace_bound",
+                  "model_certified"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Automatic Basis"
+          },
+          "automatic_evidence": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Automatic Evidence"
+          },
           "autonomy": {
             "anyOf": [
               {
@@ -522,6 +549,17 @@
             ],
             "title": "Cp Lower Bound"
           },
+          "inference_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inference Error"
+          },
           "item": {
             "anyOf": [
               {
@@ -543,6 +581,28 @@
             "minLength": 1,
             "title": "Label",
             "type": "string"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "model_revision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Revision"
           },
           "model_version": {
             "maxLength": 128,
@@ -590,7 +650,8 @@
                   "whatsapp",
                   "messenger",
                   "instagram",
-                  "ads"
+                  "ads",
+                  "account"
                 ],
                 "type": "string"
               },
@@ -1291,7 +1352,8 @@
                   "whatsapp",
                   "messenger",
                   "instagram",
-                  "ads"
+                  "ads",
+                  "account"
                 ],
                 "type": "string"
               },

@@ -1,13 +1,16 @@
-"""Workspace evidence for earned autonomy, additional to model certification."""
+"""Workspace evidence for earned autonomy, independent of public model certification."""
 
+import random
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 from scipy.stats import beta
 
+from backend import metrics
+from backend.loop import SPOT_CHECK_RATE
 from backend.schemas import WorkspaceId
-from backend.store import encode, timestamp
+from backend.store import timestamp
 
 KINDS = ("ad", "inbox", "account")
 WINDOW = 1000
@@ -39,6 +42,7 @@ class Policy(BaseModel):
 class Autonomy:
     def __init__(self, service):
         self.service = service
+        self._checks = {}
         with service.store.connect(write=True) as db:
             db.execute("""CREATE TABLE IF NOT EXISTS autonomy_policies (
                 workspace_id TEXT NOT NULL, kind TEXT NOT NULL, policy_json TEXT NOT NULL,
@@ -47,6 +51,48 @@ class Autonomy:
                 workspace_id TEXT NOT NULL, answer_key TEXT NOT NULL, item_id TEXT NOT NULL,
                 kind TEXT NOT NULL, confirmed BOOLEAN NOT NULL, confidence REAL NOT NULL,
                 created_at TEXT NOT NULL, PRIMARY KEY(workspace_id,answer_key))""")
+
+            columns = {r[1] for r in db.execute("PRAGMA table_info(autonomy_reviews)")}
+            for column in ("person_id", "model_id", "model_revision"):
+                if column not in columns:
+                    db.execute(
+                        f"ALTER TABLE autonomy_reviews ADD COLUMN {column} TEXT NOT NULL DEFAULT ''"
+                    )
+
+    def owner(self, ws):
+        with self.service.store.connect() as db:
+            if not db.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='workspace_owners'"
+            ).fetchone():
+                return ""
+            row = db.execute(
+                "SELECT user_id FROM workspace_owners WHERE workspace_id=?", (ws,)
+            ).fetchone()
+        return row[0] if row else ""
+
+    def identity(self, ws, decision_type, previous=None):
+        if previous and previous.get("model_id"):
+            return previous["model_id"], previous.get("model_revision", "")
+        if previous and previous.get("reader"):
+            return previous["reader"]["model_id"], previous["reader"]["revision"]
+        if previous and previous.get("model_version"):
+            return "workspace-head", previous["model_version"]
+        if hasattr(self.service, "decision_identity"):
+            return self.service.decision_identity(ws, decision_type)
+        return "", ""
+
+    def observe(self, ws, item, label, previous):
+        if previous and previous.get("spot_check"):
+            identity = self.identity(ws, kind(previous.get("source_app")), previous)
+            state = self._checks.setdefault((ws, *identity), {})
+            state.setdefault(item, previous["label"] == label)
+
+    def guarded(self, ws, identity):
+        checked = list(self._checks.get((ws, *identity), {}).values())
+        return metrics.clopper_pearson_lower(len(checked) - sum(checked), len(checked)) > 0.01
+
+    def sample(self, ws, decision):
+        return random.random() < SPOT_CHECK_RATE
 
     def active(self, ws):
         oauth = getattr(self.service, "meta_oauth", None)
@@ -84,7 +130,7 @@ class Autonomy:
             return
         with self.service.store.connect(write=True) as db:
             db.execute(
-                "INSERT OR IGNORE INTO autonomy_reviews VALUES (?,?,?,?,?,?,?)",
+                "INSERT OR IGNORE INTO autonomy_reviews VALUES (?,?,?,?,?,?,?,?,?,?)",
                 (
                     ws,
                     key,
@@ -93,8 +139,11 @@ class Autonomy:
                     previous["label"] == label,
                     previous["prob"],
                     timestamp(),
+                    self.owner(ws),
+                    *self.identity(ws, kind(previous.get("source_app")), previous),
                 ),
             )
+        self.observe(ws, item, label, previous)
 
     def reviews(self, ws, decision_type, cut):
         with self.service.store.connect() as db:
@@ -106,6 +155,14 @@ class Autonomy:
                 ORDER BY r.created_at DESC, r.answer_key DESC""",
                 (ws, decision_type),
             ).fetchall()
+        owner = self.owner(ws)
+        identity = self.identity(ws, decision_type)
+        rows = [
+            r
+            for r in rows
+            if not owner
+            or (r["person_id"] == owner and (r["model_id"], r["model_revision"]) == identity)
+        ]
         latest = {}
         for row in rows:
             latest.setdefault(row["item_id"], row)
@@ -133,6 +190,8 @@ class Autonomy:
         return {
             **policy.model_dump(),
             "decision_type": decision_type,
+            "model_id": self.identity(ws, decision_type)[0],
+            "model_revision": self.identity(ws, decision_type)[1],
             "reviewed": n,
             "confirmed": k,
             "corrected": n - k,
@@ -152,7 +211,37 @@ class Autonomy:
             return status["bar"] == 99 and status[flag]
         return True
 
+    def authorizes(self, ws, decision):
+        decision = decision if isinstance(decision, dict) else decision.model_dump()
+        decision_type = kind(decision.get("source_app"))
+        action = "send message" if decision_type == "inbox" else decision["label"]
+        status = self.status(ws, decision_type)
+        identity = self.identity(ws, decision_type)
+        return bool(
+            self.owner(ws)
+            and decision.get("automatic_basis") == "workspace_bound"
+            and decision.get("auto")
+            and not decision.get("spot_check")
+            and not decision.get("inference_error")
+            and (decision.get("model_id"), decision.get("model_revision")) == identity
+            and decision["prob"] >= status["confidence_cut"]
+            and self.allowed(ws, decision_type, action)
+            and not self.guarded(ws, identity)
+            and not self.service.automatic_guarded(ws)
+        )
+
     def apply(self, ws, decisions):
+        for decision in decisions:
+            if decision.get("auto"):
+                decision["automatic_basis"] = "model_certified"
+                decision["automatic_evidence"] = {
+                    "prob": decision["prob"],
+                    "model_id": decision.get("model_id"),
+                    "model_revision": decision.get("model_revision"),
+                    "threshold": decision.get("threshold"),
+                    "cp_lower_bound": decision.get("cp_lower_bound"),
+                    "reader": decision.get("reader"),
+                }
         if not self.active(ws):
             return decisions
         for decision in decisions:
@@ -175,13 +264,33 @@ class Autonomy:
                 ws, decision_type, action
             ):
                 decision["auto"] = False
-            with self.service.store.connect(write=True) as db:
-                db.execute(
-                    "UPDATE predictions SET auto=?,decision_json=? WHERE workspace_id=? "
-                    "AND id=(SELECT id FROM predictions WHERE workspace_id=? AND item_id=? "
-                    "ORDER BY created_at DESC,id DESC LIMIT 1)",
-                    (decision["auto"], encode(decision), ws, ws, decision["item_id"]),
+            identity = self.identity(ws, decision_type, decision)
+            guarded = self.guarded(ws, identity) or (
+                hasattr(self.service, "automatic_guarded") and self.service.automatic_guarded(ws)
+            )
+            if (
+                self.owner(ws)
+                and decision["prob"] >= status["confidence_cut"]
+                and self.allowed(ws, decision_type, action)
+                and not guarded
+                and identity == self.identity(ws, decision_type)
+                and not decision.get("inference_error")
+                and not decision["item_id"].startswith("outcome-")
+            ):
+                if not decision.get("auto") and not decision.get("spot_check"):
+                    decision["spot_check"] = self.sample(ws, decision)
+                decision["auto"] = not decision.get("spot_check", False)
+                decision["threshold"] = status["confidence_cut"]
+                decision["cp_lower_bound"] = None
+                decision["automatic_basis"] = "workspace_bound"
+                decision["automatic_evidence"] = dict(
+                    decision["autonomy"], model_id=identity[0], model_revision=identity[1]
                 )
+            if guarded or decision.get("spot_check"):
+                decision["auto"] = False
+            if not decision["auto"]:
+                decision["automatic_basis"] = None
+                decision["automatic_evidence"] = None
         return decisions
 
     def aggregate(self):

@@ -65,6 +65,8 @@ class Harness:
         }
 
     def log(self, ws, event, item=None):
+        if ws in getattr(self.service, "_deleted", set()):
+            return
         with self.service.store.connect(write=True) as db:
             db.execute(
                 "INSERT INTO agent_activity(workspace_id,event,item_id,created_at) VALUES "
@@ -88,7 +90,7 @@ class Harness:
         return self.status(ws)
 
     def enqueue(self, ws, message):
-        with self.service.store.connect(write=True) as db:
+        with self.service._lock(ws), self.service.store.connect(write=True) as db:
             previous = db.execute(
                 "SELECT message_json FROM agent_messages WHERE workspace_id=? AND item_id=?",
                 (ws, message.item_id),

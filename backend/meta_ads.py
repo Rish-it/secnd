@@ -478,6 +478,21 @@ class AdsService:
                 proposals.append(proposal)
             return proposals
 
+    def controls(self, workspace, *, automatic=False):
+        harness = getattr(self.service, "harness", None)
+        if harness and harness.killed():
+            raise ActionBlocked("The global kill switch is on.")
+        if (
+            getattr(self.service, "meta_oauth", None)
+            and self.service.meta_oauth.owned(workspace)
+            and not harness.status(workspace)["enabled"]
+        ):
+            raise ActionBlocked("This workspace is stopped.")
+        if not self.settings.ads_send_enabled:
+            raise ActionBlocked("Ads execution switch is off. Proposal only.")
+        if automatic and not self.status(workspace).auto_act:
+            raise ActionBlocked("Workspace auto-act is off. Proposal only.")
+
     def execute(self, workspace, item_id, *, confirmed_action=None):
         with self.service._lock(workspace):
             if getattr(self.service, "harness", None) and self.service.harness.killed():
@@ -530,10 +545,16 @@ class AdsService:
                 and not decision.spot_check
                 and decision.threshold is not None
                 and decision.prob >= decision.threshold
-                and card.cp_lower_bound is not None
-                and card.cp_lower_bound >= 0.99
-                and card.threshold == decision.threshold
-                and card.model_version == decision.model_version
+                and (
+                    (autonomy and autonomy.authorizes(workspace, decision))
+                    or (
+                        decision.automatic_basis != "workspace_bound"
+                        and card.cp_lower_bound is not None
+                        and card.cp_lower_bound >= 0.99
+                        and card.threshold == decision.threshold
+                        and card.model_version == decision.model_version
+                    )
+                )
                 and not self.service.metrics(workspace)["guarded"]
             ):
                 raise ActionBlocked(
@@ -564,6 +585,7 @@ class AdsService:
                     raise ActionBlocked("Budget adjustment is outside the supported range.")
                 payload = {"daily_budget": str(budget)}
             snapshot = self.client_for(workspace).snapshot(proposal.insight.target_id, account)
+            self.controls(workspace, automatic=confirmed_action is None)
             if snapshot["daily_budget"] != proposal.insight.daily_budget:
                 raise ActionBlocked("Daily budget changed since this proposal. Fetch new insights.")
             with self.service.store.connect(write=True) as db:
@@ -635,6 +657,7 @@ class AdsService:
 
     def undo(self, workspace, item_id):
         with self.service._lock(workspace):
+            self.controls(workspace)
             proposal = self.get(workspace, item_id)
             if proposal.status == "undone":
                 return proposal
@@ -658,11 +681,15 @@ class AdsService:
                 raise ActionBlocked(
                     "The target changed after this action. Review it before restoring."
                 )
+            self.controls(workspace)
             with self.service.store.connect(write=True) as db:
-                db.execute(
-                    "UPDATE ads_reversals SET status='undoing' WHERE workspace_id=? AND item_id=?",
+                claimed = db.execute(
+                    "UPDATE ads_reversals SET status='undoing' WHERE workspace_id=? "
+                    "AND item_id=? AND status='available'",
                     (workspace, item_id),
-                )
+                ).rowcount
+                if claimed != 1:
+                    raise ActionBlocked("Undo was already attempted. Review its action log.")
                 self._log(db, workspace, item_id, "undo_started", {})
             try:
                 result = client.request(
