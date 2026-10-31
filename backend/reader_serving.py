@@ -88,7 +88,7 @@ class CPUReader:
         ]
         return "ren-reader-" + hashlib.sha256(json.dumps(identity).encode()).hexdigest()[:16]
 
-    def predict(self, labels, history, frame, *, allow_auto=False):
+    def predict(self, labels, history, frame, *, allow_auto=False, decision=None):
         import torch
 
         from backend import incontext as ic
@@ -127,6 +127,18 @@ class CPUReader:
                     ]
                 context = [(n.text, labels.index(n.label)) for n in neighbours[::-1]]
                 ids = ic.render(self.tok, task, row.text, list(range(len(labels))), context)
+                if decision is not None:
+                    from dataclasses import replace
+
+                    from backend.typed import render
+
+                    examples = "\n".join(
+                        f"Example: {n.text} => {n.label}" for n in neighbours[::-1]
+                    )
+                    typed_decision = replace(decision, state=f"{examples}\n{row.text}")
+                    ids = render(self.tok, typed_decision, list(range(len(labels))))
+                    if ids.count(self.tok.mask_token_id) != len(labels):
+                        raise ValueError("Every decision option must fit in the reader input.")
                 packed = ic.batch(self.tok, [(ids, 0)], self.device)
                 autocast = (
                     torch.autocast("cuda", dtype=torch.bfloat16)
@@ -182,3 +194,35 @@ class CPUReader:
                     ).model_dump(mode="json")
                 )
             return decisions
+
+
+class SavedDecisionReader(CPUReader):
+    """Local saved reader, with no inherited benchmark certification."""
+
+    def __init__(self, folder, model_id, device="cpu"):
+        from types import SimpleNamespace
+
+        from backend.reader_policy import ReaderPolicy
+
+        self.folder = Path(folder)
+        files = sorted(p for p in self.folder.rglob("*") if p.is_file())
+        if not (self.folder / "scorer.pt").is_file() or not (self.folder / "encoder").is_dir():
+            raise ReaderUnavailable("Meta decision reader needs encoder/ and scorer.pt.")
+        fingerprint = hashlib.sha256()
+        for path in files:
+            fingerprint.update(str(path.relative_to(self.folder)).encode())
+            with path.open("rb") as stream:
+                for block in iter(lambda: stream.read(1024 * 1024), b""):
+                    fingerprint.update(block)
+        self.options = SimpleNamespace(model_id=model_id, examples=8)
+        self.artifact = SimpleNamespace(
+            revision=fingerprint.hexdigest(), policy_file="workspace-only"
+        )
+        self.policy, self.device, self._lock = ReaderPolicy(), device, RLock()
+        try:
+            self._load()
+        except Exception:
+            raise ReaderUnavailable(
+                "Meta decision reader could not load its local files."
+            ) from None
+        self._history_key, self._vectors = None, None

@@ -11,7 +11,7 @@ NonNegative = Annotated[float, Field(ge=0, allow_inf_nan=False)]
 Identifier = Annotated[str, Field(min_length=1, max_length=128)]
 WorkspaceId = Annotated[str, Field(pattern=r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$")]
 Label = Annotated[str, Field(min_length=1, max_length=128)]
-SourceApp = Literal["whatsapp", "messenger", "instagram", "ads"]
+SourceApp = Literal["whatsapp", "messenger", "instagram", "ads", "account"]
 
 
 class Item(BaseModel):
@@ -84,6 +84,11 @@ class ServingStatus(BaseModel):
 
 class Decision(BaseModel):
     autonomy: dict | None = None
+    automatic_basis: Literal["workspace_bound", "model_certified"] | None = None
+    automatic_evidence: dict | None = None
+    model_id: str | None = None
+    model_revision: str | None = None
+    inference_error: str | None = None
     item_id: Identifier
     label: Label
     probabilities: dict[Label, Probability] = Field(min_length=1)
@@ -111,7 +116,19 @@ class Decision(BaseModel):
             raise ValueError("Top-k probabilities must sum to at most one.")
         if self.auto and (self.threshold is None or self.prob < self.threshold):
             raise ValueError("Automatic decisions require a threshold and enough confidence.")
-        if self.auto and self.reader is not None:
+        workspace_bound = self.automatic_basis == "workspace_bound"
+        if self.auto and workspace_bound:
+            evidence = self.automatic_evidence or {}
+            if (
+                evidence.get("effective_level") != "act"
+                or evidence.get("lower_bound", -1) < evidence.get("bar", 100) / 100
+                or self.prob < evidence.get("confidence_cut", 2)
+                or evidence.get("model_id") != self.model_id
+                or evidence.get("model_revision") != self.model_revision
+                or self.spot_check
+            ):
+                raise ValueError("Workspace automatic decisions require their own bound evidence.")
+        if self.auto and self.reader is not None and not workspace_bound:
             r = self.reader
             if (
                 not r.policy_complete

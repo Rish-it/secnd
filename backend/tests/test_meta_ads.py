@@ -460,3 +460,30 @@ def test_automatic_budget_action_undo_is_idempotent_and_checks_external_changes(
     count = len(state["posts"])
     assert client.post(ADS + f"/proposals/{item}:undo").json()["status"] == "undone"
     assert len(state["posts"]) == count
+
+
+def test_workspace_bound_executes_without_global_certificate(ads, monkeypatch):
+    from backend.autonomy import Policy
+    from backend.schemas import EvalCard
+
+    client, service, settings, state, _ = ads
+    version = service.card("ads").model_version
+    monkeypatch.setattr(service, "card", lambda ws: EvalCard(model_version=version, coverage=0))
+    monkeypatch.setattr(service.autonomy, "owner", lambda ws: "person")
+    monkeypatch.setattr(service.autonomy, "sample", lambda *args: False)
+    service._loops["ads"].automatic = False
+    service.autonomy.configure("ads", "ad", Policy(level="act", bar=90))
+    for i in range(29):
+        service.autonomy.review(
+            "ads",
+            f"past-{i}",
+            "keep",
+            f"review-{i}",
+            dict(label="keep", prob=0.99, source_app="ads"),
+        )
+    enable(client, settings)
+    response = sync(client)
+    assert response.status_code == 200, response.text
+    assert response.json()[0]["decision"]["automatic_basis"] == "workspace_bound"
+    assert response.json()[0]["status"] == "executed"
+    assert len(state["posts"]) == 1

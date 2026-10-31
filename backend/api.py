@@ -39,6 +39,7 @@ from backend.meta_ads import ActionBlocked, AdsService, AdsUnavailable
 from backend.meta_ads import router as ads_router
 from backend.meta_oauth import MetaOAuth
 from backend.meta_oauth import router as oauth_router
+from backend.meta_reader import MetaDecisionRuntime
 from backend.meta_webhook import MetaWebhook, public_router
 from backend.meta_webhook import router as meta_router
 from backend.reader_runtime import ReaderRuntime
@@ -110,6 +111,9 @@ def create_app(
             service.cold_start = cold_start_service or ColdStartService(
                 service.store, config, reader_pool=service.readers
             )
+            service.meta_decisions = MetaDecisionRuntime(service, config)
+            if service.meta_decisions.enabled(""):
+                await run_in_threadpool(service.meta_decisions.reader)
             service.meta_oauth = MetaOAuth(config, service, meta_transport)
             app.state.meta_oauth = service.meta_oauth
             app.state.meta_webhook = MetaWebhook(config, service, transport=meta_transport)
@@ -276,7 +280,9 @@ def create_app(
         service = app.state.workspaces
         if stored_workspace(ws) is None:
             raise HTTPException(404, "Workspace was not found.")
-        if service.cold_start and service.cold_start.owns(ws):
+        if service.meta_decisions and service.meta_decisions.enabled(ws):
+            result = service.meta_decisions.status(ws)
+        elif service.cold_start and service.cold_start.owns(ws):
             result = service.readers.status(ws, cold_history=service.cold_start.history(ws))
         elif service.readers.enabled(ws):
             result = service.readers.status(ws)

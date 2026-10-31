@@ -2,6 +2,7 @@
 
 import hashlib
 import hmac
+import math
 import secrets
 import sqlite3
 import time
@@ -40,6 +41,47 @@ class Auth:
                 expires REAL NOT NULL)""")
             db.execute("""CREATE TABLE IF NOT EXISTS workspace_owners (
                 workspace_id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id))""")
+
+            db.execute("""CREATE TABLE IF NOT EXISTS auth_attempts (
+                attempt_id TEXT NOT NULL, bucket TEXT NOT NULL, created REAL NOT NULL,
+                PRIMARY KEY(attempt_id,bucket))""")
+            db.execute(
+                "CREATE INDEX IF NOT EXISTS auth_attempts_bucket ON auth_attempts(bucket,created)"
+            )
+
+    def reserve(self, request, username=None):
+        address = request.client.host if request.client else "unknown"
+        if username is None:
+            limits = [("register-ip:" + digest(address), 5, 3600)]
+        else:
+            limits = [
+                ("login-name:" + digest(username.casefold()), 5, 900),
+                ("login-ip:" + digest(address), 20, 900),
+            ]
+        now, attempt = time.time(), secrets.token_hex(16)
+        with self.store.connect(write=True) as db:
+            db.execute("DELETE FROM auth_attempts WHERE created<=?", (now - 3600,))
+            for bucket, limit, window in limits:
+                count, first = db.execute(
+                    "SELECT COUNT(*),MIN(created) FROM auth_attempts WHERE bucket=? AND created>?",
+                    (bucket, now - window),
+                ).fetchone()
+                if count >= limit:
+                    retry = max(1, math.ceil(first + window - now))
+                    raise HTTPException(
+                        429,
+                        f"Too many attempts. Retry in {retry} seconds.",
+                        headers={"Retry-After": str(retry)},
+                    )
+            db.executemany(
+                "INSERT INTO auth_attempts VALUES (?,?,?)",
+                [(attempt, bucket, now) for bucket, _, _ in limits],
+            )
+        return attempt
+
+    def succeeded(self, attempt):
+        with self.store.connect(write=True) as db:
+            db.execute("DELETE FROM auth_attempts WHERE attempt_id=?", (attempt,))
 
     def principal(self, request):
         token = request.cookies.get(COOKIE, "")
@@ -99,6 +141,7 @@ def router():
     @routes.post("/auth/register")
     def register(body: Credentials, request: Request, response: Response):
         auth = request.app.state.auth
+        auth.reserve(request)
         user, salt = secrets.token_hex(16), secrets.token_hex(16)
         try:
             with auth.store.connect(write=True) as db:
@@ -119,6 +162,7 @@ def router():
     @routes.post("/auth/login")
     def login(body: Credentials, request: Request, response: Response):
         auth = request.app.state.auth
+        attempt = auth.reserve(request, body.username)
         with auth.store.connect() as db:
             row = db.execute(
                 "SELECT * FROM users WHERE username=?", (body.username.casefold(),)
@@ -127,6 +171,7 @@ def router():
         candidate = auth.password(body.password.get_secret_value(), salt)
         if not row or not hmac.compare_digest(candidate, row["password_hash"]):
             raise HTTPException(401, "Sign-in name or password is incorrect.")
+        auth.succeeded(attempt)
         auth.issue(row["id"], response)
         return {"signed_in": True, "demo": False}
 
@@ -169,6 +214,8 @@ def router():
         user = auth.principal(request)
         if user == "demo":
             raise HTTPException(409, "Use a signed-in account to create a workspace.")
+        if body.workspace_id in request.app.state.workspaces._deleted:
+            raise HTTPException(409, "Choose a different workspace name.")
         try:
             with auth.store.connect(write=True) as db:
                 # Existing unowned demo workspaces cannot be claimed by a new account.
@@ -189,6 +236,8 @@ def same_origin(request):
         return
     origin = request.headers.get("origin")
     if request.headers.get("sec-fetch-site") == "cross-site" or (
-        origin and urlsplit(origin).netloc != request.url.netloc
+        origin
+        and (urlsplit(origin).scheme, urlsplit(origin).netloc)
+        != (request.url.scheme, request.url.netloc)
     ):
         raise HTTPException(403, "Use this app's own page to make changes.")

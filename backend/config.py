@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     workspace_backends: dict[str, Literal["reader", "head"]] = Field(default_factory=dict)
     workspace_readers: dict[str, ReaderOptions] = Field(default_factory=dict)
 
+    meta_decision_model_folder: Path | None = None
+    meta_decision_model_id: str = ""
+    reader_endpoint_url: str = ""
+    reader_endpoint_token: SecretStr = SecretStr("")
+    reader_endpoint_revision: str = ""
+    reader_endpoint_timeout_seconds: float = Field(default=10, gt=0, le=120)
+
     meta_app_secret: SecretStr = SecretStr("")
     meta_app_id: str = ""
     meta_login_config_id: str = ""
@@ -50,6 +57,7 @@ class Settings(BaseSettings):
             "ads_management",
             "business_management",
             "pages_show_list",
+            "pages_manage_metadata",
             "pages_messaging",
             "instagram_basic",
             "instagram_manage_messages",

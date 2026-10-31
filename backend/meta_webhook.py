@@ -198,6 +198,11 @@ class MetaWebhook:
                     return result
             elif not service.autonomy.allowed(workspace, "inbox", "send message"):
                 return result
+        if owned and not confirmed:
+            decision = service.store.latest_prediction(workspace, message.item_id)
+            if not service.automatic_authorized(workspace, decision):
+                result.update(status="queued", reply=None)
+                return result
         try:
             token = (
                 oauth.token(workspace, message.platform, message.account)
