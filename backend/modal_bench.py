@@ -59,7 +59,9 @@ def pretune(encoder: str, steps: int = 3000) -> str:
 
 
 @app.function(gpu="A10G", volumes={"/vol": volume}, timeout=4 * 3600)
-def incontext(encoder: str, steps: int, none: bool = False) -> str:
+def incontext(
+    encoder: str, steps: int, none: bool = False, wide: str = "", drop: str = "", seed: int = 0
+) -> str:
     """Train the in-context reader on the volume's training sets; score it on the held-out ones."""
     import torch
 
@@ -68,12 +70,16 @@ def incontext(encoder: str, steps: int, none: bool = False) -> str:
     run.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         ["python", "-m", "backend.incontext", "--encoder", encoder, "--steps", str(steps)]
-        + (["--none"] if none else []),
+        + (["--none"] if none else [])
+        + (["--wide", wide] if wide else [])
+        + (["--drop", *drop.split(",")] if drop else [])
+        + (["--seed", str(seed)] if seed else []),
         cwd=run,
         check=True,
     )
     volume.commit()
-    out = f"ic-{encoder}-s{steps}-near" + ("-none" if none else "")
+    out = f"ic-{encoder}-s{steps}-near" + ("-none" if none else "") + (f"-{wide}" if wide else "")
+    out += f"-seed{seed}" if seed else ""
     return (run / f"docs/results/s2/incontext-{out}.json").read_text()
 
 
@@ -84,24 +90,45 @@ def reader_budgets(out: str) -> str:
 
     assert torch.cuda.is_available(), "no CUDA device: refusing to score on CPU"
     run = Path("/vol/run")
+    run.mkdir(parents=True, exist_ok=True)
     subprocess.run(["python", "-m", "backend.incontext", "--evaluate", out], cwd=run, check=True)
     volume.commit()
     return (run / f"docs/results/s2/incontext-{out}-clean.json").read_text()
 
 
 @app.local_entrypoint()
-def budgets(out: str = "ic-ettin-32m-s6000-near", gpu: str = "A10G"):
+def budgets(out: str = "ic-ettin-32m-s6000-near", gpu: str = "A10G", spawn: bool = False):
+    """`spawn` with `modal run --detach` survives this machine losing its connection."""
+    if spawn:
+        print(reader_budgets.with_options(gpu=gpu).spawn(out).object_id)
+        return
     path = ROOT / f"docs/results/s2/incontext-{out}-clean.json"
     path.write_text(reader_budgets.with_options(gpu=gpu).remote(out))
     print(f"saved {path}")
 
 
 @app.local_entrypoint()
-def reader(encoder: str = "ettin-32m", steps: int = 6000, none: bool = False, gpu: str = "A10G"):
-    """`gpu` A100 for readers whose activations do not fit an A10G's 24 GB."""
-    name = f"ic-{encoder}-s{steps}-near" + ("-none" if none else "")
+def reader(
+    encoder: str = "ettin-32m",
+    steps: int = 6000,
+    none: bool = False,
+    gpu: str = "A10G",
+    wide: str = "",
+    drop: str = "",
+    spawn: bool = False,
+    seed: int = 0,
+):
+    """`gpu` A100 for readers whose activations do not fit an A10G's 24 GB. `spawn` with
+    `modal run --detach` survives this machine losing its connection."""
+    if spawn:
+        print(
+            incontext.with_options(gpu=gpu).spawn(encoder, steps, none, wide, drop, seed).object_id
+        )
+        return
+    name = f"ic-{encoder}-s{steps}-near" + ("-none" if none else "") + (f"-{wide}" if wide else "")
+    name += f"-seed{seed}" if seed else ""
     out = ROOT / f"docs/results/s2/incontext-{name}.json"
-    out.write_text(incontext.with_options(gpu=gpu).remote(encoder, steps, none))
+    out.write_text(incontext.with_options(gpu=gpu).remote(encoder, steps, none, wide, drop, seed))
     print(f"saved {out}")
 
 
@@ -150,10 +177,56 @@ def typed_run(init: str, epochs: int, seed: int) -> str:
 
 
 @app.local_entrypoint()
-def typed(init: str = "ettin-150m", epochs: int = 8, seed: int = 0):
+def typed(init: str = "ettin-150m", epochs: int = 8, seed: int = 0, spawn: bool = False):
+    """`spawn` with `modal run --detach` survives this machine losing its connection."""
+    if spawn:
+        print(typed_run.spawn(init, epochs, seed).object_id)
+        return
     path = ROOT / f"docs/results/s2/typed-{init}-e{epochs}-s{seed}.json"
     path.write_text(typed_run.remote(init, epochs, seed))
     print(f"saved {path}")
+
+
+@app.function(gpu="A10G", volumes={"/vol": volume}, timeout=1800)
+def panel_tasks_run(init: str, rows: list[dict]) -> str:
+    """Score a saved typed reader on written Meta-app tasks; labels are model-panel labels."""
+    import json
+
+    from backend.panel_tasks import score
+    from backend.typed import reader
+
+    model, tok = reader(init, Path("/vol/data"))
+    return json.dumps(score(model.to("cuda"), tok, rows, init))
+
+
+@app.function(gpu="A10G", volumes={"/vol": volume}, timeout=1800)
+def panel_tune_run(init: str, history: list[dict], rows: list[dict]) -> str:
+    """Fine-tune a saved reader on panel-labelled written tasks, then score the held-out ones."""
+    import json
+
+    from backend.panel_tasks import tune
+
+    result = json.dumps(tune(init, Path("/vol/data"), history, rows))
+    volume.commit()
+    return result
+
+
+@app.local_entrypoint()
+def panel_tune(init: str, history: str, labels: str, out: str):
+    import csv
+
+    read = lambda p: list(csv.DictReader(open(p, encoding="utf-8", newline="")))  # noqa: E731
+    Path(out).write_text(panel_tune_run.remote(init, read(history), read(labels)) + "\n")
+    print(f"saved {out}")
+
+
+@app.local_entrypoint()
+def panel_tasks(init: str, labels: str, out: str):
+    import csv
+
+    rows = list(csv.DictReader(open(labels, encoding="utf-8", newline="")))
+    Path(out).write_text(panel_tasks_run.remote(init, rows) + "\n")
+    print(f"saved {out}")
 
 
 @app.function(gpu="A10G", volumes={"/vol": volume}, timeout=2 * 3600)
