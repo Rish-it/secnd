@@ -1,0 +1,21 @@
+docs/submission/implementation-notes.md
+  s_9245a16bb07969::t_9cc59e2c871c4f 71-76
+docs/submission/verification.md
+  s_9245a16bb07969::t_3b1446aa633a61 3-17,20,25-26,33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8b1bdd6ecdb17fa349136ca0561803887b733f29",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
