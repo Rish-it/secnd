@@ -107,7 +107,6 @@ class MetaOAuth:
                 "config_id": config.meta_login_config_id,
                 "redirect_uri": config.meta_redirect_uri,
                 "response_type": "code",
-                "scope": ",".join(config.meta_scopes),
                 "state": state,
             }
         )

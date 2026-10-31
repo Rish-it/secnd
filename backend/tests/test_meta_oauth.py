@@ -82,6 +82,7 @@ def oauth(tmp_path):
 
 def start(client):
     response = client.get(BASE + "/oauth/start", follow_redirects=False)
+    assert "scope=" not in response.headers["location"]  # the login config sets permissions
     assert response.status_code == 303
     params = parse_qs(urlsplit(response.headers["location"]).query)
     assert params["redirect_uri"] == ["https://app.example/api/v1/meta/oauth/callback"]
