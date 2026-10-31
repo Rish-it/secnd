@@ -1,0 +1,52 @@
+docs/results/s3r/README.md
+  s_9245a16bb07969::t_13b32de0798f4d 179-196
+docs/results/s2/wide-round.md
+  s_9245a16bb07969::t_13b32de0798f4d 18,57-58,135-138,140-148
+  s_9245a16bb07969::t_70c197e3ee85c5 139
+backend/modal_serve.py
+  s_9245a16bb07969::t_6304f9a53c253a 25
+  s_9245a16bb07969::t_b2e31dd0639fe9 33,44
+README.md
+  s_9245a16bb07969::t_13b32de0798f4d 70-73,76-77,80,82-84
+backend/modal_hf_reader.py
+  s_9245a16bb07969::t_0ebbf487ae2b86 39-40
+  s_9245a16bb07969::t_4d84147790e8d5 7
+docs/submission/submission.md
+  s_9245a16bb07969::t_13b32de0798f4d 32-33,35,38-39,41-43,46-48
+docs/results/final/model-release.md
+  s_9245a16bb07969::t_13b32de0798f4d 3-4,16
+docs/results/final/submission-checklist.md
+  s_9245a16bb07969::t_13b32de0798f4d 26-27
+docs/serving.md
+  s_9245a16bb07969::t_13b32de0798f4d 35-39,99-103
+  s_9245a16bb07969::t_3e58cd88b17770 104
+backend/config.py
+  s_9245a16bb07969::t_4d84147790e8d5 48
+docs/integrations/harness.md
+  s_9245a16bb07969::t_13b32de0798f4d 200-201
+docs/submission/video-script.md
+  s_9245a16bb07969::t_13b32de0798f4d 26,28,30
+docs/results/s8/load-gpu-secnd-ren-1.json
+  s_9245a16bb07969::t_6a8764e0c3ad91 1-7,9-11,15-17,21,23
+  s_9245a16bb07969::t_6304f9a53c253a 8,12-14,18-20,22
+docs/model.md
+  s_9245a16bb07969::t_13b32de0798f4d 7,19-24
+docs/hf/README.md
+  s_9245a16bb07969::t_cba866c76e66af 5,9-10,13,16,22-38,40,42,44-51,53-73,77-83,91,104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "adc75ce1e34f1946a182da98ab01ae7a1f92dd5f",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
