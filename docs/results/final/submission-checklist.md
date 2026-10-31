@@ -14,7 +14,7 @@ Deadline: **Nov 4, 2026, 9:00 PM ET = Nov 5, 2026, 7:30 AM IST**.
 - [ ] Public repository: https://github.com/Rish-it/secnd, with the submitted
       branch/commit clearly linked. The judge's quickstart runs twice from a clean
       clone; all displayed numbers link to results from that revision.
-- [ ] Public live-product URL: **RELEASE_TODO**. Test without the developer's session.
+- [x] Public live-product URL: https://athreanlab--secnd-demo-web.us-east.modal.run. Synthetic demo, tested from a fresh browser.
 - [ ] Public video URL: **RELEASE_TODO**. Maximum 3 minutes. Script:
       [video-script.md](../../submission/video-script.md).
 - [ ] Project name, short description, team names, roles and contact information

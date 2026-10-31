@@ -17,6 +17,10 @@ loading the 400M model. [Serving configuration](docs/serving.md).
 Built for Meta's platform. Built with Muse Spark Open. Secnd is independently
 developed and is not an official Meta product.
 
+## Try it
+
+[Public demo](https://athreanlab--secnd-demo-web.us-east.modal.run), with fictional data and no live Meta actions. The first load after idle takes about 10 seconds.
+
 ## Run the offline product demo
 
 From the repository root, using Python 3.12 and Node.js 24:
