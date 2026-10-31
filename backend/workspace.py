@@ -1,10 +1,12 @@
 """Persistent workspace loops and a background answer dispatcher."""
 
+import hashlib
 import json
 import logging
 import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor, wait
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,6 +14,7 @@ import pandas as pd
 from pydantic import TypeAdapter
 from sklearn.metrics.pairwise import cosine_similarity
 
+from backend.autonomy import Autonomy, kind
 from backend.config import Settings
 from backend.encoders import fetch
 from backend.features import featurize
@@ -40,8 +43,11 @@ class WorkspaceService:
         self._guard = threading.RLock()
         self._locks, self._loops, self._positions = {}, {}, {}
         self._pending, self._errors = set(), {}
+        self._deleted = set()
         self.cold_start = None
         self.readers = None
+        self.meta_decisions = None
+        self.autonomy = Autonomy(self)
         # carmy: one process; use a durable worker queue before running multiple API processes.
         self._executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="workspace-answer")
 
@@ -103,6 +109,8 @@ class WorkspaceService:
             }
 
     def has_model(self, workspace):
+        if self.meta_decisions and self.meta_decisions.enabled(workspace):
+            return True
         if self.cold_start and self.cold_start.owns(workspace):
             return True
         if self.readers and self.readers.enabled(workspace):
@@ -111,6 +119,8 @@ class WorkspaceService:
         return Registry(self.data_dir, workspace).current() is not None
 
     def card(self, workspace):
+        if self.meta_decisions and self.meta_decisions.enabled(workspace):
+            return self.meta_decisions.card(workspace)
         if self.cold_start and self.cold_start.owns(workspace):
             return self.cold_start.card(workspace)
         if self.readers and self.readers.enabled(workspace):
@@ -128,6 +138,13 @@ class WorkspaceService:
 
     def metrics(self, workspace):
         with self._lock(workspace):
+            if self.meta_decisions and self.meta_decisions.enabled(workspace):
+                return dict(
+                    card=self.card(workspace),
+                    history=[],
+                    guarded=self.autonomy.guarded(workspace, self.meta_decisions.identity()),
+                    labels=len(self.meta_decisions.history(workspace)),
+                )
             if self.cold_start and self.cold_start.owns(workspace):
                 return dict(
                     card=self.card(workspace),
@@ -162,10 +179,15 @@ class WorkspaceService:
                 "labels": len(self.store.labels(workspace)),
             }
 
+    @contextmanager
     def _lock(self, workspace):
         TypeAdapter(WorkspaceId).validate_python(workspace)
         with self._guard:
-            return self._locks.setdefault(workspace, threading.RLock())
+            lock = self._locks.setdefault(workspace, threading.RLock())
+        with lock:
+            if workspace in self._deleted:
+                raise KeyError(workspace)
+            yield
 
     def _validate_training(self, workspace, frame, labels):
         config = self.store.workspace(workspace)
@@ -231,8 +253,65 @@ class WorkspaceService:
         self._restore_current(workspace, loop)
         return loop
 
+    def decision_identity(self, workspace, decision_type):
+        if self.meta_decisions and self.meta_decisions.enabled(workspace):
+            return self.meta_decisions.identity()
+        if self.readers and self.readers.enabled(workspace):
+            reader = self.readers.reader(workspace)
+            return reader.options.model_id, reader.artifact.revision
+        version = self.card(workspace).model_version
+        return "workspace-head", version
+
+    def automatic_guarded(self, workspace):
+        if self.readers and self.readers.enabled(workspace):
+            return self.readers.guarded(workspace)
+        return bool(getattr(self._loops.get(workspace), "guarded", False))
+
+    def automatic_authorized(self, workspace, decision):
+        if (
+            not decision
+            or not decision.get("auto")
+            or decision.get("spot_check")
+            or decision.get("inference_error")
+        ):
+            return False
+        if decision.get("automatic_basis") == "workspace_bound":
+            return self.autonomy.authorizes(workspace, decision)
+        if self.automatic_guarded(workspace):
+            return False
+        card = self.card(workspace)
+        if card.model_version != decision["model_version"]:
+            return False
+        if decision.get("reader"):
+            return self.readers.scope_matches(
+                self.store.workspace(workspace)["labels"], self.readers.history(workspace)
+            )
+        return (
+            card.cp_lower_bound is not None
+            and card.cp_lower_bound >= 0.99
+            and card.threshold is not None
+            and card.threshold == decision.get("threshold")
+            and decision["prob"] >= card.threshold
+        )
+
     def route(self, workspace, frame: pd.DataFrame) -> list[dict]:
         with self._lock(workspace):
+            decisions = self._route(workspace, frame)
+            sources = {str(r["id"]): r.get("source_app") for r in frame.to_dict("records")}
+            for row in decisions:
+                row["source_app"] = sources.get(row["item_id"])
+                if not row.get("model_id"):
+                    row["model_id"], row["model_revision"] = self.decision_identity(
+                        workspace, kind(row["source_app"])
+                    )
+            decisions = self.autonomy.apply(workspace, decisions)
+            self.store.update_decisions(workspace, decisions)
+            return decisions
+
+    def _route(self, workspace, frame: pd.DataFrame) -> list[dict]:
+        with self._lock(workspace):
+            if self.meta_decisions and self.meta_decisions.enabled(workspace):
+                return self.meta_decisions.route(workspace, frame)
             if self.cold_start and self.cold_start.owns(workspace):
                 return self.cold_start.route(workspace, frame)
             if self.readers and self.readers.enabled(workspace):
@@ -275,11 +354,54 @@ class WorkspaceService:
             )
             return decisions
 
+    def queue_outcome_review(self, workspace, item_id, before, after, *, action=None, status=None):
+        review_id = "outcome-" + hashlib.sha256(item_id.encode()).hexdigest()[:40]
+        with self._lock(workspace):
+            if self.store.latest_prediction(workspace, review_id):
+                return review_id
+            text = (
+                "Review this observed ad result before adding it to history. "
+                f"Proposal: {action or 'unavailable'}; execution: {status or 'unavailable'}. "
+                f"Before: {json.dumps(before)}. Seven days after: {json.dumps(after)}. "
+                "Which action would you choose in light of this result? "
+                "These observations alone do not establish causation."
+            )
+            self.route(
+                workspace,
+                pd.DataFrame(
+                    [
+                        dict(
+                            id=review_id,
+                            text=text,
+                            amount=None,
+                            date=None,
+                            merchant_key="",
+                            source_app="ads",
+                        )
+                    ]
+                ),
+            )
+            # Outcomes are observations, not automatically inferred action labels.
+            with self.store.connect(write=True) as db:
+                row = self.store.latest_prediction(workspace, review_id)
+                row["auto"], row["spot_check"] = False, False
+                db.execute(
+                    "UPDATE predictions SET auto=0,spot_check=0,decision_json=? WHERE "
+                    "workspace_id=? AND item_id=?",
+                    (json.dumps(row), workspace, review_id),
+                )
+            return review_id
+
     def undo_answer(self, workspace, key):
         with self._lock(workspace):
             row, changed = self.store.undo_answer(workspace, key)
-            cold = self.cold_start and self.cold_start.owns(workspace)
+            cold = (self.cold_start and self.cold_start.owns(workspace)) or (
+                self.meta_decisions and self.meta_decisions.enabled(workspace)
+            )
             if changed and not cold:
+                old_loop = self._loops.get(workspace)
+                checks = list(getattr(old_loop, "checks", [0, 0]))
+                pending = dict(getattr(old_loop, "pending", {}))
                 # Restore the pre-answer artifact before rebuilding. A refused candidate must
                 # never leave a classifier trained on the retracted answer serving requests.
                 previous = json.loads(row["result_json"])["model_version"]
@@ -290,7 +412,9 @@ class WorkspaceService:
                     (registry.root / "current").unlink(missing_ok=True)
                 self._loops.pop(workspace, None)
                 self._positions.pop(workspace, None)
-                self._runtime(workspace)
+                rebuilt = self._runtime(workspace)
+                # Retraction changes history, not the evidence that triggered the live guard.
+                rebuilt.checks, rebuilt.pending = checks, pending
             current = self.card(workspace)
             return dict(
                 item_id=row["item_id"],
@@ -300,9 +424,24 @@ class WorkspaceService:
             )
 
     def answer(self, workspace, item_id, label, idempotency_key, *, source=None) -> dict:
-        if self.cold_start and self.cold_start.owns(workspace):
+        # Replays return the durable result without waiting for an in-flight retrain.
+        replay = self.store.replay_answer(workspace, item_id, label, idempotency_key)
+        if replay is not None:
+            return replay
+        with self._lock(workspace):
+            return self._answer(workspace, item_id, label, idempotency_key, source=source)
+
+    def _answer(self, workspace, item_id, label, idempotency_key, *, source=None) -> dict:
+        if (
+            self.cold_start
+            and self.cold_start.owns(workspace)
+            and not (self.meta_decisions and self.meta_decisions.enabled(workspace))
+        ):
             with self._lock(workspace):
-                return self.cold_start.answer(workspace, item_id, label, idempotency_key)
+                previous = self.store.latest_prediction(workspace, item_id)
+                result = self.cold_start.answer(workspace, item_id, label, idempotency_key)
+                self.autonomy.review(workspace, item_id, label, idempotency_key, previous)
+                return result
         item = self.store.item(workspace, item_id)
         previous = self.store.latest_prediction(workspace, item_id)
         if source is None:
@@ -318,11 +457,25 @@ class WorkspaceService:
                 "item_id": item_id,
                 "coverage": current.coverage,
                 "model_version": current.model_version,
-                "retrain": "queued",
+                "retrain": "history_updated"
+                if self.meta_decisions and self.meta_decisions.enabled(workspace)
+                else "queued",
             },
             source,
+            review=None
+            if not previous or item_id.startswith("outcome-")
+            else (
+                kind(previous.get("source_app")),
+                previous["label"] == label,
+                previous["prob"],
+                self.autonomy.owner(workspace),
+                *self.autonomy.identity(workspace, kind(previous.get("source_app")), previous),
+            ),
         )
         if created:
+            self.autonomy.observe(workspace, item_id, label, previous)
+            if self.meta_decisions and self.meta_decisions.enabled(workspace):
+                return result
             if self.readers and source == "spot_check":
                 self.readers.on_answer(workspace, item_id, label, previous)
             with self.store.connect() as db:

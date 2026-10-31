@@ -52,6 +52,20 @@ def undo(client, key="first"):
     return client.post(API + "/answers:undo", json={"idempotency_key": key})
 
 
+def test_undo_preserves_spot_check_guard_and_pending_checks(inbox):
+    client, service = inbox
+    predict(client)
+    assert answer(client).status_code == 200
+    service.drain()
+    loop = service._loops["demo"]
+    loop.checks = [0, 20]
+    loop.pending = {"another-spot-check": "a"}
+    assert undo(client).status_code == 200
+    rebuilt = service._loops["demo"]
+    assert rebuilt.checks == [0, 20]
+    assert rebuilt.pending == {"another-spot-check": "a"}
+
+
 def test_all_labels_source_and_correction_survive_restart(inbox):
     client, service = inbox
     assert client.get(API + "/labels").json() == ["a", "b", "c", "d"]

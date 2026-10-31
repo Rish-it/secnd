@@ -1,0 +1,133 @@
+{
+  "branch": "stage/c4-harness",
+  "base": "origin/main",
+  "commits": [],
+  "commit_status": "blocked: sandbox refuses shared worktree index lock; changes remain in working tree",
+  "checkpoints": [
+    {
+      "item": 1,
+      "result": "Owned workspace bounds can authorize Act independently; owner/type/model evidence isolation, basis metadata, spot checks and action gates retained."
+    },
+    {
+      "item": 2,
+      "result": "Optional saved Meta decision reader reuses loader and typed renderer, nearest-eight history and immediate corrections; model identity recorded."
+    },
+    {
+      "item": 3,
+      "result": "SQLite failed-login limits by username/address and registration limit by address; generic retry response."
+    },
+    {
+      "item": 4,
+      "result": "Asset subscriptions, partial failure reports, retries and best-effort disconnect/reconnect cleanup through mocked transport."
+    },
+    {
+      "item": 5,
+      "result": "Optional Modal GPU endpoint, authenticated HTTP reader client with human fallback, and fixed-rate load probe; no deployment or load run."
+    },
+    {
+      "item": 6,
+      "result": "Security/concurrency review with regressions for origins, OAuth revocation, deletion, stale decisions, stop checks, undo claims and durable metadata."
+    },
+    {
+      "item": 7,
+      "result": "Cached-package npm run check passed; OpenAPI snapshot and setup guide refreshed."
+    }
+  ],
+  "verification": {
+    "npm_run_check": "passed with cached packages",
+    "python_tests_passed": 369,
+    "python_tests_added": 29,
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "frontend_lint": "passed with 6 existing warnings; frontend source unchanged",
+    "frontend_typescript_and_production_build": "passed",
+    "git_diff_check": "passed",
+    "environment": {
+      "UV_NO_SYNC": "true",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1"
+    },
+    "dependencies": "Existing cached environment reused; dependencies and lockfiles unchanged.",
+    "model_tests": "Mocked models/tokenizers/embeddings; no weights loaded.",
+    "meta_tests": "Mocked transport only; no live Meta or paid requests.",
+    "modal_deployment": "not performed",
+    "load_test": "not run",
+    "browser_and_live_oauth": "not run",
+    "protected_files_gate_frontend_submission_seeded_demo": "unchanged",
+    "python_test_seconds": 55.23
+  },
+  "regression_first": {
+    "owned_bound_authorizes_without_model_certificate": "failed before fix; passed after fix",
+    "owner_and_model_evidence_isolation": "failed before fix; passed after fix",
+    "ad_execution_on_workspace_evidence": "failed before fix; passed after fix",
+    "meta_reader_and_live_corrections": "failed before implementation; passed after implementation",
+    "login_and_registration_limits": "failed before fix; passed after fix",
+    "asset_subscriptions_and_partial_failure": "failed before implementation; passed after implementation",
+    "reader_timeout_human_fallback": "failed before implementation; passed after implementation",
+    "origin_scheme": "failed before fix; passed after fix",
+    "kill_blocks_undo_and_snapshot_race": "failed before fix; passed after fix",
+    "atomic_undo_claim": "failed before fix; passed after fix",
+    "all_decision_metadata_persists": "failed before fix; passed after fix",
+    "stale_automatic_message": "failed before fix; passed after fix",
+    "deletion_quotes_schema_identifiers": "failed before fix; passed after fix",
+    "oauth_session_revoked_during_exchange": "failed before fix; passed after fix",
+    "deletion_runtime_cleanup_and_stale_work": "failed before fix; passed after fix",
+    "unsubscribe_previously_selected_assets_and_reconnect": "failed before fix; passed after fix",
+    "meta_serving_status_and_retired_cold_reader": "failed before fix; passed after fix",
+    "remote_correction_recency": "failed before fix; passed after fix",
+    "signed_in_api_earns_act_after_history_changes": "passed with mocked model; model revision change removes evidence"
+  },
+  "no_correction_unlock_cases": [
+    {
+      "bar": 0.9,
+      "reviewed": 29,
+      "confirmed": 29,
+      "one_sided_95_lower": 0.9018553723227043
+    },
+    {
+      "bar": 0.95,
+      "reviewed": 59,
+      "confirmed": 59,
+      "one_sided_95_lower": 0.950492390111773
+    },
+    {
+      "bar": 0.98,
+      "reviewed": 149,
+      "confirmed": 149,
+      "one_sided_95_lower": 0.9800951837793149
+    },
+    {
+      "bar": 0.99,
+      "reviewed": 299,
+      "confirmed": 299,
+      "one_sided_95_lower": 0.9900308532071007
+    }
+  ],
+  "shortcuts_and_limits": [
+    "One API process with SQLite and an in-process worker; no distributed worker or shared in-memory locks.",
+    "Local password accounts have no email verification or password recovery.",
+    "Login limits use the transport client address and ignore forwarded headers; shared proxy addresses share a limit.",
+    "Workspace bounds use the latest 1000 distinct eligible reviews, isolated by owner, workspace, decision type and model identity; legacy unproven reviews do not unlock owned workspaces.",
+    "Spot-check counters remain in-process, as before; review evidence, history, switches, action claims and audit records persist.",
+    "Local reader files must be immutable while running and require restart after replacement; fingerprints cover every saved file.",
+    "Remote requests contain at most 1000 current history rows before endpoint nearest-eight retrieval; corrections move to the recent end. Revision pinning is optional; an unpinned changed revision needs new evidence.",
+    "An unresolved remote revision cannot use evidence until a successful response supplies its identity. Network failures never authorize an automatic action.",
+    "Typed readers have no inherited public benchmark certificate. The existing 99% promotion gate is unchanged.",
+    "Separate Ads workspaces use the existing four-action labels; inbox options remain approved verbatim response templates, without freeform generation.",
+    "Only operator-allowed sandbox Ads accounts are supported. No Meta account-management writes are implemented.",
+    "Meta app-level webhook setup and permissions remain operator tasks; asset subscription failures preserve selections. Old inventories missing parent IDs require reconnecting.",
+    "Unsubscribe is best effort; local credentials/mappings are erased on disconnect even when provider cleanup fails. Meta app roles are not revoked.",
+    "Observed outcomes still need human review before training; hindsight reviews do not unlock Act and observations do not establish causation.",
+    "Answer undo cannot retract delivered messages. Ads undo refuses intervening target changes, claims atomically and leaves ambiguous results for manual review.",
+    "Global stop cannot cancel a provider request already submitted. Stops are rechecked after Ads snapshot reads and before undo claims.",
+    "Deleted workspace names remain blocked for the process lifetime to reject stale requests; choose a new name or restart.",
+    "The Modal SDK is an optional operator tool, outside app runtime dependencies. The GPU image follows the existing pinned Torch image pattern; no GPU deployment/runtime or latency verification was performed.",
+    "The load probe was not run. It uses fixed arrivals and concurrent requests, nearest-rank latency over all attempts, and no retries; no capacity measurement is claimed.",
+    "Cached packages were used with UV_NO_SYNC=true; no dependency install, lockfile change or Dockerfile change was needed.",
+    "No live OAuth, Meta delivery, browser or GPU execution was performed; no paid calls. Runtime tests use mocked models and transports.",
+    "Frontend, submission docs and seeded demo are owned elsewhere and were not edited; the frontend owner must consume the new basis/subscription metadata. Six existing frontend lint warnings remain."
+  ],
+  "run_settings_document": "docs/integrations/harness.md",
+  "starting_commit": "2c04df40b8b4975eda983f9d367a3c7cbd3210da",
+  "prior_harness_commit": "95987e53878f57ea96f553e516fed6976249145a"
+}

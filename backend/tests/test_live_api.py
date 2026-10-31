@@ -217,3 +217,28 @@ def test_workspace_metrics_track_versions_and_show_live_guard(live):
     benchmark = client.get(API + "/metrics?dataset=mtop")
     assert benchmark.headers["X-Secnd-Mode"] == "evaluation"
     assert benchmark.json()["history"] == []
+
+
+def test_undo_keeps_real_spot_check_guard_active(live):
+    client, service = live
+    assert upload(client).status_code == 200
+    client.post(
+        API + "/predict", json={"items": [{"item_id": "guard-undo", "text": "new question"}]}
+    )
+    assert (
+        client.post(
+            API + "/answers",
+            json={"item_id": "guard-undo", "label": "Food"},
+            headers={"Idempotency-Key": "guard-undo"},
+        ).status_code
+        == 200
+    )
+    service.drain()
+    service._loops["default"].checks = [0, 20]
+    assert service._loops["default"].guarded
+    assert (
+        client.post(API + "/answers:undo", json={"idempotency_key": "guard-undo"}).status_code
+        == 200
+    )
+    assert service._loops["default"].guarded
+    assert client.get(API + "/metrics").json()["guarded"]

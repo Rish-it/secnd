@@ -5,7 +5,6 @@ import hmac
 import json
 from typing import Annotated, Literal
 
-import httpx
 import pandas as pd
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.concurrency import run_in_threadpool
@@ -15,6 +14,7 @@ from pydantic import BaseModel, Field
 from backend.config import Settings
 from backend.connector_source import attach_source
 from backend.data import merchant_key
+from backend.meta_ads import AdsUnavailable, MarketingClient
 from backend.schemas import Error, WorkspaceId
 from backend.store import IdempotencyConflict, encode
 from backend.workspace import WorkspaceService
@@ -98,6 +98,16 @@ class MetaWebhook:
                 PRIMARY KEY (workspace_id, item_id)
             )""")
 
+    def mapped(self, workspace, message):
+        oauth = getattr(self.service, "meta_oauth", None)
+        if oauth:
+            return oauth.mapped(workspace, message.platform, message.account)
+        return (
+            self.settings.demo_mode
+            and self.settings.meta_workspace_accounts.get(f"{message.platform}:{message.account}")
+            == workspace
+        )
+
     def _save(self, workspace, item_id, result):
         with self.service.store.connect(write=True) as db:
             db.execute(
@@ -106,10 +116,7 @@ class MetaWebhook:
             )
 
     def handle(self, workspace, message: Message) -> dict:
-        if (
-            self.settings.meta_workspace_accounts.get(f"{message.platform}:{message.account}")
-            != workspace
-        ):
+        if not self.mapped(workspace, message):
             raise ValueError("Receiving account is not mapped to this workspace.")
         service = self.service
         with service._lock(workspace):
@@ -166,35 +173,95 @@ class MetaWebhook:
                 "reply": decision["label"] if decision["auto"] else None,
                 "duplicate": False,
             }
-            token = self.settings.whatsapp_token.get_secret_value()
-            send = (
-                message.platform == "whatsapp"
-                and decision["auto"]
-                and self.settings.whatsapp_send_enabled
-                and token
-            )
-            if send:
-                result["status"] = "replying"
-                self._save(workspace, message.item_id, result)
-                try:
-                    with httpx.Client(transport=self.transport, timeout=10) as client:
-                        response = client.post(
-                            f"https://graph.facebook.com/{self.settings.meta_graph_version}"
-                            f"/{message.account}/messages",
-                            headers={"Authorization": f"Bearer {token}"},
-                            json={
-                                "messaging_product": "whatsapp",
-                                "to": message.sender,
-                                "type": "text",
-                                "text": {"body": result["reply"]},
-                            },
-                        )
-                        response.raise_for_status()
-                    result["status"] = "sent"
-                except httpx.HTTPError:
-                    # A timeout can follow delivery; replay must never send it again.
-                    result["status"] = "delivery_unknown"
+            if decision["auto"]:
+                result = self._deliver(workspace, message, result)
             self._save(workspace, message.item_id, result)
+            return result
+
+    def _deliver(self, workspace, message, result, *, confirmed=False):
+        service = self.service
+        oauth = getattr(service, "meta_oauth", None)
+        owned = oauth and oauth.owned(workspace)
+        enabled = (
+            self.settings.whatsapp_send_enabled
+            if message.platform == "whatsapp"
+            else self.settings.meta_message_send_enabled and owned
+        )
+        harness = getattr(service, "harness", None)
+        if not enabled or (harness and harness.killed()):
+            return result
+        if owned and not harness.status(workspace)["enabled"]:
+            return result
+        if service.autonomy.active(workspace):
+            if confirmed:
+                if service.autonomy.policy(workspace, "inbox").level == "watch":
+                    return result
+            elif not service.autonomy.allowed(workspace, "inbox", "send message"):
+                return result
+        if owned and not confirmed:
+            decision = service.store.latest_prediction(workspace, message.item_id)
+            if not service.automatic_authorized(workspace, decision):
+                result.update(status="queued", reply=None)
+                return result
+        try:
+            token = (
+                oauth.token(workspace, message.platform, message.account)
+                if owned
+                else self.settings.whatsapp_token.get_secret_value()
+            )
+            if not token:
+                return result
+            result["status"] = "replying"
+            # Claim before sending. Interrupted sends are never blindly repeated.
+            self._save(workspace, message.item_id, result)
+            payload = (
+                {
+                    "messaging_product": "whatsapp",
+                    "to": message.sender,
+                    "type": "text",
+                    "text": {"body": result["reply"]},
+                }
+                if message.platform == "whatsapp"
+                else {"recipient": {"id": message.sender}, "message": {"text": result["reply"]}}
+            )
+            response = MarketingClient(self.settings, self.transport, token=token).request(
+                "POST", f"{message.account}/messages", json=payload
+            )
+            result["status"] = (
+                "sent"
+                if response.get("messages") or response.get("message_id")
+                else "delivery_unknown"
+            )
+        except AdsUnavailable:
+            result["status"] = "delivery_unknown"
+        if harness:
+            harness.log(workspace, "message_" + result["status"], message.item_id)
+        return result
+
+    def confirm(self, workspace, item_id, label, key):
+        with self.service._lock(workspace):
+            with self.service.store.connect() as db:
+                row = db.execute(
+                    "SELECT * FROM meta_messages WHERE workspace_id=? AND item_id=?",
+                    (workspace, item_id),
+                ).fetchone()
+            if not row or not row["result_json"]:
+                return None
+            result = json.loads(row["result_json"])
+            if (
+                result["status"] in ("sent", "replying", "delivery_unknown")
+                or result.get("review_key") == key
+            ):
+                return result
+            labels = [r for r in self.service.store.labels(workspace) if r["item_id"] == item_id]
+            if not labels or labels[-1]["label"] != label:
+                return None
+            message = Message.model_validate_json(row["message_json"])
+            if not self.mapped(workspace, message):
+                return None
+            result.update(reply=label, status="dry_run", review_key=key)
+            result = self._deliver(workspace, message, result, confirmed=True)
+            self._save(workspace, item_id, result)
             return result
 
 
@@ -208,8 +275,12 @@ def router(settings: Settings) -> APIRouter:
     @routes.get("/status")
     def status(ws: WorkspaceId, request: Request):
         service = request.app.state.workspaces
+        oauth = getattr(service, "meta_oauth", None)
+        mapped = oauth.mappings(ws) if oauth and oauth.owned(ws) else None
         accounts = {
-            platform: [
+            platform: [r["asset_id"] for r in mapped if r["kind"] == platform]
+            if mapped is not None
+            else [
                 key.split(":", 1)[1]
                 for key, workspace in settings.meta_workspace_accounts.items()
                 if workspace == ws and key.startswith(platform + ":")
@@ -226,6 +297,7 @@ def router(settings: Settings) -> APIRouter:
             "model_ready": ready,
             "signing_configured": bool(settings.meta_app_secret.get_secret_value()),
             "whatsapp_send_enabled": settings.whatsapp_send_enabled,
+            "message_send_enabled": settings.meta_message_send_enabled,
         }
 
     @routes.get("/webhook", response_class=PlainTextResponse)
@@ -267,20 +339,80 @@ def router(settings: Settings) -> APIRouter:
             service.store.workspace(ws)
         except KeyError as error:
             raise HTTPException(404, "Workspace was not found.") from error
-        if any(
-            settings.meta_workspace_accounts.get(f"{m.platform}:{m.account}") != ws
-            for m in messages
-        ):
+        if any(not request.app.state.meta_webhook.mapped(ws, m) for m in messages):
             raise HTTPException(403, "Receiving account is not mapped to this workspace.")
         if messages and not service.has_model(ws):
             raise HTTPException(503, "Import labelled decisions before receiving Meta messages.")
         try:
+            if request.app.state.meta_oauth.owned(ws):
+                results = [request.app.state.harness.enqueue(ws, message) for message in messages]
+                return {"accepted": len(results), "ignored": ignored, "items": results}
             results = [
                 await run_in_threadpool(request.app.state.meta_webhook.handle, ws, message)
                 for message in messages
             ]
         except IdempotencyConflict as error:
             raise HTTPException(409, str(error)) from error
+        return {"accepted": len(results), "ignored": ignored, "items": results}
+
+    return routes
+
+
+def public_router(settings):
+    """One app callback dispatches signed events to user-selected workspace mappings."""
+    routes = APIRouter(prefix="/api/v1/meta", tags=["Meta delivery"])
+
+    @routes.get("/webhook", response_class=PlainTextResponse)
+    def verify(
+        mode: Annotated[str, Query(alias="hub.mode")],
+        token: Annotated[str, Query(alias="hub.verify_token")],
+        challenge: Annotated[str, Query(alias="hub.challenge", min_length=1, max_length=256)],
+    ):
+        expected = settings.meta_verify_token.get_secret_value()
+        if not expected:
+            raise HTTPException(503, "Meta webhook verification is not configured.")
+        if mode != "subscribe" or not hmac.compare_digest(token.encode(), expected.encode()):
+            raise HTTPException(403, "Meta webhook verification failed.")
+        return challenge
+
+    @routes.post("/webhook")
+    async def receive(request: Request):
+        secret = settings.meta_app_secret.get_secret_value()
+        if not secret:
+            raise HTTPException(503, "Meta webhook signing is not configured.")
+        chunks, size = [], 0
+        async for chunk in request.stream():
+            size += len(chunk)
+            if size > MAX_BODY:
+                raise HTTPException(413, "Meta payload exceeds 1 MiB.")
+            chunks.append(chunk)
+        raw = b"".join(chunks)
+        signature = "sha256=" + hmac.new(secret.encode(), raw, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(
+            signature.encode(), request.headers.get("X-Hub-Signature-256", "").encode()
+        ):
+            raise HTTPException(403, "Meta signature verification failed.")
+        try:
+            messages, ignored = parse(json.loads(raw))
+        except ValueError:
+            raise HTTPException(422, "Invalid Meta message payload.") from None
+        results = []
+        for message in messages:
+            with request.app.state.workspaces.store.connect() as db:
+                row = db.execute(
+                    "SELECT a.workspace_id FROM meta_assets a JOIN meta_connections c "
+                    "ON c.user_id=a.user_id WHERE a.kind=? AND a.asset_id=?",
+                    (message.platform, message.account),
+                ).fetchone()
+            workspace = row[0] if row else None
+            if not workspace and settings.demo_mode:
+                workspace = settings.meta_workspace_accounts.get(
+                    f"{message.platform}:{message.account}"
+                )
+            if not workspace:
+                ignored += 1
+                continue
+            results.append(request.app.state.harness.enqueue(workspace, message))
         return {"accepted": len(results), "ignored": ignored, "items": results}
 
     return routes

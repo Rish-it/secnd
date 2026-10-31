@@ -6,7 +6,24 @@ export type Item = {
   date?: string | null;
   source_app?: "whatsapp" | "messenger" | "instagram" | "ads" | null;
 };
+export type DecisionBasis = {
+  kind?: string; type?: string; source?: string;
+  text?: string; display_text?: string; summary?: string;
+  reviewed?: number; confirmed?: number; lower_bound?: number; cp_lower_bound?: number;
+  bar?: number; target?: number;
+  reader?: { scope_authorized?: boolean; policy_complete?: boolean } | null;
+};
 export type Decision = {
+  basis?: DecisionBasis | string | null;
+  automatic_basis?: "workspace_bound" | "model_certified" | null;
+  automatic_evidence?: DecisionBasis | null;
+  reader?: { scope_authorized?: boolean; policy_complete?: boolean } | null;
+  autonomy?: {
+    reviewed: number;
+    confirmed: number;
+    lower_bound: number;
+    effective_level: string;
+  } | null;
   item_id: string;
   label: string;
   probabilities: Record<string, number>;
@@ -116,9 +133,9 @@ async function request<T>(
   if (!response.ok) {
     throw new Error(
       typeof data?.message === "string"
-        ? data.message
+        ? data.message.replace(/workspace/gi, "business")
         : typeof data?.detail === "string"
-          ? data.detail
+          ? data.detail.replace(/workspace/gi, "business")
           : "This request could not be completed. Please try again.",
     );
   }
@@ -208,6 +225,7 @@ export const api = {
       coverage: number;
       model_version: string;
       retrain: "queued" | "fixture" | "history_updated";
+      action_status?: string | null;
     }>(`${base}/answers`, {
       ...json({ item_id, label }),
       headers: {

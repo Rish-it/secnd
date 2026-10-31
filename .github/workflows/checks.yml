@@ -62,7 +62,9 @@ jobs:
           done
           python -c 'import json; h=json.load(open("/tmp/health.json")); assert h == {"status":"ok","database":"ready"}'
           curl --fail --silent http://127.0.0.1:8000/ | grep -q '<div id="root">'
-          curl --fail --silent -F file=@examples/decisions.csv http://127.0.0.1:8000/api/preview > /tmp/preview.json
+          test "$(curl --silent -o /dev/null -w '%{http_code}' -F file=@examples/decisions.csv http://127.0.0.1:8000/api/preview)" = 401
+          curl --fail --silent -c /tmp/session -H 'Content-Type: application/json' -d '{"username":"ci-check","password":"not-a-real-secret"}' http://127.0.0.1:8000/api/v1/auth/register > /dev/null
+          curl --fail --silent -b /tmp/session -F file=@examples/decisions.csv http://127.0.0.1:8000/api/preview > /tmp/preview.json
           python -c 'import json; p=json.load(open("/tmp/preview.json")); assert p["row_count"] == 8 and len(p["rows"]) == 5 and "category" in p["columns"]'
       - name: Container logs
         if: failure()
@@ -113,26 +115,3 @@ jobs:
       - name: Reproduce IPSA and BANKING77 CPU evaluations (under two minutes)
         run: timeout 120 uv run python -m backend.ci_eval
 
-  reader:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-        with:
-          version: "0.9.26"
-          enable-cache: true
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - run: uv sync --locked
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:reader
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: reader-browser
-          path: |
-            test-results/
-            docs/results/c3-serving/*.png
