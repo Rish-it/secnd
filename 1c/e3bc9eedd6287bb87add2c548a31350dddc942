@@ -1,0 +1,21 @@
+docs/integrations/harness.md
+  s_9245a16bb07969::t_0dbd48a2f40d0f 55-56,62-63
+backend/tests/test_meta_oauth.py
+  s_9245a16bb07969::t_ad7b1441eb9d18 85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1ce3bc9eedd6287bb87add2c548a31350dddc942",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
