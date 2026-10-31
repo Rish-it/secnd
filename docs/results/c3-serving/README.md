@@ -58,8 +58,8 @@ answers. Stop and rerun for a fresh copy; do not edit a real database to restore
   [Assertions](browser-live-audited.json): no horizontal overflow or page errors.
 - [Fixture desktop](desktop-audited.png) / [fixture 390px](mobile-audited-390.png):
   synthetic smaller history requires confirmation. The fixture is visibly marked.
-- `npm run test:reader` reproduces the fixture scenario, including the audited 400M
-  zero-example policy and model-audit qualification, without a checkpoint or GPU.
+- These screens were later removed from the product, along with their browser test.
+  The backend tests still cover the audited policy without a checkpoint or GPU.
 
 Earlier `http-cpu.json`, `browser-live.json`, `checks.json` and screenshot files
 are retained as historical evidence of the pre-audit implementation. They do not

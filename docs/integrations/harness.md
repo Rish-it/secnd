@@ -14,7 +14,7 @@ Workspace ownership is enforced for reads, imports, answers, exports, models and
 Previously unowned workspaces stay available only in explicit demo mode; they cannot be claimed
 through registration.
 
-Use Teach to import the person's past labelled decisions before enabling background work.
+Use Past decisions to import the person's past labelled decisions before enabling background work.
 The existing fixed calibration holdout and model promotion checks remain in place.
 Use a separate Ads workspace with the four labels `pause`, `keep`, `raise budget`, `lower budget`.
 Message workspaces use the person's approved short response templates as labels. This version

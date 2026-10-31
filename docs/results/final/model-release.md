@@ -1,5 +1,8 @@
 # Model release preparation draft
 
+These steps cover the classifier-head bundle. The 400M reader needs its own bundle: encoder,
+`scorer.pt`, retrieval cache pin and a card from [the reader draft](../../hf/README-draft.md).
+
 No upload is performed by the build or by this document. The helper defaults
 to a local preview; publication requires a separate approved invocation.
 

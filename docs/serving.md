@@ -126,20 +126,19 @@ and account changes retain their explicit switches.
 ## Inspect and verify
 
 `GET /api/v1/workspaces/{workspace}/serving` exposes the active backend, reader
-identity, frozen policy, scope/guard status and published evidence. Metrics shows
-the full-test floored benchmark with its model-audit qualification. Workspace
-measurement fields stay separate.
+identity, frozen policy, scope/guard status and published evidence, including
+the full-test floored benchmark with its model-audit qualification. About shows the
+running model. Workspace measurement fields stay separate.
 
 ```sh
 uv sync --locked
 npm ci
 npm run check
-npm run test:reader
 ```
 
 Tests cover registered-head preservation, explicit reader selection, default
 startup, frozen policy loading, support gating, spot-check routing and guard
-feedback. Reader model loading uses stand-ins in CI; the browser fixture is marked.
+feedback. Reader model loading uses stand-ins in CI.
 Docker CI runs the default command without a backend override. No checkpoint or
 GPU is needed for these tests.
 
