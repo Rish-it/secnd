@@ -56,7 +56,19 @@ INTENT = "What does the customer want?"
 # answer, so a message whose intent is missing from the set draws its mass away from the labels.
 NONE = "none of these"
 DROP = 0.1
-QUESTIONS = {"go_emotions": "Which emotion does this message express?"}
+QUESTIONS = {
+    "go_emotions": "Which emotion does this message express?",
+    "dbpedia_14": "What kind of thing is this text about?",
+    "civil_comments": "Is this comment toxic?",
+    "sms_spam": "Is this message spam?",
+    "paws": "Do these two sentences mean the same thing?",
+    "wanli": "Does the premise support the hypothesis?",
+    "fever": "Does the premise support the hypothesis?",
+    "squad_answerable": "Can the passage answer the question?",
+    "meta_ad": "Below is the state of an ad campaign. What should its manager do next?",
+    "meta_inbox": "Below is a message a business received. How should the business handle it?",
+    "meta_account": "Below is a change on a business account. How should a reviewer treat it?",
+}
 
 
 @dataclass
@@ -171,7 +183,9 @@ def held_out(data_dir: Path) -> dict[str, Task]:
     return out
 
 
-def training_pool(data_dir: Path, evals: dict[str, Task]) -> list[Task]:
+def training_pool(
+    data_dir: Path, evals: dict[str, Task], wide: str = "", drop: tuple[str, ...] = ()
+) -> list[Task]:
     from backend.data import load_dataset
 
     seen = {
@@ -216,6 +230,15 @@ def training_pool(data_dir: Path, evals: dict[str, Task]) -> list[Task]:
             _frame(f["instruction"], f["intent"]) for f in (support[:cut], support[cut:])
         ),
     }
+    if wide:
+        for path in sorted((folder / wide).glob("*-train.parquet")):
+            name = path.name.removesuffix("-train.parquet")
+            frames[name] = (
+                pd.read_parquet(path),
+                pd.read_parquet(folder / wide / f"{name}-test.parquet"),
+            )
+    for name in drop:
+        del frames[name]
     return [
         _task(name, train[["text", "label"]], test[["text", "label"]], seen)
         for name, (train, test) in frames.items()
@@ -554,15 +577,23 @@ def main():
     parser.add_argument("--steps", type=int, default=6000)
     parser.add_argument("--evaluate", help="re-score a saved reader, e.g. ic-ettin-32m-s6000-near")
     parser.add_argument("--none", action="store_true", help=f"train with a '{NONE}' option")
+    parser.add_argument("--wide", default="", help="add the sets in this datasets folder")
+    parser.add_argument("--drop", nargs="*", default=[], help="training sets to leave out")
+    parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
     if args.evaluate:
         return evaluate(args.evaluate)
     data_dir = Settings().data_dir
     evals = held_out(data_dir)
-    tasks = training_pool(data_dir, evals)
+    tasks = training_pool(data_dir, evals, args.wide, tuple(args.drop))
     index(tasks + list(evals.values()))
-    model, tok, report = train(args.encoder, tasks, args.steps, none=args.none)
-    out = f"ic-{args.encoder}-s{args.steps}-near" + ("-none" if args.none else "")
+    model, tok, report = train(args.encoder, tasks, args.steps, seed=args.seed, none=args.none)
+    out = (
+        f"ic-{args.encoder}-s{args.steps}-near"
+        + ("-none" if args.none else "")
+        + (f"-{args.wide}" if args.wide else "")
+        + (f"-seed{args.seed}" if args.seed else "")
+    )
     model.encoder.save_pretrained(data_dir / "encoders" / out / "encoder")
     tok.save_pretrained(data_dir / "encoders" / out / "encoder")
     torch.save(model.scorer.state_dict(), data_dir / "encoders" / out / "scorer.pt")
