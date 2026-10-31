@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 
-const folder = "docs/results/c1-inbox";
+const folder = "frontend/test-results/inbox";
 const api = "/api/v1/workspaces/default";
 
 test("inbox decisions, evidence, undo, source groups, keyboard, pagination and workspace isolation", async ({
@@ -31,7 +31,7 @@ test("inbox decisions, evidence, undo, source groups, keyboard, pagination and w
   ).toBeVisible();
   await page.getByRole("button", { name: "Undo last answer" }).click();
   await expect(pending.getByRole("article")).toHaveCount(4);
-  await original.getByRole("button", { name: "Pick another label" }).click();
+  await original.getByRole("button", { name: "Correct this" }).click();
   await original.getByRole("combobox").selectOption("Escalate");
   // The synthetic ambiguous input predicts Reply or Archive, never Escalate for this seed.
   const modelLabel = (await request.get(api + "/queue").then((r) => r.json()))
@@ -61,10 +61,10 @@ test("inbox decisions, evidence, undo, source groups, keyboard, pagination and w
   });
   await expect(automatic.getByRole("article")).toHaveCount(4);
   await expect(
-    automatic.getByText("Precision lower bound", { exact: true }),
+    automatic.getByText(/Measured on saved calibration history/),
   ).toHaveCount(4);
   const evidence = automatic.getByRole("article").first();
-  await evidence.getByText("Evidence · nearest past decisions").click();
+  await evidence.getByText("Why · nearest past decisions").click();
   await expect(evidence.getByRole("listitem")).toHaveCount(3);
   await page.screenshot({
     path: `${folder}/automatic-evidence.png`,
@@ -100,8 +100,9 @@ test("inbox decisions, evidence, undo, source groups, keyboard, pagination and w
   await expect(pending.getByRole("article")).toHaveCount(20);
   await page.getByRole("button", { name: "Load more decisions" }).click();
   await expect(pending.getByRole("article")).toHaveCount(27);
-  await page.getByRole("textbox", { name: "Workspace", exact: true }).fill("other");
-  await page.getByRole("button", { name: "Open workspace" }).click();
+  await page.getByText("Switch business", { exact: true }).click();
+  await page.getByRole("textbox", { name: "Business", exact: true }).fill("other");
+  await page.getByRole("button", { name: "Open business" }).click();
   await expect(page).toHaveURL(/workspace=other/);
   await expect(
     page.getByRole("tabpanel", { name: /^Needs you/ }).getByRole("article"),

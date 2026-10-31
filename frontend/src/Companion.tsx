@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, percent, workspaceId } from "./api";
 import type { Decision, Page } from "./api";
 import "./Companion.css";
+import SourceIcon from "./SourceIcon";
+import { decisionBasis } from "./decisionBasis";
 
 type Tab = "Pending" | "Answered automatically" | "Overridden";
 const tabNames = {
@@ -23,11 +25,8 @@ const names = {
   messenger: "Messenger",
   instagram: "Instagram",
   ads: "Ads",
-  workspace: "Workspace",
+  workspace: "Business",
 };
-const measured = (value: number | null | undefined) =>
-  value == null ? "Unavailable" : `${Math.floor(value * 10000) / 100}%`;
-
 export default function Companion({ onAnswer }: { onAnswer: () => void }) {
   const [tab, setTab] = useState<Tab>("Pending");
   const [pages, setPages] = useState<Record<Tab, Page<Decision>>>({
@@ -35,6 +34,8 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
     "Answered automatically": empty,
     Overridden: empty,
   });
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const cardNodes = useRef(new Map<string, HTMLElement>());
   const [fixture, setFixture] = useState(false);
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -93,6 +94,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
         "Answered automatically": automatic.data,
         Overridden: overridden.data,
       });
+      setActiveId(old => pending.data.items.some(item => item.item_id === old) ? old : null);
       setFixture(pending.fixture || automatic.fixture);
       setDemo(pending.demo);
     } catch (cause) {
@@ -161,7 +163,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
       mutating.current = false;
       setBusy(false);
       await load();
-      heading.current?.focus();
+      requestAnimationFrame(() => heading.current?.focus());
     }
   }
   async function undoLast() {
@@ -171,6 +173,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
     revision.current++;
     setBusy(true);
     setError("");
+    setNotice("");
     try {
       await api.undo(last.key);
       setUndo((previous) => previous.slice(0, -1));
@@ -186,7 +189,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
       mutating.current = false;
       setBusy(false);
       await load();
-      heading.current?.focus();
+      requestAnimationFrame(() => heading.current?.focus());
     }
   }
   async function more() {
@@ -223,20 +226,49 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
   }
   function changeTab(value: Tab) {
     setTab(value);
+    setActiveId(null);
     setOther(null);
   }
+  useEffect(() => {
+    function keyboard(event: KeyboardEvent) {
+      const target = event.target as HTMLElement;
+      if (event.ctrlKey || event.metaKey || event.altKey || target.closest("input, textarea, select, [contenteditable=true]")) return;
+      if (busy) return;
+      const items = sources.flatMap(source => pages[tab].items.filter(item => (item.source_app ?? item.item?.source_app ?? "workspace") === source));
+      const index = items.findIndex(item => item.item_id === activeId);
+      const item = items[index < 0 ? 0 : index];
+      if (["j", "k"].includes(event.key) && items.length) {
+        event.preventDefault();
+        const next = items[index < 0 ? 0 : (index + (event.key === "j" ? 1 : -1) + items.length) % items.length];
+        setActiveId(next.item_id); cardNodes.current.get(next.item_id)?.focus();
+      } else if (event.key === "y" && item && tab === "Pending") {
+        event.preventDefault(); void answer(item, item.label);
+      } else if (/^[1-4]$/.test(event.key) && item) {
+        const options = Object.keys(item.probabilities).filter(label => label !== (item.answer_label ?? item.label));
+        const label = options[Number(event.key) - 1];
+        if (label) { event.preventDefault(); void answer(item, label); }
+      } else if (event.key === "u" && undo.length) { event.preventDefault(); void undoLast(); }
+    }
+    window.addEventListener("keydown", keyboard);
+    return () => window.removeEventListener("keydown", keyboard);
+  });
   function card(item: Decision) {
     const source = item.source_app ?? item.item?.source_app ?? "workspace";
-    const choices = labels.length ? labels : Object.keys(item.probabilities);
+    const choices = Object.keys(item.probabilities).length ? Object.keys(item.probabilities) : labels;
+    const alternatives = choices.filter(label => label !== (item.answer_label ?? item.label));
     return (
       <article
-        className="inbox-card"
+        className={`inbox-card ${activeId === item.item_id ? "is-current" : ""}`}
+        ref={node => { if (node) cardNodes.current.set(item.item_id, node); else cardNodes.current.delete(item.item_id); }}
+        tabIndex={0}
+        onFocus={() => setActiveId(item.item_id)}
+        onClick={() => setActiveId(item.item_id)}
         key={item.item_id}
         aria-label={item.item?.text || item.item_id}
       >
         <div className="decision-meta">
           <span className={`source-badge source-${source}`}>
-            {names[source]}
+            <SourceIcon source={source} />{names[source]}
           </span>
           <span>
             {item.spot_check
@@ -264,41 +296,9 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
             history.
           </p>
         )}
-        {tab === "Answered automatically" && (
-          <dl className="certification">
-            <div>
-              <dt>Certified threshold</dt>
-              <dd>{measured(item.threshold)}</dd>
-            </div>
-            <div>
-              <dt>Precision lower bound</dt>
-              <dd>{measured(item.cp_lower_bound)}</dd>
-            </div>
-          </dl>
-        )}
-        {item.autonomy && (
-          <dl className="certification">
-            <div>
-              <dt>Workspace reviews</dt>
-              <dd>
-                {item.autonomy.confirmed} confirmed / {item.autonomy.reviewed}{" "}
-                reviewed
-              </dd>
-            </div>
-            <div>
-              <dt>Workspace lower bound</dt>
-              <dd>{measured(item.autonomy.lower_bound)}</dd>
-            </div>
-          </dl>
-        )}
-        {tab === "Answered automatically" && (
-          <p className="evidence-note">
-            One-sided 95% calibration bound measured for this saved model. Your
-            workspace permission is a separate check.
-          </p>
-        )}
+        {tab === "Answered automatically" && <p className="decision-proof">{decisionBasis(item)}</p>}
         <details className="inbox-evidence">
-          <summary>Evidence · nearest past decisions</summary>
+          <summary>Why · nearest past decisions</summary>
           {item.reasons.neighbours.length ? (
             <ol>
               {item.reasons.neighbours.map((row) => (
@@ -339,8 +339,11 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
               );
             }}
           >
-            Pick another label
+            Correct this
           </button>
+        </div>
+        <div className="quick-corrections" aria-label="Other actions">
+          {alternatives.slice(0, 4).map((label, index) => <button className="text-button" key={label} disabled={busy} onClick={() => void answer(item, label)}><kbd>{index + 1}</kbd> {label}</button>)}
         </div>
         {other === item.item_id && (
           <form
@@ -351,7 +354,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
             }}
           >
             <label>
-              Choose label
+              Choose action
               <select
                 autoFocus
                 value={otherLabel}
@@ -364,7 +367,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
               </select>
             </label>
             <p className="evidence-note">
-              Every label in this workspace is available.
+              All actions for this decision are available.
             </p>
             <button className="primary-button" disabled={busy || !otherLabel}>
               Save correction
@@ -382,7 +385,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
           <h1 id="inbox-title" ref={heading} tabIndex={-1}>
             Your decision inbox.
           </h1>
-          <p>Ren handles certified decisions. You make the rest.</p>
+          <p>One clear choice at a time. Confirm Ren’s suggestion or make your own call.</p>
         </div>
         <button
           className="secondary-button"
@@ -395,8 +398,8 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
           Refresh inbox
         </button>
       </div>
-      <form className="workspace-picker" method="get">
-        <label htmlFor="workspace-id">Workspace</label>
+      <details className="business-switch"><summary>Switch business</summary><form className="workspace-picker" method="get">
+        <label htmlFor="workspace-id">Business</label>
         <input
           id="workspace-id"
           name="workspace"
@@ -405,12 +408,11 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
           pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}"
           maxLength={64}
         />
-        <button className="secondary-button">Open workspace</button>
-      </form>
+        <button className="secondary-button">Open business</button>
+      </form></details>
       {fixture && (
         <p className="preview-banner">
-          Preview · illustrative decisions. Answers are not saved. Teach this
-          workspace to start.
+          Preview · illustrative decisions. Answers are not saved. Add your past decisions to start.
         </p>
       )}
       {demo && (
@@ -419,6 +421,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
           Certification below uses synthetic calibration data, not Meta traffic.
         </p>
       )}
+      <p className="keyboard-hint"><kbd>j</kbd> / <kbd>k</kbd> move <kbd>y</kbd> confirm <kbd>1–4</kbd> correct <kbd>u</kbd> undo</p>
       <div className="inbox-tabs" role="tablist" aria-label="Decision status">
         {(["Pending", "Answered automatically", "Overridden"] as const).map(
           (value, index) => (
@@ -516,10 +519,10 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
                     </h2>
                     <p>
                       {value === "Pending"
-                        ? "New questions from your connected apps will appear here."
+                        ? "Connect Meta in Connections and pick your accounts. New questions will appear here; your Autonomy settings decide what Ren can handle."
                         : value === "Overridden"
-                          ? "Pick another label on a decision to teach Ren your preference."
-                          : "Until the gate certifies enough evidence, decisions wait for you."}
+                          ? "Correct this on a decision to teach Ren your preference."
+                          : "Review the suggestions in Needs you. Ren earns permission separately for Ads, Inbox and Account in Autonomy."}
                     </p>
                   </div>
                 )}

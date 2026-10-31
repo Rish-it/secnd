@@ -6,7 +6,15 @@ export type Item = {
   date?: string | null;
   source_app?: "whatsapp" | "messenger" | "instagram" | "ads" | null;
 };
+export type DecisionBasis = {
+  kind?: string; type?: string; source?: string;
+  text?: string; display_text?: string; summary?: string;
+  reviewed?: number; confirmed?: number; lower_bound?: number; cp_lower_bound?: number;
+  bar?: number; target?: number;
+};
 export type Decision = {
+  basis?: DecisionBasis | string | null;
+  reader?: { scope_authorized?: boolean; policy_complete?: boolean } | null;
   autonomy?: {
     reviewed: number;
     confirmed: number;
@@ -122,9 +130,9 @@ async function request<T>(
   if (!response.ok) {
     throw new Error(
       typeof data?.message === "string"
-        ? data.message
+        ? data.message.replace(/workspace/gi, "business")
         : typeof data?.detail === "string"
-          ? data.detail
+          ? data.detail.replace(/workspace/gi, "business")
           : "This request could not be completed. Please try again.",
     );
   }

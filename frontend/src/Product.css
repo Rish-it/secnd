@@ -1,0 +1,5 @@
+.about-product > p { max-width: 64ch; }
+.about-product h2 { margin-top: 36px; }
+.running-model { border-block: 1px solid var(--line); margin: 32px 0; padding: 16px 0; }
+.running-model .eyebrow { margin-bottom: 8px; }
+.page-footer a, .running-model a { display: inline-flex; align-items: center; min-height: 44px; }

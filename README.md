@@ -1,52 +1,103 @@
-# Secnd · Ren for Meta apps
+# Secnd
 
-Ren is an independently released decision model built for Meta's platform.
-Its encoder learns from Meta's open assistant data; each workspace learns its own
-labels and corrections. Confident decisions are handled automatically. The rest
-become questions for a person, whose answers train the next classifier version.
+**Your Meta business. With you.**
 
-The open encoder is [Secnd-AI/ren](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0):
-release **ren-1.0.0**, tag **v1.0.0**, pinned by immutable revision and
-[SHA-256 manifest](backend/encoder-ren-1.0.0.json). The app defaults to the released encoder and workspace classifier.
-The 150M CPU reader and optional 400M GPU reader are explicitly configurable.
-[Serving configuration and required local reader files](docs/serving.md).
+Sign in → Connect Meta → Pick accounts → Set your bar → Open your decision inbox.
+Ren watches ads, WhatsApp, Messenger and Instagram, asks one tap at a time,
+and earns permission to act separately for Ads, Inbox and Account.
+You choose Watch, Ask or Act and a required bar of 90%, 95%, 98% or 99%.
 
-On the fixed English MTOP split at 2,000 workspace labels, the released encoder
-and calibrated head measured **42.42% automatic coverage at 99.93% test precision**.
-The associated 2,000 re-splits passed **99.45%** of the time. These are recorded
-benchmark results, separate from an uploaded workspace's calibration card.
-[Card](docs/results/s3/card-mtop-pt-minilm+lr-b2000.json) ·
-[re-splits](docs/results/s3/robustness-mtop-pt-minilm+lr-b2000.json) ·
-[model and limits](docs/model.md).
+Ren is our **400M decision model**, trained once and reading a person's past
+choices as examples. Muse Spark Open supports the project's language work;
+**Muse never decides**. The running model identifier is shown in About and the
+footer, with a model-card link when supplied by the API. Deployments may select
+other serving backends; the synthetic demo below runs scripted proposals, without
+loading the 400M model. [Serving configuration](docs/serving.md).
 
-The experimental 150M reader also uses Meta models as teachers for its history.
-On fixed MTOP splits, **3,000 teacher-labelled history rows and zero human history
-labels** measured **87.7% accuracy, 42.5% certified coverage and 99.7% accepted
-precision**. Gold calibration labels are still required. Inventing ten messages
-per label from label names alone measured **84.95% accuracy and 25.6% coverage**,
-about equal to 200 human history labels. These are offline reader results;
-Meta models supply history and Ren makes the decisions.
-[Teacher protocol and results](docs/results/s2/teacher.md).
+Built for Meta's platform. Built with Muse Spark Open. Secnd is independently
+developed and is not an official Meta product.
 
-On typed-decisions, the fixed five-member ensemble measured **80.25% accuracy**.
-The pre-registered label-fit point has Brier **0.098** and ECE **0.019**; a later
-teacher-distribution fit has Brier **0.042** and ECE **0.169**, at the same accuracy.
-Both operating points remain reported together. The reader can still accept
-wrong answers when the correct intent is absent from its options.
-[Ensemble protocol](docs/results/s2/typed-ensemble-plan.md) ·
-[Missing-intent audit](docs/results/s3r/README.md).
+## Run the offline product demo
 
-## Sign in and connect Meta
+From the repository root, using Python 3.12 and Node.js 24:
 
-Workspace routes now require a signed-in session and enforce workspace ownership.
-Create an account and workspace, import the person's past decisions with Teach, then connect
-Meta and select accounts in Connections. Autonomy controls permission per decision type;
-Activity contains the background-work switch, global stop, audit trail and observed ad results.
-Real sends and ad changes default off. Only sandbox ad accounts are supported.
+```sh
+uv sync --locked
+npm ci
+npm run demo --workspace @secnd/frontend
+```
 
-[Login, exact OAuth settings, synthetic demo and execution switches](docs/integrations/harness.md).
-Use `SECND_SESSION_COOKIE_SECURE=false` only for local HTTP development. Existing contract
-fixtures require explicit `SECND_DEMO_MODE=true`; a seeded synthetic demo is also available.
+The first two commands install locked dependencies and may need network access if
+packages are not cached. The demo command uses installed dependencies, builds the
+frontend and starts a local server with `UV_NO_SYNC=true`; it makes no provider or
+paid calls. If uv's normal cache is inaccessible, prefix the demo command with
+`UV_CACHE_DIR=/tmp/secnd-uv-cache`. No `.env` file or model download is needed.
+
+Open **http://127.0.0.1:8000/?setup=1** for the synthetic sign-in and Meta
+walkthrough. Open **http://127.0.0.1:8000/** directly for the decision inbox.
+Use `-- --port 8032` after the demo command to select another local port.
+Restart the command for a fresh story; each run creates and removes its own
+new temporary database. The seeder refuses any directory with existing contents
+and any directory that is itself a symbolic link. It never opens an ordinary
+business database. [Seeder](backend/demo_seed.py).
+
+**All demo people, business names, messages, scores, reviews, actions and ad
+outcomes are synthetic.** The fictional Fold & Field business contains:
+
+- 20 pending decisions: five each from Ads, WhatsApp, Messenger and Instagram.
+- Ads with 61 of 61 synthetic confirmations and a 95% chosen bar; three simulated
+  acted decisions show that personal-review basis.
+- Inbox with 40 confirmations, still short of its 95% bar.
+- Account with 61 confirmations followed by a correction; its bound drops below
+  95% and its effective level returns from Act to Ask. Account writes are not implemented.
+- Three synthetic ad observations comparing spend, cost per result and click-through
+  before and seven days after. They are illustrative observations, not causal results.
+
+These counts and scores are **story props, not measured model performance**.
+The running model identifier is `synthetic-scripted-demo`. Reviews and undo persist
+in the disposable SQLite database; no model trains or infers in this demo.
+Meta connection and account selection are simulated. Live sign-in, OAuth,
+generation, imports and provider writes are blocked by the demo server.
+
+In the inbox, **j/k** move, **y** confirms, **1–4** choose another action and **u**
+undoes the last answer. Why shows nearest saved decisions. Autonomy shows exact
+review counts, a conservative lower bound and the additional confirmations needed.
+Activity includes the agent log, observations and a stop switch with one inline
+confirmation. Stopping requires an operator reset before actions resume.
+
+## Evidence, kept separate from your business
+
+The fixed public-history evaluation for `ic-ettin-400m-s6000-near`, with eight
+examples and the support floor, recorded **13.89% coverage**, **609 accepted
+answers with zero errors** and a **99.40% lower confidence bound** over **4,386**
+unchanged MTOP test rows. Source: `docs/results/s3r/floor-full-test.json`.
+Calibration labels were audited by models, not humans. These results require the
+full fixed public history and do not certify a new business or future traffic.
+The separate missing-intent audit contains a wrong acceptance for this condition.
+Source: `docs/results/s3r/README.md`.
+
+Personal reviews are labelled “Measured on your own reviews”. Audited public
+history is labelled separately. Saved classifier calibration is described as
+calibration history; it is never presented as either of those evidence sources.
+
+The independently released encoder remains available at
+[Secnd-AI/ren](https://huggingface.co/Secnd-AI/ren/tree/v1.0.0), pinned by the
+[SHA-256 manifest](backend/encoder-ren-1.0.0.json). Encoder, local classifier and
+400M serving configurations are distinct artifacts.
+
+[Three-minute video script](docs/submission/video-script.md) ·
+[Indie developer submission](docs/submission/submission.md) ·
+[Integration and demo limitations](docs/submission/implementation-notes.md).
+
+## Connect a real business
+
+Use `npm run dev` after installing the locked dependencies. Create a local
+account and business, connect through Facebook Login for Business, select accounts
+and choose a bar. Local HTTP requires `SECND_SESSION_COOKIE_SECURE=false`;
+production requires HTTPS and secure cookies. Import past decisions before expecting
+suggestions. Public app access, permissions and asset subscriptions require setup.
+Real sends and ad changes default off; Ads supports sandbox accounts only.
+[Full integration instructions](docs/integrations/harness.md).
 
 ## Run one container
 
@@ -182,7 +233,7 @@ fetch/verification failure. Encoder repo/revision overrides must match the commi
 manifest. `.env.example` lists messaging settings; teacher calls use Meta provider
 settings locally and require an explicit paid flag with a $10 task cap across resumes.
 
-## What the gate means
+## What the evidence means
 
 Temperature calibration and threshold selection use a fixed held-out calibration
 set. Automatic coverage requires the one-sided Clopper–Pearson lower bound to pass
