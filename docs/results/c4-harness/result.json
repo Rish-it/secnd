@@ -44,7 +44,6 @@
     "git_diff_check": "passed",
     "environment": {
       "UV_NO_SYNC": "true",
-      "UV_CACHE_DIR": "/private/tmp/secnd-uv-cache",
       "HF_HUB_OFFLINE": "1",
       "TRANSFORMERS_OFFLINE": "1"
     },

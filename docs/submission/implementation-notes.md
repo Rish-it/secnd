@@ -68,11 +68,9 @@ explicitly discloses that no Ren checkpoint is loaded.
 
 ## Remaining integration and submission work
 
-Record and upload the video; supply the final product/video URLs. Verify real
-Facebook Login for Business with the app's roles and permissions. Merge the other
-engineer's backend changes and verify the basis and model-card fields against that
-response. Select and run the actual 400M model only with its required local files
-and supported serving configuration. Its latency for this build is TBD. Re-run the
-browser suite in an environment that permits local servers and browsers, then
-visually review desktop and narrow layouts, contrast and focus navigation.
-No live or paid verification is claimed by this branch.
+Record and upload the video; supply the final product and video URLs. Verify real
+Facebook Login for Business with the app's roles and permissions. Select and run
+the actual 400M model only with its required local files and supported serving
+configuration; its latency for this build is TBD. Visually review desktop and
+narrow layouts, contrast and focus navigation. No live or paid verification is
+claimed by this branch.
