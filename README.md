@@ -116,29 +116,18 @@ Open **http://localhost:8000**. The build downloads and verifies the pinned publ
 encoder. Runtime can copy it into the persistent data volume and infer offline.
 The `secnd-data` volume keeps labels, predictions, models and embedding caches.
 
-Teach imports labelled CSVs, freezes a calibration holdout and fits a first model.
-Companion shows automatic decisions, uncertain questions and random spot-checks.
-Answers persist before background retraining. Metrics shows local version history,
-rollback and `guarded` when automatic answers are paused. Published evaluations
-and the recorded teacher handoff remain separate from workspace measurements.
-Chat currently remains a preview.
+Past decisions imports labelled CSVs, freezes a calibration holdout and fits a first
+model. The inbox shows automatic decisions, uncertain questions and random spot-checks.
+Answers persist before background retraining. Automatic answers pause through
+`guarded`, and the About screen names the running model. Published evaluations remain
+separate from workspace measurements.
 
-Teach also offers **Start with only label names**: enter 2–128 labels or import
-a one-column list. Muse Wonder on the Meta API invents up to ten starting
-messages per label, with a **$1 cumulative workspace cap**, then Ren reads the
-editable history for its suggestions. Saved examples are shared by label-list
-hash; resuming keeps edits and deletions and does not buy completed examples
-again. Failed or interrupted requests require review before another paid attempt.
-
-This mode requires the configured reader checkpoint (default 150M; `encoder/` and
-`scorer.pt`) under `SECND_DATA_DIR/encoders/<model_id>`, the pinned local MiniLM
-retrieval cache, plus `SECND_META_API_KEY`. The released encoder above is a separate
-artifact. The default reader and retrieval inference run on CPU with up to eight
-nearest history examples.
-Generation refuses to start if the reader cannot load. With only invented
-history there is no independent workspace calibration, so every suggestion
-requires human review. Confirmed answers join the history without a teacher call.
-[Cold-start API and budget behavior](docs/api/README.md#start-with-label-names).
+Starting from label names alone is available through the API: Muse Wonder invents up
+to ten starting messages per label under a **$1 cumulative workspace cap**, then Ren
+reads the editable history for its suggestions. It needs the configured reader
+checkpoint, the pinned MiniLM retrieval cache and `SECND_META_API_KEY`. With only
+invented history there is no independent workspace calibration, so every suggestion
+requires human review. [Cold-start API and budget behavior](docs/api/README.md#start-with-label-names).
 
 ## CSV to a live decision
 
@@ -157,12 +146,17 @@ for i in range(200):
         label = 'Food' if label == 'Travel' else 'Travel'
     writer.writerow([f'past-{i}', f'{text} {tag} number {i}', i % 7, label])
 PY
-API=http://127.0.0.1:8000/api/v1/workspaces/default
-curl --fail-with-body -sS "$API/decisions:import" \
+ROOT=http://127.0.0.1:8000/api/v1
+API=$ROOT/workspaces/ren-demo
+curl --fail-with-body -sS -c /tmp/ren-demo-session "$ROOT/auth/register" -H 'Content-Type: application/json' \
+  -d '{"username":"ren-demo","password":"choose-a-long-password"}'
+curl --fail-with-body -sS -b /tmp/ren-demo-session "$ROOT/workspaces" -H 'Content-Type: application/json' \
+  -d '{"workspace_id":"ren-demo"}'
+curl --fail-with-body -sS -b /tmp/ren-demo-session "$API/decisions:import" \
   -F 'file=@/tmp/ren-demo.csv;type=text/csv' -F target_column=category
-curl --fail-with-body -sS "$API/predict" -H 'Content-Type: application/json' \
+curl --fail-with-body -sS -b /tmp/ren-demo-session "$API/predict" -H 'Content-Type: application/json' \
   -d '{"items":[{"item_id":"next","text":"Train fare","amount":25}]}'
-curl --fail-with-body -sS "$API/queue"
+curl --fail-with-body -sS -b /tmp/ren-demo-session "$API/queue"
 ```
 
 A small import can promote a classifier with zero certified coverage. In that
@@ -170,10 +164,10 @@ state every item goes to a person. Importing again into the same workspace retur
 409 and preserves its labels and holdout; choose a new workspace for another task.
 
 ```sh
-curl --fail-with-body -sS "$API/answers" -H 'Content-Type: application/json' \
+curl --fail-with-body -sS -b /tmp/ren-demo-session "$API/answers" -H 'Content-Type: application/json' \
   -H 'Idempotency-Key: demo-answer-1' -d '{"item_id":"next","label":"Travel"}'
-curl --fail-with-body -sS "$API/metrics"
-curl --fail-with-body -sS "$API/models"
+curl --fail-with-body -sS -b /tmp/ren-demo-session "$API/metrics"
+curl --fail-with-body -sS -b /tmp/ren-demo-session "$API/models"
 ```
 
 [API contract and errors](docs/api/README.md).

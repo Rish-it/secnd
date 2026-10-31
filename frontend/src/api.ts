@@ -11,6 +11,7 @@ export type DecisionBasis = {
   text?: string; display_text?: string; summary?: string;
   reviewed?: number; confirmed?: number; lower_bound?: number; cp_lower_bound?: number;
   bar?: number; target?: number;
+  reader?: { scope_authorized?: boolean; policy_complete?: boolean } | null;
 };
 export type Decision = {
   basis?: DecisionBasis | string | null;

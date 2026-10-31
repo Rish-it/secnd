@@ -2,16 +2,14 @@ import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { createHmac } from "node:crypto";
 
-test("connector source groups appear in the decision inbox when it is available", async ({
+test("connector source groups appear in the decision inbox", async ({
   page,
   request,
 }) => {
   await page.goto("/");
-  const heading = page.getByRole("heading", { name: "Your decision inbox." });
-  test.skip(
-    (await heading.count()) === 0,
-    "Decision inbox ships separately; run both app changes to verify source groups.",
-  );
+  await expect(
+    page.getByRole("heading", { name: "Your decision inbox." }),
+  ).toBeVisible();
   const api = "/api/v1/workspaces/default";
   for (const platform of ["whatsapp", "messenger", "instagram"]) {
     const bytes = readFileSync(
@@ -41,7 +39,7 @@ test("connector source groups appear in the decision inbox when it is available"
     ).ok(),
   ).toBeTruthy();
   await page.getByRole("button", { name: "Refresh inbox" }).click();
-  const pending = page.getByRole("tabpanel", { name: /^Pending/ });
+  const pending = page.getByRole("tabpanel", { name: /^Needs you/ });
   for (const source of ["WhatsApp", "Messenger", "Instagram", "Ads"]) {
     await expect(
       pending.getByRole("region", { name: `${source} decisions` }),

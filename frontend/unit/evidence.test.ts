@@ -23,3 +23,10 @@ test("plain calibration is never presented as audited public history", () => {
   assert.doesNotMatch(decisionBasis(saved), /audited public/);
   assert.match(decisionBasis({ ...saved, cp_lower_bound: null }), /unavailable/);
 });
+test("a passed gate alone is not audited public history", () => {
+  const certified = { ...saved, automatic_basis: "model_certified" as const };
+  assert.match(decisionBasis(certified), /^Measured on saved calibration history:/);
+  const scoped = { ...certified, reader: { scope_authorized: true, policy_complete: true } };
+  assert.equal(decisionBasis(scoped), "Certified at 99% on audited public history");
+  assert.match(decisionBasis({ ...certified, reader: { scope_authorized: true, policy_complete: false } }), /^Measured on saved calibration history:/);
+});

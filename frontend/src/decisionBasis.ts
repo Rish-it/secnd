@@ -12,7 +12,7 @@ export function decisionBasis(item: Decision) {
       ? basis
       : details?.kind ?? details?.type ?? details?.source ?? ""
   ).toLowerCase();
-  const publicHistory = /public|audited|benchmark|certified/.test(kind);
+  const publicHistory = /public|audited|benchmark/.test(kind);
   const own = !publicHistory && /personal|own|review|business|workspace/.test(kind);
 
   // An explicit basis wins. Legacy responses can prove business reviews through autonomy.
@@ -24,8 +24,10 @@ export function decisionBasis(item: Decision) {
     return "Your own review evidence is not available for this saved decision.";
   }
   const bound = details?.lower_bound ?? details?.cp_lower_bound ?? item.cp_lower_bound;
-  const legacyPublic = !basis && item.reader?.scope_authorized && item.reader?.policy_complete;
-  if ((publicHistory || legacyPublic) && bound != null) {
+  // "model_certified" only says the gate passed; public history needs a complete, authorized reader policy.
+  const reader = item.reader ?? details?.reader;
+  const readerPublic = (!basis || kind === "model_certified") && reader?.scope_authorized && reader?.policy_complete;
+  if ((publicHistory || readerPublic) && bound != null) {
     return `Certified at ${atLeast(bound)} on audited public history`;
   }
   return bound == null
