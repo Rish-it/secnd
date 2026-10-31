@@ -1,0 +1,21 @@
+README.md
+  s_9245a16bb07969::t_69c2114e370de0 20-23
+docs/results/final/submission-checklist.md
+  s_9245a16bb07969::t_e8e05b710861f2 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "be33b48423deef483f6937d3209690844b13bc79",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
