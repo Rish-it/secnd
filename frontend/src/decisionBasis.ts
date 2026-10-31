@@ -2,9 +2,9 @@ import type { Decision } from "./api";
 
 const atLeast = (value: number) => `${Math.floor(value * 100)}%`;
 export function decisionBasis(item: Decision) {
-  const basis = item.basis;
+  const basis = item.basis ?? item.automatic_basis;
   if (typeof basis === "string" && /\s/.test(basis)) return basis;
-  const details = typeof basis === "object" ? basis : null;
+  const details = typeof basis === "object" ? basis : item.automatic_evidence ?? null;
   const description = details?.display_text ?? details?.text ?? details?.summary;
   if (description) return description;
   const kind = (
@@ -12,7 +12,7 @@ export function decisionBasis(item: Decision) {
       ? basis
       : details?.kind ?? details?.type ?? details?.source ?? ""
   ).toLowerCase();
-  const publicHistory = /public|audited|benchmark/.test(kind);
+  const publicHistory = /public|audited|benchmark|certified/.test(kind);
   const own = !publicHistory && /personal|own|review|business|workspace/.test(kind);
 
   // An explicit basis wins. Legacy responses can prove business reviews through autonomy.

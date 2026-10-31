@@ -36,7 +36,7 @@ def test_demo_story_counts_evidence_correction_and_outcomes(demo):
     assert policies["account"]["lower_bound"] < 0.95
     acted = demo.get(ROOT + "/feed").json()["items"]
     assert len(acted) == 3
-    assert all(row["basis"]["kind"] == "personal_reviews" for row in acted)
+    assert all(row["automatic_basis"] == "workspace_bound" for row in acted)
     outcomes = demo.get(ROOT + "/outcomes").json()
     assert len(outcomes) == 3
     assert all(row["status"] == "synthetic_executed" for row in outcomes)

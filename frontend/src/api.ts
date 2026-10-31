@@ -14,6 +14,8 @@ export type DecisionBasis = {
 };
 export type Decision = {
   basis?: DecisionBasis | string | null;
+  automatic_basis?: "workspace_bound" | "model_certified" | null;
+  automatic_evidence?: DecisionBasis | null;
   reader?: { scope_authorized?: boolean; policy_complete?: boolean } | null;
   autonomy?: {
     reviewed: number;

@@ -250,6 +250,9 @@ class SyntheticService(WorkspaceService):
                     kind(previous.get("source_app")),
                     previous["label"] == label,
                     previous["prob"],
+                    "",
+                    "",
+                    "",
                 ),
             )
             if created and getattr(self, "harness", None):
@@ -352,7 +355,7 @@ def create_demo(directory: Path):
         for decision_type, count in [("ad", 61), ("inbox", 40), ("account", 61)]:
             for i in range(count):
                 db.execute(
-                    "INSERT INTO autonomy_reviews VALUES (?,?,?,?,?,?,?)",
+                    "INSERT INTO autonomy_reviews VALUES (?,?,?,?,?,?,?,?,?,?)",
                     (
                         BUSINESS,
                         f"synthetic-{decision_type}-{i}",
@@ -361,6 +364,9 @@ def create_demo(directory: Path):
                         True,
                         0.99,
                         timestamp(),
+                        "",
+                        "",
+                        "",
                     ),
                 )
     for i, (source, text, label, confidence) in enumerate(PENDING):
@@ -388,11 +394,17 @@ def create_demo(directory: Path):
         proposal_decision["autonomy"] = {
             key: status[key] for key in ("reviewed", "confirmed", "lower_bound", "effective_level")
         }
-        proposal_decision["basis"] = {
-            "kind": "personal_reviews",
-            "confirmed": status["confirmed"],
-            "reviewed": status["reviewed"],
-            "lower_bound": status["lower_bound"],
+        proposal_decision["automatic_basis"] = "workspace_bound"
+        proposal_decision["automatic_evidence"] = {
+            key: status[key]
+            for key in (
+                "reviewed",
+                "confirmed",
+                "lower_bound",
+                "effective_level",
+                "bar",
+                "confidence_cut",
+            )
         }
         service.store.record_predictions(
             BUSINESS,
