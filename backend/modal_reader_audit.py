@@ -65,6 +65,13 @@ def attacks(
     return persist(report, name + "-audited" if audited else name)
 
 
+@app.function(image=image, cpu=4, memory=16384, volumes={"/vol": volume}, timeout=3600)
+def full_test(model_name: str, gate: str):
+    from backend.panel_floors import score
+
+    return json.dumps(score(Path("/vol/data"), model_name, json.loads(gate)))
+
+
 @app.local_entrypoint()
 def main(
     latency: bool = False,
@@ -72,7 +79,16 @@ def main(
     model_name: str = "ic-ettin-150m-s6000-near",
     floor: bool = False,
     audited: bool = False,
+    score_gate: str = "",
 ):
+    if score_gate:
+        # Score a committed gate on every test row, from saved probabilities.
+        gate = (ROOT / "docs/results/s3r" / score_gate).read_text()
+        name = score_gate.replace("attacks-floor-audited", "floor-full-test")
+        out = ROOT / "docs/results/s3r" / name
+        report = {model_name: json.loads(full_test.remote(model_name, gate))}
+        out.write_text(json.dumps(report, indent=1) + "\n")
+        return
     # Snapshot provenance before dispatch; later doc edits cannot change a run's identity.
     protocol_hash = hashlib.sha256((ROOT / "docs/results/s3r/protocol.md").read_bytes()).hexdigest()
     runner_hash = hashlib.sha256((ROOT / "backend/reader_audit.py").read_bytes()).hexdigest()
@@ -90,6 +106,8 @@ def main(
         name += "-audited"
     if "400m" in model_name:
         name += "-400m"
+    if model_name.endswith("-fine-seed1"):
+        name += "-fine-seed1"
     if model_name.endswith("-none"):
         name += "-none"
     path = ROOT / "docs/results/s3r" / f"{name}.json"

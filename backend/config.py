@@ -9,9 +9,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class ReaderOptions(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-    model_id: Literal["ic-ettin-150m-s6000-near", "ic-ettin-400m-s6000-near"] = (
-        "ic-ettin-150m-s6000-near"
-    )
+    model_id: Literal[
+        "ic-ettin-150m-s6000-near",
+        "ic-ettin-400m-s6000-near",
+        "ic-ettin-400m-s6000-near-wide-fine-seed1",
+    ] = "ic-ettin-150m-s6000-near"
     # None resolves to the immutable checkpoint fingerprint in reader-manifest.json.
     revision: str | None = None
     device: Literal["cpu", "cuda"] = "cpu"
@@ -33,7 +35,7 @@ class Settings(BaseSettings):
     agent_insights_seconds: int = Field(default=3600, ge=60)
     encoder_repo: str = "Secnd-AI/ren"
     encoder_revision: str = "5560f25414195f1d1224a6ae7efd19c6b7646d3f"
-    serving_backend: Literal["reader", "head"] = "head"
+    serving_backend: Literal["reader", "head", "auto"] = "head"
     reader: ReaderOptions = Field(default_factory=ReaderOptions)
     workspace_backends: dict[str, Literal["reader", "head"]] = Field(default_factory=dict)
     workspace_readers: dict[str, ReaderOptions] = Field(default_factory=dict)
