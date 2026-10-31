@@ -32,6 +32,22 @@
       "evaluation_sha256": "6f5b1aebf7c4808c134078c7a9dd77dada026013ee701980df20e839d07939f7",
       "floor_benchmark_file": "docs/results/s3r/floor-full-test.json",
       "floor_benchmark_sha256": "3aa88eba2577d56fe576af0e9e79898cc680cf0b600a50b3f4b7d2bf8db48b27"
+    },
+    "ic-ettin-400m-s6000-near-wide-fine-seed1": {
+      "revision": "f8e1ca1820522dfd610dcdbba2c81be8d60bb4005abc93c4059bb7741a5c4b9d",
+      "checkpoint_sha256": {
+        "encoder/config.json": "d83663a6531e325591959e1902c4dad41744f3072dc723ca8a6f5d8bc2132622",
+        "encoder/model.safetensors": "5396a0be1ab8bbca221641c61018ab62528f9884ddcabf65d3599d8824f8d949",
+        "encoder/tokenizer.json": "3b67e6b106786d2bd769675fd65b8b2f85a99bc045346afbdd7871d77f84b1c5",
+        "encoder/tokenizer_config.json": "fb54f027372062b2ca52282efb04d178a8b57167a00cd8f4e816515823a2c016",
+        "scorer.pt": "9d2a0401df24d8751a525851927bd49ca7c7c6346b45418ac21ee1fc349225f0"
+      },
+      "policy_file": "docs/results/s3r/attacks-floor-audited-400m-fine-seed1.json",
+      "policy_sha256": "d31ad5b136c9d4451ddf04f64ead8e40e8d08db3165a49093fff639b88e3a84f",
+      "evaluation_file": "docs/results/s2/incontext-ic-ettin-400m-s6000-near-wide-fine-seed1-clean.json",
+      "evaluation_sha256": "0f94a5f49d3f20c7a24e46a23bedaf29a4b8528a817095fc092b6a14b02cbb71",
+      "floor_benchmark_file": "docs/results/s3r/floor-full-test-400m-fine-seed1.json",
+      "floor_benchmark_sha256": "150e78b86a17a51eb06da0be39dd4673335772421edf0b2ee7f14acf8e3d848b"
     }
   },
   "scope": {

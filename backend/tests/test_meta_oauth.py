@@ -16,19 +16,26 @@ from backend.config import Settings
 BASE = "/api/v1/workspaces/mine/integrations/meta"
 
 
+broken: set[str] = set()
+never_expires: list[bool] = []
+
+
 @pytest.fixture
 def oauth(tmp_path):
     calls = []
+    broken.clear()
+    never_expires.clear()
 
     def transport(request):
         calls.append(request)
         path = request.url.path
+        if any(path.endswith(part) for part in broken):
+            return httpx.Response(403, json={"error": {"code": 200, "message": "private-text"}})
         if path.endswith("/subscribed_apps"):
             return httpx.Response(200, json={"success": True})
         if path.endswith("oauth/access_token"):
-            return httpx.Response(
-                200, json={"access_token": "private-long-token", "expires_in": 5184000}
-            )
+            token = {"access_token": "private-long-token"}
+            return httpx.Response(200, json=token if never_expires else token | {"expires_in": 60})
         if path.endswith("/me"):
             return httpx.Response(200, json={"id": "123"})
         if path.endswith("/me/adaccounts"):
@@ -82,6 +89,7 @@ def oauth(tmp_path):
 
 def start(client):
     response = client.get(BASE + "/oauth/start", follow_redirects=False)
+    assert "scope=" not in response.headers["location"]  # the login config sets permissions
     assert response.status_code == 303
     params = parse_qs(urlsplit(response.headers["location"]).query)
     assert params["redirect_uri"] == ["https://app.example/api/v1/meta/oauth/callback"]
@@ -396,3 +404,15 @@ def test_reconnect_removes_old_subscriptions_before_replacing_credentials(oauth)
     assert connect(client).status_code == 303
     assert any(r.method == "DELETE" and r.url.path.endswith("/20/subscribed_apps") for r in calls)
     assert client.get(BASE + "/connection").json()["selected"] == []
+
+
+def test_missing_product_or_no_expiry_still_connects_with_what_meta_allows(oauth, caplog):
+    client, _ = oauth
+    broken.add("/me/businesses")
+    never_expires.append(True)
+    response = connect(client)
+    assert "connected=true" in response.headers["location"]
+    status = client.get(BASE + "/connection").json()
+    kinds = {asset["kind"] for asset in status["assets"]}
+    assert status["connected"] and kinds == {"ads", "messenger", "instagram"}
+    assert "code 200" in caplog.text and "private" not in caplog.text

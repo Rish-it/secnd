@@ -176,3 +176,21 @@ that coverage. All 4,386 MTOP test rows at full history, gate and floor fixed on
 | 150M | 32 | 16.1% | 0 | 99.48% | 1 |
 
 Files: `attacks-floor-audited.json`, `attacks-floor-audited-400m.json`, `floor-full-test.json`.
+
+## Released reader (Amendment 6)
+
+`ic-ettin-400m-s6000-near-wide-fine-seed1`, same method, same 12 model-audited calibration labels, no new votes.
+Those rows were chosen using older readers, so other wrong labels may remain. All 4,386 MTOP test rows:
+
+| Examples | Temperature | Threshold | Floor | Answered alone | Accepted | Errors | 95% low | Wrong accepts, intent removed (of 500) |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 1.526 | none | none | 0% | 0 | 0 | n/a | 0 |
+| 8 | 1.198 | 0.9825 | 0.86 | 21.04% | 923 | 1 | 99.40% | 2 |
+| 32 | 1.136 | 0.9669 | 0.90 | 14.46% | 634 | 1 | 99.12% | 2 |
+
+Coverage is up against the older 400M, 13.89% at 8 and 7.3% at 32, on one seed. **The missing-intent target of at most 1
+wrong accept per 500 was missed at both counts.** With no examples nothing certifies, so it never answers alone. On the
+500 attack rows with the gate unchanged, nothing else accepted a wrong answer at 8 or 32 examples, and rewording cuts
+coverage hard: 21.6% falls to 6.8% with a polite prefix and 3.0% with transposed letters at 8.
+
+Files: `attacks-floor-audited-400m-fine-seed1.json`, `floor-full-test-400m-fine-seed1.json`.

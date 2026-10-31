@@ -14,6 +14,9 @@ from backend.reader_serving import CPUReader
 from backend.registry import Registry
 from backend.schemas import EvalCard
 
+# Measured crossover, docs/results/s2/wide-round.md: fewer rows favour the reader, more the head.
+HEAD_FROM_ROWS = 1000
+
 
 class ReaderRuntime:
     def __init__(self, store, settings, factory=CPUReader):
@@ -27,10 +30,11 @@ class ReaderRuntime:
             return self.settings.workspace_backends[workspace] == "reader"
         if workspace in self.settings.workspace_readers:
             return True
+        registered = Registry(self.settings.data_dir, workspace).current() is not None
+        if self.settings.serving_backend == "auto":
+            return not registered or len(self.history(workspace)) < HEAD_FROM_ROWS
         # A registered workspace keeps its own calibrated head unless explicitly selected.
-        if Registry(self.settings.data_dir, workspace).current() is not None:
-            return False
-        return self.settings.serving_backend == "reader"
+        return not registered and self.settings.serving_backend == "reader"
 
     def _state(self, workspace):
         reader = self.reader(workspace)
@@ -80,7 +84,7 @@ class ReaderRuntime:
 
     def startup(self):
         # Eager loading makes bad model/device configuration a startup error, never a fallback.
-        if self.settings.serving_backend == "reader":
+        if self.settings.serving_backend in ("reader", "auto"):
             self.reader("")
         for workspace in self.settings.workspace_readers | self.settings.workspace_backends:
             if self.enabled(workspace):

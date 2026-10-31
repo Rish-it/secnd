@@ -17,6 +17,10 @@ loading the 400M model. [Serving configuration](docs/serving.md).
 Built for Meta's platform. Built with Muse Spark Open. Secnd is independently
 developed and is not an official Meta product.
 
+## Try it
+
+[Public demo](https://athreanlab--secnd-demo-web.us-east.modal.run), with fictional data and no live Meta actions. The first load after idle takes about 10 seconds.
+
 ## Run the offline product demo
 
 From the repository root, using Python 3.12 and Node.js 24:
@@ -67,20 +71,21 @@ confirmation. Stopping requires an operator reset before actions resume.
 
 ## Evidence, kept separate from your business
 
-The fixed public-history evaluation for `ic-ettin-400m-s6000-near`, with eight
-examples and the support floor, recorded **13.89% coverage**, **609 accepted
-answers with zero errors** and a **99.40% lower confidence bound** over **4,386**
-unchanged MTOP test rows. Source: `docs/results/s3r/floor-full-test.json`.
+The fixed public-history evaluation for the [released reader](https://huggingface.co/Secnd-AI/ren/tree/v1.1.0), with eight
+examples and the support floor, recorded **21.04% coverage**, **923 accepted
+answers with 1 error** and a **99.40% lower confidence bound** over **4,386**
+unchanged MTOP test rows. Source: `docs/results/s3r/floor-full-test-400m-fine-seed1.json`.
 Calibration labels were audited by models, not humans. These results require the
 full fixed public history and do not certify a new business or future traffic.
-The separate missing-intent audit contains a wrong acceptance for this condition.
+The separate missing-intent audit accepted 2 wrong answers per 500 for this condition,
+above its target of 1.
 Source: `docs/results/s3r/README.md`.
 
-The latest retraining added wider, licence-checked data. Its best shippable reader
-measured **90.62%** on BANKING77 and **92.93%** on MTOP with eight examples, and
-**68.90%** and **78.64%** with none. On raw labels, BANKING77 still certifies no
-automatic coverage, and MTOP coverage moved 19 points between seeds of one pool, so
-one run cannot prove a coverage gain. These weights are not released yet.
+The released weights come from wider, licence-checked data. They measured
+**89.90%** on BANKING77 and **92.38%** on MTOP with eight examples, and **68.99%** and
+**75.99%** with none. BANKING77 certifies none at the 99% bar, even after a model audit.
+MTOP coverage moved 19 points between seeds of one earlier pool, so one run cannot prove a
+coverage gain.
 [Wider training pools](docs/results/s2/wide-round.md).
 
 Personal reviews are labelled “Measured on your own reviews”. Audited public

@@ -182,3 +182,28 @@ training. Spend is capped at $6.
 
 Inputs are fixed by SHA-256 in a commit made before the first vote.
 
+### Amendment 5, reader revised (registered before any vote)
+
+No vote had been cast. The reader named above lost to `ic-ettin-400m-s6000-near-wide-fine-seed1`, chosen
+because it certified the most calibration rows at 8 nearest examples, so the audit uses that reader
+instead. Nothing else changes. Its 600 most confident rows of the certification half hold 9
+disagreements and the 100 controls, with the first wrong answer at rank 200 of the 427 the gate needs.
+Controls offer the reader's second choice as the other option. Inputs:
+`59b981d6f5fda7139edea8bb62b38bc9c54ff6a1b50779fd9fff9c3fa75e53ee`
+
+## Amendment 6: gate and support floor for the shipped reader (registered before its inference)
+
+Reason: `ic-ettin-400m-s6000-near-wide-fine-seed1` was chosen on calibration as the reader to ship, and
+the floors and audited thresholds above belong to older weights. Nothing here is a new vote. The 12
+MTOP calibration labels changed by the Amendment 4 model audit are applied as published; those rows were
+selected using older readers, so other wrong labels may remain. BANKING77 calibration labels stay raw for
+gating, because its audit leaves certified coverage at zero.
+
+Method: the Amendment 2 floor, unchanged, on the 2,000 certification rows at 0, 8 and 32 examples, then
+the same 500-row attack set once, then all 4,386 MTOP test rows from saved probabilities. Test labels are
+unchanged. Only values from this run ship with this reader. Every result says it comes from a model audit.
+
+Serving choice, fixed before results and from existing measurements only: the reader answers with fewer
+than 1,000 history rows and the logistic head from 1,000 up. At 1,000 labels the reader leads on MTOP
+(88.12% against 80.46%) and the head on BANKING77 (85.32% against 82.60%); at full history the head leads
+both. Reader cutoffs certify full MTOP history only and never apply to another workspace's history.

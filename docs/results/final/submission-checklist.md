@@ -14,7 +14,7 @@ Deadline: **Nov 4, 2026, 9:00 PM ET = Nov 5, 2026, 7:30 AM IST**.
 - [ ] Public repository: https://github.com/Rish-it/secnd, with the submitted
       branch/commit clearly linked. The judge's quickstart runs twice from a clean
       clone; all displayed numbers link to results from that revision.
-- [ ] Public live-product URL: **RELEASE_TODO**. Test without the developer's session.
+- [x] Public live-product URL: https://athreanlab--secnd-demo-web.us-east.modal.run. Synthetic demo, tested from a fresh browser.
 - [ ] Public video URL: **RELEASE_TODO**. Maximum 3 minutes. Script:
       [video-script.md](../../submission/video-script.md).
 - [ ] Project name, short description, team names, roles and contact information
@@ -23,9 +23,8 @@ Deadline: **Nov 4, 2026, 9:00 PM ET = Nov 5, 2026, 7:30 AM IST**.
       labeller selection, never for training. Muse Spark Open labels and writes training
       rows. Muse never decides. Distinguish implemented clients from features exercised
       in the recorded product.
-- [ ] Ren model URL: **RELEASE_TODO**, model id `secnd-ren-1`. The public encoder is
-      `v1.0.0`; the 400M reader is not released yet. Do not call its weights public until
-      the upload exists, and do not describe Ren as an official Meta product.
+- [x] Ren model URL: https://huggingface.co/Secnd-AI/ren/tree/v1.1.0, model id `secnd-ren-1`. Do not describe Ren as an
+      official Meta product.
 - [ ] Review the open-weight prize flag against the official eligibility rules
       and actual Meta model usage; record the relevant model/provider accurately.
 - [ ] Dataset and encoder credits, artifact rights and the selected release license are in

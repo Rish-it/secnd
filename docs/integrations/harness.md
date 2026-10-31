@@ -52,14 +52,15 @@ Do not put tokens or the key into frontend configuration. Short-lived and long-l
 exchanges run on the server. Tokens, including Page tokens, are encrypted at rest.
 Disconnect deletes stored credentials and all of that person's account mappings.
 
-These scopes live in one Settings list. The default is:
+The Business login configuration alone decides the permissions; the app sends only its ID, as Meta
+recommends. Select these in it:
 
 ```json
 ["ads_read", "ads_management", "business_management", "pages_show_list", "pages_manage_metadata", "pages_messaging", "instagram_basic", "instagram_manage_messages", "whatsapp_business_management", "whatsapp_business_messaging"]
 ```
 
-An optional `SECND_META_SCOPES` JSON override changes that one list. Keep the Business login
-configuration synchronized with it. Add **exactly** the configured redirect URI to Meta's
+A permission is offered only once its product is on the app, and an asset that lacks one reports it
+when subscribing. Add **exactly** the configured redirect URI to Meta's
 Valid OAuth Redirect URIs. Set the data deletion request callback to
 `https://YOUR_HOST/api/v1/meta/data-deletion`. Its signed request removes credentials and the
 person's derived workspace data, history and local model artifacts, even after disconnect.
@@ -196,7 +197,8 @@ MiniLM retrieval cache under `/vol/hf`. The endpoint requires `Authorization: Be
 returns model id, fingerprint and option probabilities. Its JSON request contains `item_id`,
 `text`, `decision_type` (`ad`, `inbox`, `account`), `keys`, `meanings`, and `history` rows with
 `id`, `text`, `label`. It never executes an action. The optional Modal SDK is an operator tool,
-not an app runtime dependency. No deployment or GPU serving measurement was performed here.
+not an app runtime dependency. [Measured over HTTP](../results/s8/load-gpu-secnd-ren-1.json): 17.5 s cold start, then
+3.68 requests a second with four clients. The client waits 30 seconds by default, so a cold start still gets an answer.
 See Modal's [web application](https://modal.com/docs/guide/webhooks) and
 [scaling](https://modal.com/docs/guide/scale) configuration.
 

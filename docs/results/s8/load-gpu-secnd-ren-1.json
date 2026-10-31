@@ -1,0 +1,23 @@
+{
+ "kind": "HTTP from a laptop in India to one A10G in us-east, written tasks only",
+ "model_id": "secnd-ren-1",
+ "revision": "d56b4262654976386ac81144dc2a9670ae7601c359962ef86377774ddb854c72",
+ "history_rows": 200,
+ "options": 4,
+ "examples": 8,
+ "cold_start_ms": 17499,
+ "a10g_usd_per_second_list": 0.000306,
+ "sequential": {
+  "requests": 100,
+  "p50_ms": 424.3,
+  "p95_ms": 440.5,
+  "requests_per_second": 2.26
+ },
+ "four_clients": {
+  "requests": 100,
+  "p50_ms": 883.6,
+  "p95_ms": 1823.4,
+  "requests_per_second": 3.68
+ },
+ "gpu_usd_per_1000_when_saturated": 0.0833
+}

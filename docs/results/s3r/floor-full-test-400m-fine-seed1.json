@@ -1,0 +1,31 @@
+{
+ "ic-ettin-400m-s6000-near-wide-fine-seed1": {
+  "0": {
+   "test_rows": 4386,
+   "accepted_without_floor": 0,
+   "accepted": 0,
+   "errors": 0,
+   "coverage": 0.0,
+   "precision": null,
+   "low95": 0.0
+  },
+  "8": {
+   "test_rows": 4386,
+   "accepted_without_floor": 2571,
+   "accepted": 923,
+   "errors": 1,
+   "coverage": 0.2104,
+   "precision": 0.9989,
+   "low95": 0.994
+  },
+  "32": {
+   "test_rows": 4386,
+   "accepted_without_floor": 3106,
+   "accepted": 634,
+   "errors": 1,
+   "coverage": 0.1446,
+   "precision": 0.9984,
+   "low95": 0.9912
+  }
+ }
+}

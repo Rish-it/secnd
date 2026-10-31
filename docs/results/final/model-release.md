@@ -1,7 +1,7 @@
 # Model release preparation draft
 
-These steps cover the classifier-head bundle. The 400M reader needs its own bundle: encoder,
-`scorer.pt`, retrieval cache pin and a card from [the reader draft](../../hf/README-draft.md).
+These steps cover the classifier-head bundle. The 400M reader and Meta checkpoints are public at
+tag `v1.1.0`, uploaded by `backend/modal_hf_reader.py` with [this card](../../hf/README.md).
 
 No upload is performed by the build or by this document. The helper defaults
 to a local preview; publication requires a separate approved invocation.
@@ -13,7 +13,7 @@ Prepare a dedicated directory containing exactly four reviewed files:
 - `runtime.json`: `model_id: "secnd-ren-1"`, `model_version`, `labels` in classifier
   order, `featurizer`, and `merchant_memory` mapping normalised keys to label
   indices. Include the encoder revision, preprocessing and seed needed to load it.
-- `README.md`: the completed [model card](../../hf/README-draft.md), with an approved
+- `README.md`: the completed [model card](../../hf/README.md), with an approved
   release license and results for those exact weights. No DRAFT/RELEASE_TODO markers.
 
 The registry currently stores a candidate head/calibration dictionary. Final

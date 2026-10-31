@@ -417,10 +417,7 @@ def test_audited_manifest_and_floored_full_test_benchmark():
     manifest = json.loads(MANIFEST.read_text())
     assert manifest["source_commit"] == "ada0a0d"
     for model, entry in manifest["models"].items():
-        expected = (
-            "attacks-floor-audited-400m.json" if "400m" in model else "attacks-floor-audited.json"
-        )
-        assert entry["policy_file"] == "docs/results/s3r/" + expected
+        assert entry["policy_file"].startswith("docs/results/s3r/attacks-floor-audited")
         raw = Path(entry["policy_file"]).read_bytes()
         assert hashlib.sha256(raw).hexdigest() == entry["policy_sha256"]
         for examples in (0, 8, 32):
@@ -434,5 +431,39 @@ def test_audited_manifest_and_floored_full_test_benchmark():
             assert card["with_floor_precision"] == full["precision"]
             assert card["with_floor_sample"] == full["test_rows"]
             assert card["with_floor_low95"] == full["low95"]
-            assert card["floor_result_file"] == "docs/results/s3r/floor-full-test.json"
+            assert card["floor_result_file"] == entry["floor_benchmark_file"]
             assert card["calibration_audit"] == "model"
+
+
+def test_auto_reads_until_a_registered_head_has_enough_history(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+
+    from backend.reader_runtime import HEAD_FROM_ROWS
+    from backend.registry import Registry
+
+    settings = Settings(data_dir=tmp_path, serving_backend="auto", _env_file=None)
+    runtime = ReaderRuntime(Store(settings.database_path), settings)
+    rows = []
+    monkeypatch.setattr(runtime, "history", lambda workspace: rows)
+    registered = None
+    monkeypatch.setattr(Registry, "current", lambda self: registered)
+
+    rows[:] = [SimpleNamespace()] * HEAD_FROM_ROWS
+    assert runtime.enabled("shop"), "no head yet, so the reader answers"
+    registered = "ren-1.1"
+    assert not runtime.enabled("shop"), "enough history with a head uses the head"
+    rows.pop()
+    assert runtime.enabled("shop"), "too little history uses the reader"
+
+    settings.workspace_backends = {"shop": "head"}
+    assert not runtime.enabled("shop"), "an explicit choice wins"
+
+
+@pytest.mark.parametrize("examples,floor", [(8, 0.86), (32, 0.90)])
+def test_shipped_reader_serves_its_own_gate_and_no_examples_stays_closed(
+    stand_in, tmp_path, examples, floor
+):
+    model = "ic-ettin-400m-s6000-near-wide-fine-seed1"
+    policy = ReaderArtifact(ReaderOptions(model_id=model, examples=examples)).policy
+    assert policy.complete and policy.floor == floor
+    assert not ReaderArtifact(ReaderOptions(model_id=model, examples=0)).policy.complete

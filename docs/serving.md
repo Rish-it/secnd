@@ -32,6 +32,11 @@ The optional GPU selection is:
 SECND_WORKSPACE_READERS='{"demo":{"model_id":"ic-ettin-400m-s6000-near","device":"cuda","examples":8}}'
 ```
 
+`SECND_SERVING_BACKEND=auto` uses the reader until a workspace has both a registered
+head and 1,000 history rows, then the head. At 1,000 labels the reader leads on MTOP and the
+head on BANKING77; at full history the head leads both
+([measurements](results/s2/wide-round.md#how-much-history-a-person-needs)). A per-workspace choice still wins.
+
 A global `SECND_SERVING_BACKEND=reader` supplies a reader for workspaces without a
 registered model. It preserves existing registered workspace models. An explicit
 per-workspace reader selection can override a registered head. Label-only
@@ -90,6 +95,12 @@ coverage. At eight examples, the 150M floored share is **10.85%**, observed prec
 **100%** and **99.40%**. These are the recorded GPU-derived evaluation conditions,
 not independent CPU certification or measurements of an arbitrary workspace.
 Confidence-only coverage figures do not describe the floored policy.
+
+The [released reader](https://huggingface.co/Secnd-AI/ren/tree/v1.1.0),
+`ic-ettin-400m-s6000-near-wide-fine-seed1`, has [its own gate](results/s3r/README.md#released-reader-amendment-6):
+**21.04%**, 923 accepted with 1 error, lower bound **99.40%** at eight examples. It accepts nothing with no examples.
+Install it with `hf download Secnd-AI/ren --revision v1.1.0 --include "reader/*"`, then move `reader/` to
+`SECND_DATA_DIR/encoders/ic-ettin-400m-s6000-near-wide-fine-seed1/`.
 
 Limits stay visible in the source results: the audited 150M eight-example policy
 accepted two wrong missing-intent answers out of 500, exceeding the one-error target.

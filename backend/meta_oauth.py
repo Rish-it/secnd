@@ -4,6 +4,7 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
 import secrets
 import shutil
 import time
@@ -25,6 +26,8 @@ REFUSED = (
     "Meta declined the connection. Until Advanced Access is approved, use an account "
     "with an admin, developer or tester role on this Meta app."
 )
+
+logger = logging.getLogger(__name__)
 
 
 def serialized_connection(method):
@@ -107,7 +110,6 @@ class MetaOAuth:
                 "config_id": config.meta_login_config_id,
                 "redirect_uri": config.meta_redirect_uri,
                 "response_type": "code",
-                "scope": ",".join(config.meta_scopes),
                 "state": state,
             }
         )
@@ -125,8 +127,10 @@ class MetaOAuth:
             or row["expires"] < time.time()
             or not hmac.compare_digest(row["state_hash"], digest(state))
         ):
+            logger.warning("Meta sign-in refused: state expired or did not match")
             raise HTTPException(403, "Meta sign-in expired or state did not match. Connect again.")
         if error or not code:
+            logger.warning("Meta sign-in refused: the person or Meta denied it")
             raise HTTPException(403, REFUSED)
         try:
             config = self.settings
@@ -152,6 +156,8 @@ class MetaOAuth:
                 },
             )
             token = long["access_token"]
+            # Meta omits expires_in for tokens that do not expire; recheck after its usual 60 days.
+            expires_in = int(long.get("expires_in", 60 * 86400))
             client = self.client(token)
             meta_user = client.request("GET", "me", params={"fields": "id"})["id"]
             assets, tokens = self.inventory(client)
@@ -176,12 +182,13 @@ class MetaOAuth:
                         user,
                         meta_user,
                         blob,
-                        time.time() + int(long["expires_in"]),
+                        time.time() + expires_in,
                         encode(assets),
                     ),
                 )
             return row["workspace_id"]
-        except (AdsUnavailable, KeyError, ValueError, TypeError):
+        except (AdsUnavailable, KeyError, ValueError, TypeError) as failure:
+            logger.warning("Meta sign-in refused: %s", type(failure).__name__)
             raise HTTPException(403, REFUSED) from None
 
     @staticmethod
@@ -215,10 +222,17 @@ class MetaOAuth:
             if token:
                 tokens[key] = token
 
-        for row in self.rows(client, "me/adaccounts", "id,name"):
+        def listed(path, fields):
+            # A product missing from the app removes its assets, not the whole connection.
+            try:
+                return self.rows(client, path, fields)
+            except AdsUnavailable:
+                return []
+
+        for row in listed("me/adaccounts", "id,name"):
             add("ads", row["id"], row.get("name", "Ad account"))
-        for row in self.rows(
-            client, "me/accounts", "id,name,access_token,instagram_business_account{id,username}"
+        for row in listed(
+            "me/accounts", "id,name,access_token,instagram_business_account{id,username}"
         ):
             add("messenger", row["id"], row.get("name", "Page"), row.get("access_token"))
             ig = row.get("instagram_business_account")
@@ -230,15 +244,13 @@ class MetaOAuth:
                     row.get("access_token"),
                     row["id"],
                 )
-        for business in self.rows(client, "me/businesses", "id"):
+        for business in listed("me/businesses", "id"):
             if not str(business["id"]).isdigit():
                 raise ValueError("Invalid business id")
-            for waba in self.rows(
-                client, f"{business['id']}/owned_whatsapp_business_accounts", "id,name"
-            ):
+            for waba in listed(f"{business['id']}/owned_whatsapp_business_accounts", "id,name"):
                 if not str(waba["id"]).isdigit():
                     raise ValueError("Invalid business id")
-                for number in self.rows(client, f"{waba['id']}/phone_numbers", "id,verified_name"):
+                for number in listed(f"{waba['id']}/phone_numbers", "id,verified_name"):
                     add(
                         "whatsapp",
                         number["id"],
