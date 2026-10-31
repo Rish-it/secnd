@@ -182,3 +182,11 @@ training. Spend is capped at $6.
 
 Inputs are fixed by SHA-256 in a commit made before the first vote.
 
+### Amendment 5, reader revised (registered before any vote)
+
+No vote had been cast. The reader named above lost to `ic-ettin-400m-s6000-near-wide-fine-seed1`, chosen
+because it certified the most calibration rows at 8 nearest examples, so the audit uses that reader
+instead. Nothing else changes. Its 600 most confident rows of the certification half hold 9
+disagreements and the 100 controls, with the first wrong answer at rank 200 of the 427 the gate needs.
+Controls offer the reader's second choice as the other option. Inputs:
+`59b981d6f5fda7139edea8bb62b38bc9c54ff6a1b50779fd9fff9c3fa75e53ee`
