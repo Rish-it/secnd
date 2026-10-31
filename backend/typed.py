@@ -148,6 +148,9 @@ def temperatures(ds, probs, target: str = "label") -> dict[str, float]:
     out = {}
     for kind in ("choice", "noul", "score"):
         mine = [(d, p) for d, p in zip(ds, probs, strict=True) if d.kind == kind]
+        if not mine:
+            out[kind] = 1.0
+            continue
         p = pad([p for _, p in mine])
         out[kind] = (
             fit_temperature(np.array([d.label for d, _ in mine]), p)
@@ -192,13 +195,13 @@ def ece_binary(conf: np.ndarray, hits: np.ndarray, bins: int = 15) -> float:
     )
 
 
-def train(init, data_dir, epochs, seed, batch_size=16, lr=3e-5):
+def train(init, data_dir, epochs, seed, batch_size=16, lr=3e-5, splits=None, keep=False):
     from transformers import get_linear_schedule_with_warmup
 
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     dev = device()
-    fit, val, test = load(data_dir)
+    fit, val, test = splits or load(data_dir)
     model, tok = reader(init, data_dir)
     model = model.to(dev)
     optim = torch.optim.AdamW(
@@ -245,10 +248,14 @@ def train(init, data_dir, epochs, seed, batch_size=16, lr=3e-5):
         if best is None or acc > best[0]:
             best = (acc, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()})
     model.load_state_dict(best[1])
+    folder = data_dir / "encoders" / f"typed-{init}-e{epochs}-s{seed}"
+    model.encoder.save_pretrained(folder / "encoder")
+    tok.save_pretrained(folder / "encoder")
+    torch.save(model.scorer.state_dict(), folder / "scorer.pt")
     val_probs, test_probs = predict(model, tok, val), predict(model, tok, test)
     temps = temperatures(val, val_probs)
     probs = {"val": pad(val_probs), "test": pad(test_probs)}
-    return probs, {
+    result = {
         "init": init,
         "seed": seed,
         "epochs": epochs,
@@ -260,6 +267,7 @@ def train(init, data_dir, epochs, seed, batch_size=16, lr=3e-5):
         "val": report(val, val_probs, temps),
         "test": report(test, test_probs, temps),
     }
+    return (probs, result, model, tok) if keep else (probs, result)
 
 
 def ensemble(data_dir: Path, paths: list[Path], target: str = "label") -> dict:

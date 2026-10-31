@@ -1,0 +1,151 @@
+{
+  "steps": 6000,
+  "final_loss": 0.20971787029411643,
+  "train_seconds": 1850,
+  "model": "ic-ettin-400m-s6000-near-wide",
+  "base": "jhu-clsp/ettin-encoder-400m@7662476d60abb071a5bd319c9f3074f3072c062d",
+  "parameters": 395834369,
+  "device": "cuda",
+  "train_sets": {
+    "topv2": 151266,
+    "clinc150": 15191,
+    "massive_en": 11406,
+    "snips": 13080,
+    "atis": 4978,
+    "go_emotions": 36306,
+    "bitext_support": 24182,
+    "civil_comments": 30000,
+    "dbpedia_14": 30000,
+    "fever": 30000,
+    "paws": 30000,
+    "sms_spam": 5017,
+    "squad_answerable": 30000,
+    "wanli": 30000
+  },
+  "results": {
+    "banking77": {
+      "0-shot": {
+        "accuracy": 0.6386,
+        "ece_test": 0.0279,
+        "temperature": 1.985,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-random": {
+        "accuracy": 0.6455,
+        "ece_test": 0.0251,
+        "temperature": 1.918,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-nearest": {
+        "accuracy": 0.8873,
+        "ece_test": 0.0131,
+        "temperature": 1.512,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "32-nearest": {
+        "accuracy": 0.8682,
+        "ece_test": 0.0094,
+        "temperature": 1.438,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-8": {
+        "accuracy": 0.9032,
+        "ece_test": 0.0386,
+        "temperature": 1.095,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8617,
+        "ece_test": 0.0547,
+        "temperature": 0.731,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      }
+    },
+    "mtop": {
+      "0-shot": {
+        "accuracy": 0.777,
+        "ece_test": 0.0233,
+        "temperature": 1.578,
+        "certified_coverage_test": 0.2544,
+        "precision_auto_test": 0.9991,
+        "cert_rows": 2000,
+        "cert_accepted": 509,
+        "cert_cp_lower": 0.9941
+      },
+      "8-random": {
+        "accuracy": 0.7852,
+        "ece_test": 0.0229,
+        "temperature": 1.531,
+        "certified_coverage_test": 0.2622,
+        "precision_auto_test": 0.9983,
+        "cert_rows": 2000,
+        "cert_accepted": 513,
+        "cert_cp_lower": 0.9942
+      },
+      "8-nearest": {
+        "accuracy": 0.9236,
+        "ece_test": 0.0079,
+        "temperature": 1.252,
+        "certified_coverage_test": 0.2136,
+        "precision_auto_test": 0.9989,
+        "cert_rows": 2000,
+        "cert_accepted": 427,
+        "cert_cp_lower": 0.993
+      },
+      "32-nearest": {
+        "accuracy": 0.9241,
+        "ece_test": 0.0106,
+        "temperature": 1.229,
+        "certified_coverage_test": 0.495,
+        "precision_auto_test": 0.9991,
+        "cert_rows": 2000,
+        "cert_accepted": 981,
+        "cert_cp_lower": 0.9936
+      },
+      "vote-8": {
+        "accuracy": 0.8607,
+        "ece_test": 0.0691,
+        "temperature": 1.039,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8518,
+        "ece_test": 0.0467,
+        "temperature": 0.775,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      }
+    }
+  }
+}
