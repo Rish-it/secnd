@@ -1,0 +1,25 @@
+backend/demo_seed.py
+  s_9245a16bb07969::t_e9fe1b9fddbc3a 253-255,358,367-369,397-407
+backend/tests/test_product_demo.py
+  s_9245a16bb07969::t_4b9f923fad8d12 39
+frontend/src/api.ts
+  s_9245a16bb07969::t_4550fd6f19bc2e 17-18
+frontend/src/decisionBasis.ts
+  s_9245a16bb07969::t_807c0ff2e4da15 5,7,15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "cb976e98fa5b3bd7cddd1fe56374f81bb7059eed",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
