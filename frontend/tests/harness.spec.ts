@@ -16,7 +16,7 @@ test("autonomy and activity remain keyboard accessible at 390px", async ({
   await expect(
     ads.getByText("299 more consecutive confirmations", { exact: false }),
   ).toBeVisible();
-  await ads.getByLabel("Permission", { exact: true }).selectOption("ask");
+  await ads.getByRole("combobox", { name: /^Permission/ }).selectOption("ask");
   await expect(
     page.getByRole("status").filter({ hasText: /Current level: ask/ }),
   ).toBeVisible();
@@ -29,10 +29,11 @@ test("autonomy and activity remain keyboard accessible at 390px", async ({
     page.getByRole("heading", { name: "What happened after" }),
   ).toBeVisible();
   await expect(page.getByLabel(/Share anonymous aggregate/)).not.toBeChecked();
-  await page.getByLabel(/Share anonymous aggregate/).check();
+  await page.getByLabel(/Share anonymous aggregate/).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Preference saved." }),
   ).toBeVisible();
+  await expect(page.getByLabel(/Share anonymous aggregate/)).toBeChecked();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     390,
   );
