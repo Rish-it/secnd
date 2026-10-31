@@ -161,3 +161,24 @@ Spend is capped at $1, checked before every request.
 Thresholds change with the audited labels, so floors are refit by the Amendment 2 method, unchanged,
 on the audited MTOP calibration labels, and the 500-row attack set is rerun once. Test labels stay
 unchanged. Only values from this run ship with the refit gate.
+
+## Amendment 5: second BANKING77 model audit (registered before any vote)
+
+Reason: the BANKING77 audit under Amendment 4 overturned 2 of 60 controls, so it was reported as
+biased and not used. That result stands and is reported next to anything from this audit. This is
+a second, separate attempt with a different panel. If it fails its control rule, BANKING77 stays
+unaudited and there is no third attempt.
+
+Panel: `muse-wonder-1.0`, `openai/gpt-6.1-sol`, `anthropic/claude-sonnet-5.5`, one independent
+request per row, each from a different lab, none used as a teacher in training. Reader:
+`ic-ettin-400m-s6000-near-wide-clean`, 8 nearest examples, full history. Rows come only from
+calibration: every disagreement between the reader and its label among the 600 most confident rows
+of the gate's certification half, plus 100 random rows from those 600 where they agree, drawn with
+seed 5. Everything else in Amendments 3 and 4 is unchanged: the same options and shuffling, the
+2 of 3 rule, the 2% control rule, publishing every changed label with its votes, and reporting on
+both label sets. Test labels are never audited or changed, so precision against them can fall
+below 99%. Every result says it comes from a model audit. Audit outputs are never used for
+training. Spend is capped at $6.
+
+Inputs are fixed by SHA-256 in a commit made before the first vote.
+
