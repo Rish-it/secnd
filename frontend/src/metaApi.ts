@@ -11,6 +11,7 @@ export type MetaStatus = {
   model_ready: boolean;
   signing_configured: boolean;
   whatsapp_send_enabled: boolean;
+  message_send_enabled?: boolean;
 };
 export type AdsStatus = {
   demo: boolean;

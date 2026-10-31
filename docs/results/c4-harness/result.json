@@ -1,0 +1,127 @@
+{
+  "branch": "stage/c4-harness",
+  "base": "origin/main",
+  "commits": [],
+  "commit_status": "blocked: sandbox refuses the shared worktree index lock",
+  "checkpoints": [
+    {
+      "item": 1,
+      "intent": "Preserve the spot-check guard on answer undo",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 2,
+      "intent": "Require sessions and workspace ownership",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 3,
+      "intent": "Add encrypted business OAuth and selected asset mappings",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 4,
+      "intent": "Schedule workspace work with durable controls",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 5,
+      "intent": "Gate autonomy on workspace reviews and support ad undo",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 6,
+      "intent": "Record and export seven-day ad observations",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 7,
+      "intent": "Share opt-in aggregate counts only",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 8,
+      "intent": "Reuse reviewed history, promotion checks and rollback",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 9,
+      "intent": "Build sign-in, account selection, inbox, autonomy and activity screens",
+      "commit": "blocked_index_write"
+    },
+    {
+      "item": 10,
+      "intent": "Verify with mocked Meta transport and save the result",
+      "commit": "blocked_index_write"
+    }
+  ],
+  "verification": {
+    "npm_run_check": "passed with cached Python environment",
+    "python_tests_passed": 340,
+    "python_test_seconds": 56.12,
+    "ruff_check": "passed",
+    "ruff_format": "passed",
+    "frontend_lint": "passed with warnings",
+    "frontend_lint_warnings": 6,
+    "frontend_typescript_and_production_build": "passed",
+    "environment": {
+      "UV_NO_SYNC": "true",
+      "UV_CACHE_DIR": "writable temporary cache",
+      "HF_HUB_OFFLINE": "1",
+      "TRANSFORMERS_OFFLINE": "1"
+    },
+    "uv_sync_locked": "blocked: default cache is not writable; writable-cache retry crashes in macOS system configuration",
+    "npm_ci": "passed offline after repairing missing lockfile download metadata from cached tarballs",
+    "browser": "blocked: local server bind and browser launch denied; browser tool requires approval under never policy",
+    "live_meta_verification": "not run; integration tests use mocked transports",
+    "protected_model_files_and_existing_gate": "unchanged"
+  },
+  "regression_first": {
+    "undo_guard_test": "failed before fix; passed after fix"
+  },
+  "no_correction_unlock_cases": [
+    {
+      "bar": 0.9,
+      "reviewed": 29,
+      "confirmed": 29,
+      "one_sided_95_lower": 0.9018553723227043
+    },
+    {
+      "bar": 0.95,
+      "reviewed": 59,
+      "confirmed": 59,
+      "one_sided_95_lower": 0.950492390111773
+    },
+    {
+      "bar": 0.98,
+      "reviewed": 149,
+      "confirmed": 149,
+      "one_sided_95_lower": 0.9800951837793149
+    },
+    {
+      "bar": 0.99,
+      "reviewed": 299,
+      "confirmed": 299,
+      "one_sided_95_lower": 0.9900308532071007
+    }
+  ],
+  "shortcuts_and_limits": [
+    "Local password accounts and opaque sessions; no email verification or password recovery flow.",
+    "The review window is fixed at the latest 1000 distinct eligible decisions.",
+    "Workspace evidence adds a requirement; existing model certification and the reader exact-history restriction remain.",
+    "Ads use a workspace with the existing four-action label schema; inbox templates use separate workspaces.",
+    "Customer replies use approved short response-label text verbatim; no freeform reply generator was added.",
+    "Meta asset webhook subscriptions are configured manually in Meta setup tools.",
+    "WhatsApp discovery enumerates business-owned numbers and Instagram discovery follows linked Pages.",
+    "Disconnect erases local credentials and mappings; it does not provision or revoke Meta-side app roles.",
+    "No Meta account-management writes are implemented.",
+    "Observed outcomes require human review before training; hindsight reviews cannot unlock Act.",
+    "Delivered messages have no app-side undo; supported Ads undo refuses intervening changes.",
+    "The worker remains one in-process thread with SQLite, as requested. Global stop cannot cancel already submitted provider requests.",
+    "Python checks used cached packages through a local environment; the added encryption dependency lock metadata came from an existing pinned local lock.",
+    "Missing npm download metadata was repaired from cached tarball integrity without changing package versions.",
+    "No live OAuth or browser layout/accessibility execution was completed in this sandbox.",
+    "All checkpoints and this measured result file remain uncommitted because Git index writes are denied."
+  ],
+  "run_settings_document": "docs/integrations/harness.md"
+}

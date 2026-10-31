@@ -281,3 +281,106 @@ def test_message_id_cannot_reuse_a_conflicting_existing_prediction(live):
         == 200
     )
     assert signed(client, payload("instagram")).status_code == 409
+
+
+def test_ask_confirmation_sends_once_and_watch_never_sends(live):
+    from backend.autonomy import Policy
+
+    client, service, settings = live
+    settings.whatsapp_send_enabled = True
+    settings.whatsapp_token = SecretStr("test-token")
+    calls = []
+    client.app.state.meta_webhook.transport = httpx.MockTransport(
+        lambda request: (
+            calls.append(request) or httpx.Response(200, json={"messages": [{"id": "sent"}]})
+        )
+    )
+    service.autonomy.configure("default", "inbox", Policy(level="watch"))
+    first = signed(client, payload()).json()["items"][0]
+    label = service.store.latest_prediction("default", first["item_id"])["label"]
+    assert (
+        client.post(
+            API + "/answers",
+            json={"item_id": first["item_id"], "label": label},
+            headers={"Idempotency-Key": "watch-review"},
+        ).status_code
+        == 200
+    )
+    assert calls == []
+    service.autonomy.configure("default", "inbox", Policy(level="ask"))
+    assert (
+        client.post(
+            API + "/answers",
+            json={"item_id": first["item_id"], "label": label},
+            headers={"Idempotency-Key": "ask-review"},
+        ).status_code
+        == 200
+    )
+    assert len(calls) == 1
+    assert (
+        client.post(
+            API + "/answers",
+            json={"item_id": first["item_id"], "label": label},
+            headers={"Idempotency-Key": "ask-review"},
+        ).status_code
+        == 200
+    )
+    assert len(calls) == 1
+    assert service.harness.status("default")["activity"][0]["event"] == "message_sent"
+
+
+@pytest.mark.parametrize("platform", ["messenger", "instagram"])
+def test_connected_page_and_instagram_confirmations_use_selected_token(live, platform):
+    from types import SimpleNamespace
+
+    from backend.autonomy import Policy
+
+    client, service, settings = live
+    service.autonomy.configure("default", "inbox", Policy(level="ask"))
+    result = signed(client, payload(platform)).json()["items"][0]
+    service.harness.configure("default", enabled=True)
+    service.meta_oauth = SimpleNamespace(
+        owned=lambda ws: True, mapped=lambda *args: True, token=lambda *args: "selected-page-token"
+    )
+    settings.meta_message_send_enabled = True
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        assert request.headers["Authorization"] == "Bearer selected-page-token"
+        return httpx.Response(200, json={"message_id": "sent"})
+
+    client.app.state.meta_webhook.transport = httpx.MockTransport(respond)
+    label = service.store.latest_prediction("default", result["item_id"])["label"]
+    assert (
+        client.post(
+            API + "/answers",
+            json={"item_id": result["item_id"], "label": label},
+            headers={"Idempotency-Key": "page-review"},
+        ).status_code
+        == 200
+    )
+    assert len(calls) == 1
+    assert json.loads(calls[0].content)["message"]["text"] == label
+
+
+def test_one_signed_app_callback_dispatches_only_selected_receiving_accounts(live):
+    client, service, settings = live
+    body = json.dumps(payload()).encode()
+    signature = "sha256=" + hmac.new(b"test-app-secret", body, hashlib.sha256).hexdigest()
+    assert client.post("/api/v1/meta/webhook", content=body).status_code == 403
+    response = client.post(
+        "/api/v1/meta/webhook", content=body, headers={"X-Hub-Signature-256": signature}
+    )
+    assert response.status_code == 200 and response.json()["accepted"] == 1
+    item = response.json()["items"][0]["item_id"]
+    assert service.store.latest_prediction("default", item) is None
+    # Paused workspaces retain signed messages durably until enabled.
+    service.harness.tick()
+    assert service.store.latest_prediction("default", item) is None
+    service.harness.configure("default", enabled=True)
+    service.harness.tick()
+    assert service.store.latest_prediction("default", item) is not None
+    assert client.post(
+        "/api/v1/meta/webhook", content=body, headers={"X-Hub-Signature-256": signature}
+    ).json()["items"][0]["duplicate"]

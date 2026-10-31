@@ -39,7 +39,7 @@ def rows(start, count, *, calibration=False):
 
 
 def create_demo(directory):
-    settings = Settings(data_dir=directory, _env_file=None, featurizer="char_tfidf")
+    settings = Settings(data_dir=directory, _env_file=None, demo_mode=True, featurizer="char_tfidf")
     service = WorkspaceService(
         Store(settings.database_path),
         directory,

@@ -106,23 +106,26 @@ class Proposal(BaseModel):
     insight: Insight
     action: AdAction
     decision: Decision
-    status: Literal["pending", "proposed", "executing", "executed", "delivery_unknown", "kept"]
+    status: Literal[
+        "pending", "proposed", "executing", "executed", "delivery_unknown", "kept", "undone"
+    ]
     duplicate: bool = False
 
 
 class MarketingClient:
-    def __init__(self, settings: Settings, transport=None):
+    def __init__(self, settings: Settings, transport=None, *, token=None, anonymous=False):
         self.settings = settings
         self.transport = transport
+        self.token, self.anonymous = token, anonymous
 
     def request(self, method, path, **kwargs):
-        token = self.settings.ads_token.get_secret_value()
-        if not token:
+        token = self.settings.ads_token.get_secret_value() if self.token is None else self.token
+        if not token and not self.anonymous:
             raise AdsUnavailable("Configure the sandbox Ads token before fetching insights.")
         try:
             with httpx.Client(
                 base_url=f"https://graph.facebook.com/{self.settings.meta_graph_version}/",
-                headers={"Authorization": f"Bearer {token}"},
+                headers={"Authorization": f"Bearer {token}"} if token else {},
                 transport=self.transport,
                 timeout=10,
                 follow_redirects=False,
@@ -181,7 +184,7 @@ class MarketingClient:
             params["after"] = after
         raise AdsUnavailable("Insights exceed the sandbox import limit. Choose a smaller range.")
 
-    def target(self, target_id, account):
+    def snapshot(self, target_id, account):
         value = self.request(
             "GET", target_id, params={"fields": "id,account_id,daily_budget,status"}
         )
@@ -192,7 +195,13 @@ class MarketingClient:
         budget = value.get("daily_budget")
         if budget is not None and (not str(budget).isdigit() or not 0 < int(budget) <= 10**15):
             raise AdsUnavailable("Meta Ads returned an invalid daily budget.")
-        return int(budget) if budget is not None else None
+        return {
+            "daily_budget": int(budget) if budget is not None else None,
+            "status": value.get("status"),
+        }
+
+    def target(self, target_id, account):
+        return self.snapshot(target_id, account)["daily_budget"]
 
 
 class AdsService:
@@ -221,6 +230,12 @@ class AdsService:
                 created_at TEXT NOT NULL
             )""")
 
+        with service.store.connect(write=True) as db:
+            db.execute("""CREATE TABLE IF NOT EXISTS ads_reversals (
+                workspace_id TEXT NOT NULL, item_id TEXT NOT NULL, before_json TEXT NOT NULL,
+                after_json TEXT NOT NULL, status TEXT NOT NULL,
+                PRIMARY KEY(workspace_id,item_id))""")
+
     def log(self, workspace, item_id, event, details):
         with self.service.store.connect(write=True) as db:
             self._log(db, workspace, item_id, event, details)
@@ -233,8 +248,27 @@ class AdsService:
             (workspace, item_id, event, encode(details), timestamp()),
         )
 
+    def client_for(self, workspace):
+        oauth = getattr(self.service, "meta_oauth", None)
+        if oauth and oauth.owned(workspace):
+            account = self.account(workspace)
+            return MarketingClient(
+                self.settings, self.client.transport, token=oauth.token(workspace, "ads", account)
+            )
+        return self.client
+
+    def mapped_account(self, workspace):
+        oauth = getattr(self.service, "meta_oauth", None)
+        if oauth and oauth.owned(workspace):
+            return next(
+                (r["asset_id"] for r in oauth.mappings(workspace) if r["kind"] == "ads"), None
+            )
+        return (
+            self.settings.ads_workspace_accounts.get(workspace) if self.settings.demo_mode else None
+        )
+
     def account(self, workspace):
-        account = self.settings.ads_workspace_accounts.get(workspace)
+        account = self.mapped_account(workspace)
         if (
             account not in self.settings.ads_sandbox_accounts
             or not account
@@ -254,12 +288,17 @@ class AdsService:
             row = db.execute(
                 "SELECT auto_act FROM ads_preferences WHERE workspace_id=?", (workspace,)
             ).fetchone()
-        account = self.settings.ads_workspace_accounts.get(workspace)
+        account = self.mapped_account(workspace)
         return AdsStatus(
             auto_act=bool(row and row[0]),
             account=account,
             sandbox_allowed=bool(account and account in self.settings.ads_sandbox_accounts),
-            token_configured=bool(self.settings.ads_token.get_secret_value()),
+            token_configured=bool(self.mapped_account(workspace))
+            if (
+                getattr(self.service, "meta_oauth", None)
+                and self.service.meta_oauth.owned(workspace)
+            )
+            else bool(self.settings.demo_mode and self.settings.ads_token.get_secret_value()),
             server_send_enabled=self.settings.ads_send_enabled,
             workspace_ready=set(config.get("labels", [])) == set(ACTIONS)
             and self.service.has_model(workspace),
@@ -277,7 +316,7 @@ class AdsService:
             self._log(db, workspace, None, "auto_act_changed", {"auto_act": body.auto_act})
         return self.status(workspace)
 
-    def _insight(self, account, level, row, body):
+    def _insight(self, account, level, row, body, client=None, *, include_budget=True):
         try:
             target = row[f"{level}_id"]
             # Validate IDs before using them in a URL.
@@ -314,7 +353,9 @@ class AdsService:
                 cpa=cpa,
                 cpa_action_type=self.settings.ads_cpa_action_type,
                 ctr=row.get("ctr"),
-                daily_budget=self.client.target(target, account),
+                daily_budget=(client or self.client).target(target, account)
+                if include_budget
+                else None,
             )
         except (KeyError, TypeError, ValueError, ValidationError):
             raise AdsUnavailable("Meta Ads returned invalid insight fields.") from None
@@ -360,8 +401,8 @@ class AdsService:
                     "and lower budget labels first."
                 )
             insights = [
-                self._insight(account, body.level, row, body)
-                for row in self.client.insights(account, body)
+                self._insight(account, body.level, row, body, self.client_for(workspace))
+                for row in self.client_for(workspace).insights(account, body)
             ]
             proposals = []
             for insight in insights:
@@ -426,6 +467,9 @@ class AdsService:
                             "auto": decision["auto"],
                         },
                     )
+                harness = getattr(self.service, "harness", None)
+                if harness:
+                    harness.outcomes.track(workspace, proposal.model_dump(mode="json"), timestamp())
                 if self.settings.ads_send_enabled and self.status(workspace).auto_act:
                     try:
                         proposal = self.execute(workspace, item_id)
@@ -434,10 +478,18 @@ class AdsService:
                 proposals.append(proposal)
             return proposals
 
-    def execute(self, workspace, item_id):
+    def execute(self, workspace, item_id, *, confirmed_action=None):
         with self.service._lock(workspace):
+            if getattr(self.service, "harness", None) and self.service.harness.killed():
+                raise ActionBlocked("The global kill switch is on.")
+            if (
+                getattr(self.service, "meta_oauth", None)
+                and self.service.meta_oauth.owned(workspace)
+                and not self.service.harness.status(workspace)["enabled"]
+            ):
+                raise ActionBlocked("This workspace is stopped.")
             proposal = self.get(workspace, item_id)
-            if proposal.status in ("executed", "delivery_unknown", "kept"):
+            if proposal.status in ("executed", "delivery_unknown", "kept", "undone"):
                 proposal.duplicate = True
                 return proposal
             account = self.account(workspace)
@@ -445,10 +497,35 @@ class AdsService:
                 raise ActionBlocked("Workspace account mapping changed. Fetch new insights.")
             if not self.settings.ads_send_enabled:
                 raise ActionBlocked("Ads execution switch is off. Proposal only.")
-            if not self.status(workspace).auto_act:
+            if confirmed_action is None and not self.status(workspace).auto_act:
                 raise ActionBlocked("Workspace auto-act is off. Proposal only.")
+            if confirmed_action is not None:
+                labels = [
+                    r
+                    for r in self.service.store.labels(workspace)
+                    if r["item_id"] == item_id and r["source"] in ("answer", "spot_check")
+                ]
+                if (
+                    not labels
+                    or labels[-1]["label"] != confirmed_action
+                    or confirmed_action not in ACTIONS
+                ):
+                    raise ActionBlocked("Confirm the action in your inbox first.")
+                if self.service.autonomy.policy(workspace, "ad").level == "watch":
+                    raise ActionBlocked("Watch mode saves proposals only.")
+                proposal.action = confirmed_action
+            autonomy = getattr(self.service, "autonomy", None)
+            if (
+                confirmed_action is None
+                and autonomy
+                and autonomy.active(workspace)
+                and not autonomy.allowed(workspace, "ad", proposal.action)
+            ):
+                raise ActionBlocked(
+                    "This action needs your confirmation under the workspace autonomy policy."
+                )
             decision, card = proposal.decision, self.service.card(workspace)
-            if not (
+            if confirmed_action is None and not (
                 decision.auto
                 and not decision.spot_check
                 and decision.threshold is not None
@@ -463,7 +540,7 @@ class AdsService:
                     "This Ren decision is not currently certified. Answer it in the inbox."
                 )
             # A correction in the inbox always cancels the original automatic action.
-            if any(
+            if confirmed_action is None and any(
                 row["item_id"] == item_id and row["source"] in ("answer", "spot_check")
                 for row in self.service.store.labels(workspace)
             ):
@@ -486,10 +563,8 @@ class AdsService:
                 if not 0 < budget <= 10**15 or budget == previous:
                     raise ActionBlocked("Budget adjustment is outside the supported range.")
                 payload = {"daily_budget": str(budget)}
-            if (
-                self.client.target(proposal.insight.target_id, account)
-                != proposal.insight.daily_budget
-            ):
+            snapshot = self.client_for(workspace).snapshot(proposal.insight.target_id, account)
+            if snapshot["daily_budget"] != proposal.insight.daily_budget:
                 raise ActionBlocked("Daily budget changed since this proposal. Fetch new insights.")
             with self.service.store.connect(write=True) as db:
                 old = db.execute(
@@ -506,6 +581,16 @@ class AdsService:
                     "INSERT INTO ads_execution_claims VALUES (?,?,?,?)",
                     (workspace, proposal.insight.scope(), item_id, "executing"),
                 )
+                before = {}
+                if "daily_budget" in payload:
+                    before = {"daily_budget": str(snapshot["daily_budget"])}
+                elif "status" in payload and snapshot["status"] in ("ACTIVE", "PAUSED"):
+                    before = {"status": snapshot["status"]}
+                if before:
+                    db.execute(
+                        "INSERT OR REPLACE INTO ads_reversals VALUES (?,?,?,?,?)",
+                        (workspace, item_id, encode(before), encode(payload), "available"),
+                    )
                 proposal.status = "executing"
                 db.execute(
                     "UPDATE ads_proposals SET proposal_json=? WHERE workspace_id=? AND item_id=?",
@@ -522,7 +607,9 @@ class AdsService:
                 proposal.status = "kept"
             else:
                 try:
-                    result = self.client.request("POST", proposal.insight.target_id, data=payload)
+                    result = self.client_for(workspace).request(
+                        "POST", proposal.insight.target_id, data=payload
+                    )
                     proposal.status = (
                         "executed" if result.get("success") is True else "delivery_unknown"
                     )
@@ -544,6 +631,59 @@ class AdsService:
                     "executed" if proposal.status in ("executed", "kept") else "delivery_unknown",
                     {"action": proposal.action, "status": proposal.status},
                 )
+            return proposal
+
+    def undo(self, workspace, item_id):
+        with self.service._lock(workspace):
+            proposal = self.get(workspace, item_id)
+            if proposal.status == "undone":
+                return proposal
+            if not self.settings.ads_send_enabled or proposal.status != "executed":
+                raise ActionBlocked(
+                    "Only a completed action can be undone with the execution switch on."
+                )
+            account = self.account(workspace)
+            if account.removeprefix("act_") != proposal.insight.account_id:
+                raise ActionBlocked("Reconnect the original sandbox account before undoing.")
+            with self.service.store.connect() as db:
+                row = db.execute(
+                    "SELECT * FROM ads_reversals WHERE workspace_id=? AND item_id=?",
+                    (workspace, item_id),
+                ).fetchone()
+            if not row or row["status"] != "available":
+                raise ActionBlocked("No safe undo is available. Review the action log.")
+            client = self.client_for(workspace)
+            current = client.snapshot(proposal.insight.target_id, account)
+            if any(str(current.get(k)) != str(v) for k, v in json.loads(row["after_json"]).items()):
+                raise ActionBlocked(
+                    "The target changed after this action. Review it before restoring."
+                )
+            with self.service.store.connect(write=True) as db:
+                db.execute(
+                    "UPDATE ads_reversals SET status='undoing' WHERE workspace_id=? AND item_id=?",
+                    (workspace, item_id),
+                )
+                self._log(db, workspace, item_id, "undo_started", {})
+            try:
+                result = client.request(
+                    "POST", proposal.insight.target_id, data=json.loads(row["before_json"])
+                )
+                status = "undone" if result.get("success") is True else "delivery_unknown"
+            except AdsUnavailable:
+                status = "delivery_unknown"
+            with self.service.store.connect(write=True) as db:
+                db.execute(
+                    "UPDATE ads_reversals SET status=? WHERE workspace_id=? AND item_id=?",
+                    (status, workspace, item_id),
+                )
+                self._log(db, workspace, item_id, "undo_" + status, {})
+                if status == "undone":
+                    proposal.status = "undone"
+                    db.execute(
+                        "UPDATE ads_proposals SET proposal_json=? WHERE workspace_id=? AND "
+                        "item_id=?",
+                        (proposal.model_dump_json(), workspace, item_id),
+                    )
             return proposal
 
     def history(self, workspace, *, after=0, limit=20):
@@ -608,6 +748,17 @@ def router():
             raise HTTPException(404, "Proposal was not found in this workspace.") from None
         except ActionBlocked as error:
             ads(request).log(ws, item_id, "blocked", {"reason": str(error)})
+            raise HTTPException(409, str(error)) from None
+        except AdsUnavailable as error:
+            raise HTTPException(503, str(error)) from None
+
+    @routes.post("/proposals/{item_id}:undo", response_model=Proposal)
+    def undo(ws: WorkspaceId, item_id: str, request: Request):
+        try:
+            return ads(request).undo(ws, item_id)
+        except KeyError:
+            raise HTTPException(404, "Proposal was not found in this workspace.") from None
+        except ActionBlocked as error:
             raise HTTPException(409, str(error)) from None
         except AdsUnavailable as error:
             raise HTTPException(503, str(error)) from None

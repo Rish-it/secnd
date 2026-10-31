@@ -404,3 +404,59 @@ def test_insight_id_cannot_reuse_a_conflicting_existing_prediction(ads):
     )
     assert sync(client).status_code == 409
     assert not state["posts"]
+
+
+def test_earned_autonomy_keeps_uncertified_and_spot_check_decisions_queued(ads):
+    from backend.autonomy import Policy
+
+    client, service, settings, state, _ = ads
+    service.autonomy.configure("ads", "ad", Policy(level="act", bar=90))
+    enable(client, settings)
+    row = sync(client).json()[0]
+    assert not row["decision"]["auto"]
+    assert not state["posts"]
+    assert client.post(ADS + f"/proposals/{row['item_id']}:execute").status_code == 409
+
+
+def test_confirm_in_ask_mode_executes_only_explicit_action_with_switch_on(ads):
+    from backend.autonomy import Policy
+
+    client, service, settings, state, _ = ads
+    service.autonomy.configure("ads", "ad", Policy(level="ask", bar=99))
+    row = sync(client).json()[0]
+    settings.ads_send_enabled = True
+    response = client.post(
+        API + "/answers",
+        json={"item_id": row["item_id"], "label": "lower budget"},
+        headers={"Idempotency-Key": "human-action"},
+    )
+    assert response.status_code == 200
+    assert len(state["posts"]) == 1 and b"daily_budget=9000" in state["posts"][0].content
+    assert (
+        client.post(
+            API + "/answers",
+            json={"item_id": row["item_id"], "label": "lower budget"},
+            headers={"Idempotency-Key": "human-action"},
+        ).status_code
+        == 200
+    )
+    assert len(state["posts"]) == 1
+    assert client.get(ADS + "/log").json()["items"][-1]["event"] == "executed"
+
+
+def test_automatic_budget_action_undo_is_idempotent_and_checks_external_changes(ads):
+    client, service, settings, state, _ = ads
+    service._loops["ads"].action = "lower budget"
+    row = sync(client).json()[0]
+    enable(client, settings)
+    item = row["item_id"]
+    assert client.post(ADS + f"/proposals/{item}:execute").json()["status"] == "executed"
+    # Simulate Graph state after applying the write.
+    state["budget"] = "8500"
+    assert client.post(ADS + f"/proposals/{item}:undo").status_code == 409
+    state["budget"] = "9000"
+    assert client.post(ADS + f"/proposals/{item}:undo").json()["status"] == "undone"
+    assert b"daily_budget=10000" in state["posts"][-1].content
+    count = len(state["posts"])
+    assert client.post(ADS + f"/proposals/{item}:undo").json()["status"] == "undone"
+    assert len(state["posts"]) == count

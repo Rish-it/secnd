@@ -7,6 +7,12 @@ export type Item = {
   source_app?: "whatsapp" | "messenger" | "instagram" | "ads" | null;
 };
 export type Decision = {
+  autonomy?: {
+    reviewed: number;
+    confirmed: number;
+    lower_bound: number;
+    effective_level: string;
+  } | null;
   item_id: string;
   label: string;
   probabilities: Record<string, number>;
@@ -208,6 +214,7 @@ export const api = {
       coverage: number;
       model_version: string;
       retrain: "queued" | "fixture" | "history_updated";
+      action_status?: string | null;
     }>(`${base}/answers`, {
       ...json({ item_id, label }),
       headers: {

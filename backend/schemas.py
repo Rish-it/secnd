@@ -83,6 +83,7 @@ class ServingStatus(BaseModel):
 
 
 class Decision(BaseModel):
+    autonomy: dict | None = None
     item_id: Identifier
     label: Label
     probabilities: dict[Label, Probability] = Field(min_length=1)
@@ -211,6 +212,7 @@ class ImportResult(BaseModel):
 
 
 class AnswerResult(BaseModel):
+    action_status: str | None = None
     item_id: Identifier
     coverage: Probability
     model_version: Identifier

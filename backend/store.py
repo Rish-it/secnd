@@ -239,7 +239,9 @@ class Store:
             ).fetchall()
         return [json.loads(row[0]) for row in rows]
 
-    def answer(self, workspace, item_id, label, idempotency_key, result, source="answer"):
+    def answer(
+        self, workspace, item_id, label, idempotency_key, result, source="answer", *, review=None
+    ):
         """Commit the answer and training label together; return the original result on replay."""
         if not idempotency_key:
             raise ValueError("An idempotency key is required.")
@@ -264,6 +266,20 @@ class Store:
                 "INSERT INTO answers VALUES (?, ?, ?, ?, ?, ?, ?)",
                 (workspace, item_id, label, idempotency_key, label_id, encode(result), timestamp()),
             )
+            if review is not None:
+                decision_type, confirmed, confidence = review
+                db.execute(
+                    "INSERT OR IGNORE INTO autonomy_reviews VALUES (?,?,?,?,?,?,?)",
+                    (
+                        workspace,
+                        idempotency_key,
+                        item_id,
+                        decision_type,
+                        confirmed,
+                        confidence,
+                        timestamp(),
+                    ),
+                )
         return result, True
 
     def undo_answer(self, workspace, idempotency_key):

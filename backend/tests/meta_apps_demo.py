@@ -27,6 +27,7 @@ def create_demo(directory):
     settings = Settings(
         data_dir=directory,
         _env_file=None,
+        demo_mode=True,
         meta_app_secret="demo-only",
         meta_verify_token="demo-only",
         ads_token="demo-only",
@@ -92,6 +93,7 @@ def create_demo(directory):
     async def lifespan(app):
         async with original(app):
             app.state.meta_ads = DemoAds(settings, service, transport=httpx.MockTransport(respond))
+            service.harness.ads = app.state.meta_ads
             yield
 
     app.router.lifespan_context = lifespan

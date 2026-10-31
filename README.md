@@ -36,6 +36,18 @@ wrong answers when the correct intent is absent from its options.
 [Ensemble protocol](docs/results/s2/typed-ensemble-plan.md) ·
 [Missing-intent audit](docs/results/s3r/README.md).
 
+## Sign in and connect Meta
+
+Workspace routes now require a signed-in session and enforce workspace ownership.
+Create an account and workspace, import the person's past decisions with Teach, then connect
+Meta and select accounts in Connections. Autonomy controls permission per decision type;
+Activity contains the background-work switch, global stop, audit trail and observed ad results.
+Real sends and ad changes default off. Only sandbox ad accounts are supported.
+
+[Login, exact OAuth settings, synthetic demo and execution switches](docs/integrations/harness.md).
+Use `SECND_SESSION_COOKIE_SECURE=false` only for local HTTP development. Existing contract
+fixtures require explicit `SECND_DEMO_MODE=true`; a seeded synthetic demo is also available.
+
 ## Run one container
 
 The default command starts with the released encoder and workspace classifier:

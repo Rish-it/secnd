@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     frontend_dist: Path = Path("frontend/dist")
     evaluation_dir: Path = Path(__file__).resolve().parents[1] / "docs/results/s3"
     featurizer: str = "pt-minilm"
+    demo_mode: bool = False
+    session_cookie_secure: bool = True
+    agent_enabled: bool = False
+    agent_reset_kill_on_start: bool = False
+    agent_poll_seconds: int = Field(default=30, ge=1, le=3600)
+    agent_insights_seconds: int = Field(default=3600, ge=60)
     encoder_repo: str = "Secnd-AI/ren"
     encoder_revision: str = "5560f25414195f1d1224a6ae7efd19c6b7646d3f"
     serving_backend: Literal["reader", "head"] = "head"
@@ -33,9 +39,28 @@ class Settings(BaseSettings):
     workspace_readers: dict[str, ReaderOptions] = Field(default_factory=dict)
 
     meta_app_secret: SecretStr = SecretStr("")
+    meta_app_id: str = ""
+    meta_login_config_id: str = ""
+    meta_redirect_uri: str = ""
+    meta_public_url: str = ""
+    meta_token_key: SecretStr = SecretStr("")
+    meta_scopes: list[str] = Field(
+        default_factory=lambda: [
+            "ads_read",
+            "ads_management",
+            "business_management",
+            "pages_show_list",
+            "pages_messaging",
+            "instagram_basic",
+            "instagram_manage_messages",
+            "whatsapp_business_management",
+            "whatsapp_business_messaging",
+        ]
+    )
     meta_verify_token: SecretStr = SecretStr("")
     whatsapp_token: SecretStr = SecretStr("")
     whatsapp_send_enabled: bool = False
+    meta_message_send_enabled: bool = False
     # Keys are platform:receiving-account-id, values are workspace ids. Unmapped is rejected.
     meta_workspace_accounts: dict[str, str] = Field(default_factory=dict)
     ads_token: SecretStr = SecretStr("")

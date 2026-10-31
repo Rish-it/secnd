@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A companion that learns your recurring decisions and knows when to ask."
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "cryptography>=46,<51",
     "fastapi>=0.115,<1",
     "httpx>=0.28,<1",
     "numpy>=2,<3",

@@ -13,7 +13,7 @@ test("inbox decisions, evidence, undo, source groups, keyboard, pagination and w
   await expect(
     page.getByRole("heading", { name: "Your decision inbox." }),
   ).toBeVisible();
-  const pending = page.getByRole("tabpanel", { name: /^Pending/ });
+  const pending = page.getByRole("tabpanel", { name: /^Needs you/ });
   await expect(pending.getByRole("article")).toHaveCount(4);
   for (const name of ["WhatsApp", "Messenger", "Instagram", "Ads"]) {
     await expect(
@@ -39,8 +39,8 @@ test("inbox decisions, evidence, undo, source groups, keyboard, pagination and w
   if (modelLabel === "Escalate")
     await original.getByRole("combobox").selectOption("Archive");
   await original.getByRole("button", { name: "Save correction" }).click();
-  await page.getByRole("tab", { name: /^Overridden/ }).click();
-  const overridden = page.getByRole("tabpanel", { name: /^Overridden/ });
+  await page.getByRole("tab", { name: /^Corrected/ }).click();
+  const overridden = page.getByRole("tabpanel", { name: /^Corrected/ });
   await expect(overridden.getByRole("article")).toHaveCount(1);
   await expect(
     overridden.getByText(/Your correction is in its history/),
@@ -48,16 +48,16 @@ test("inbox decisions, evidence, undo, source groups, keyboard, pagination and w
   await page.screenshot({ path: `${folder}/overridden.png`, fullPage: true });
   await page.getByRole("button", { name: "Undo last answer" }).click();
   await expect(overridden.getByRole("article")).toHaveCount(0);
-  const pendingTab = page.getByRole("tab", { name: /^Pending/ });
+  const pendingTab = page.getByRole("tab", { name: /^Needs you/ });
   await pendingTab.focus();
   await page.keyboard.press("ArrowRight");
   const automaticTab = page.getByRole("tab", {
-    name: /^Answered automatically/,
+    name: /^Done by Ren/,
   });
   await expect(automaticTab).toBeFocused();
   await expect(automaticTab).toHaveAttribute("aria-selected", "true");
   const automatic = page.getByRole("tabpanel", {
-    name: /^Answered automatically/,
+    name: /^Done by Ren/,
   });
   await expect(automatic.getByRole("article")).toHaveCount(4);
   await expect(
@@ -104,7 +104,7 @@ test("inbox decisions, evidence, undo, source groups, keyboard, pagination and w
   await page.getByRole("button", { name: "Open workspace" }).click();
   await expect(page).toHaveURL(/workspace=other/);
   await expect(
-    page.getByRole("tabpanel", { name: /^Pending/ }).getByRole("article"),
+    page.getByRole("tabpanel", { name: /^Needs you/ }).getByRole("article"),
   ).toHaveCount(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
     390,

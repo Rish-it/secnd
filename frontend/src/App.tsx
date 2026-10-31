@@ -7,8 +7,10 @@ import Companion from "./Companion";
 import Metrics from "./Metrics";
 import ColdStart from "./ColdStart";
 import MetaConnections from "./MetaConnections";
+import { SessionGate, AutonomyScreen, ActivityScreen } from "./Harness";
 
-type View = "Teach" | "Companion" | "Metrics";
+type View =
+  "Teach" | "Companion" | "Metrics" | "Autonomy" | "Connections" | "Activity";
 type Connection = "connecting" | "online" | "offline";
 
 const example = `description,amount,category
@@ -41,6 +43,11 @@ function Icon({ kind }: { kind: View | "upload" | "arrow" }) {
         <path d="M4 4v16h16M8 15v-4M13 15V7M18 15v-6" />
       </>
     ),
+    Autonomy: <path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Zm-4 9 3 3 5-6" />,
+    Connections: (
+      <path d="M8 7H5a4 4 0 0 0 0 8h4m6 0h4a4 4 0 0 0 0-8h-4M7 11h10" />
+    ),
+    Activity: <path d="M3 12h4l3-7 4 14 3-7h4" />,
     upload: (
       <>
         <path d="M12 16V4m-5 5 5-5 5 5M5 15v5h14v-5" />
@@ -66,8 +73,21 @@ function Icon({ kind }: { kind: View | "upload" | "arrow" }) {
 }
 
 export default function App() {
+  return (
+    <SessionGate>
+      <AppBody />
+    </SessionGate>
+  );
+}
+
+function AppBody() {
   const [metricsRefresh, setMetricsRefresh] = useState(0);
-  const [view, setView] = useState<View>("Companion");
+  const [view, setView] = useState<View>(() => {
+    const params = new URLSearchParams(location.search);
+    return params.has("connected") || params.has("meta_error")
+      ? "Connections"
+      : "Companion";
+  });
   const [connection, setConnection] = useState<Connection>("connecting");
   const [retry, setRetry] = useState(0);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -187,7 +207,16 @@ export default function App() {
           </span>
         </div>
         <nav aria-label="Workspace">
-          {(["Teach", "Companion", "Metrics"] as const).map((item, index) => (
+          {(
+            [
+              "Companion",
+              "Connections",
+              "Autonomy",
+              "Activity",
+              "Teach",
+              "Metrics",
+            ] as const
+          ).map((item, index) => (
             <button
               key={item}
               className={`nav-item ${view === item ? "active" : ""}`}
@@ -236,8 +265,13 @@ export default function App() {
         </header>
         <main id="main" tabIndex={-1}>
           <div hidden={view !== "Companion"}>
-            <Companion onAnswer={() => setMetricsRefresh((value) => value + 1)} />
+            <Companion
+              onAnswer={() => setMetricsRefresh((value) => value + 1)}
+            />
           </div>
+          {view === "Connections" && <MetaConnections />}
+          {view === "Autonomy" && <AutonomyScreen />}
+          {view === "Activity" && <ActivityScreen />}
           {view === "Teach" && (
             <>
               <div className="page-heading">
@@ -277,7 +311,7 @@ export default function App() {
               <ColdStart
                 onChange={() => setMetricsRefresh((value) => value + 1)}
               />
-              <MetaConnections />
+
               <section className="teach-card" aria-labelledby="upload-title">
                 <div className="section-heading">
                   <div>

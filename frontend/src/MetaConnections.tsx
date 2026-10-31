@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { metaApi } from "./metaApi";
 import type { AdsStatus, MetaStatus, AdsProposal, LogPage } from "./metaApi";
 import "./MetaConnections.css";
+import { MetaLogin } from "./Harness";
 
 const platformNames = {
   whatsapp: "WhatsApp",
@@ -97,6 +98,7 @@ export default function MetaConnections() {
       <p className="connector-notice" role="status">
         {notice}
       </p>
+      <MetaLogin />
       <div className="message-connections">
         {(Object.keys(platformNames) as (keyof typeof platformNames)[]).map(
           (platform) => (
@@ -117,7 +119,9 @@ export default function MetaConnections() {
               <small>
                 {platform === "whatsapp" && meta?.whatsapp_send_enabled
                   ? "WhatsApp sends enabled by operator"
-                  : "Outbound replies remain previews"}
+                  : platform !== "whatsapp" && meta?.message_send_enabled
+                    ? "Message sends enabled by operator"
+                    : "Outbound replies remain previews"}
               </small>
             </article>
           ),
@@ -367,8 +371,8 @@ export default function MetaConnections() {
         )}
       </details>
       <p className="connector-detail">
-        Secnd is independently built for Meta’s platform. Muse may write history
-        or explanations; Ren makes each decision.
+        Secnd is independently built for Meta’s platform, and is not an official
+        Meta product. Ren makes each decision.
       </p>
     </section>
   );

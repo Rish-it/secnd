@@ -4,6 +4,11 @@ import type { Decision, Page } from "./api";
 import "./Companion.css";
 
 type Tab = "Pending" | "Answered automatically" | "Overridden";
+const tabNames = {
+  Pending: "Needs you",
+  "Answered automatically": "Done by Ren",
+  Overridden: "Corrected",
+};
 type Undo = { key: string; label: string };
 const empty: Page<Decision> = { items: [], next_cursor: null };
 const sources = [
@@ -128,7 +133,17 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
       setNotice(
         result.fixture
           ? "Preview only. Answer has not been saved."
-          : `Saved ${label} to Ren’s history.`,
+          : `Saved ${label} to Ren’s history. ${
+              result.data.action_status === "message_sent"
+                ? "Message sent. This app cannot retract it."
+                : result.data.action_status === "ad_executed"
+                  ? "Ad change applied. Undo is available in Activity."
+                  : result.data.action_status?.endsWith("delivery_unknown")
+                    ? "Delivery is unknown. Check Activity before trying another action."
+                    : result.data.action_status
+                      ? "Proposal saved. No live change was applied."
+                      : ""
+            }`,
       );
       if (!result.fixture) {
         setUndo((previous) => [...previous, { key, label }]);
@@ -261,10 +276,25 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
             </div>
           </dl>
         )}
+        {item.autonomy && (
+          <dl className="certification">
+            <div>
+              <dt>Workspace reviews</dt>
+              <dd>
+                {item.autonomy.confirmed} confirmed / {item.autonomy.reviewed}{" "}
+                reviewed
+              </dd>
+            </div>
+            <div>
+              <dt>Workspace lower bound</dt>
+              <dd>{measured(item.autonomy.lower_bound)}</dd>
+            </div>
+          </dl>
+        )}
         {tab === "Answered automatically" && (
           <p className="evidence-note">
-            One-sided 95% calibration bound; target 99%. Applies to this saved
-            model, not a guarantee for every new message.
+            One-sided 95% calibration bound measured for this saved model. Your
+            workspace permission is a separate check.
           </p>
         )}
         <details className="inbox-evidence">
@@ -284,8 +314,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
             <p>No past-decision evidence saved for this prediction.</p>
           )}
           <p className="evidence-note">
-            Similar examples provide context. Ren makes the decision; Muse may
-            write starting history.
+            Similar examples provide context. Ren makes the decision.
           </p>
         </details>
         <div className="inbox-actions">
@@ -420,7 +449,7 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
                 tabButtons.current[next]?.focus();
               }}
             >
-              {value}
+              {tabNames[value]}
               <span>
                 {pages[value].items.length}
                 {pages[value].next_cursor ? "+" : ""}
@@ -443,6 +472,12 @@ export default function Companion({ onAnswer }: { onAnswer: () => void }) {
           </button>
         )}
       </div>
+      {undo.length > 0 && (
+        <p className="evidence-note">
+          Undo last answer updates history. This app cannot retract sent
+          messages. Ad changes have a separate undo in Activity.
+        </p>
+      )}
       {error && (
         <div className="error-message" role="alert">
           <p>{error}</p>
