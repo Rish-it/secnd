@@ -1,0 +1,175 @@
+{
+  "steps": 6000,
+  "final_loss": 0.16598971015424469,
+  "train_seconds": 1745,
+  "model": "ic-ettin-400m-s6000-near-wide-fine",
+  "base": "jhu-clsp/ettin-encoder-400m@7662476d60abb071a5bd319c9f3074f3072c062d",
+  "parameters": 395834369,
+  "device": "cuda",
+  "train_sets": {
+    "topv2": 151266,
+    "clinc150": 15191,
+    "massive_en": 11406,
+    "snips": 13080,
+    "go_emotions": 36306,
+    "bitext_support": 24182,
+    "civil_comments": 30000,
+    "dbpedia_14": 30000,
+    "meta_account": 455,
+    "meta_ad": 412,
+    "meta_inbox": 412,
+    "paws": 30000,
+    "sms_spam": 5017,
+    "squad_answerable": 30000,
+    "syn_airline": 660,
+    "syn_car_insurance": 660,
+    "syn_car_rental": 660,
+    "syn_cloud_software_product": 660,
+    "syn_electricity_and_gas_utility": 660,
+    "syn_fashion_e-commerce": 660,
+    "syn_food_delivery_app": 660,
+    "syn_grocery_delivery": 660,
+    "syn_gym_chain": 660,
+    "syn_health_insurance": 660,
+    "syn_home_broadband_provider": 660,
+    "syn_home_insurance": 660,
+    "syn_hospital_appointments": 660,
+    "syn_hotel_chain": 660,
+    "syn_mobile_phone_carrier": 660,
+    "syn_online_course_platform": 659,
+    "syn_online_marketplace": 660,
+    "syn_pharmacy": 660,
+    "syn_ride_hailing_app": 660,
+    "syn_subscription_streaming_service": 660,
+    "syn_university_student_services": 660,
+    "syn_video_game_platform": 660,
+    "syn_web_hosting_provider": 660,
+    "wanli": 30000
+  },
+  "results": {
+    "banking77": {
+      "0-shot": {
+        "accuracy": 0.689,
+        "ece_test": 0.0243,
+        "temperature": 2.379,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-random": {
+        "accuracy": 0.6968,
+        "ece_test": 0.0312,
+        "temperature": 2.356,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-nearest": {
+        "accuracy": 0.9062,
+        "ece_test": 0.0109,
+        "temperature": 1.956,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "32-nearest": {
+        "accuracy": 0.8744,
+        "ece_test": 0.0142,
+        "temperature": 1.936,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-8": {
+        "accuracy": 0.9032,
+        "ece_test": 0.0386,
+        "temperature": 1.095,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8617,
+        "ece_test": 0.0547,
+        "temperature": 0.731,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 1500,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      }
+    },
+    "mtop": {
+      "0-shot": {
+        "accuracy": 0.7864,
+        "ece_test": 0.042,
+        "temperature": 1.493,
+        "certified_coverage_test": 0.2544,
+        "precision_auto_test": 0.9982,
+        "cert_rows": 2000,
+        "cert_accepted": 486,
+        "cert_cp_lower": 0.9939
+      },
+      "8-random": {
+        "accuracy": 0.7845,
+        "ece_test": 0.0483,
+        "temperature": 1.489,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "8-nearest": {
+        "accuracy": 0.9293,
+        "ece_test": 0.0083,
+        "temperature": 1.216,
+        "certified_coverage_test": 0.2859,
+        "precision_auto_test": 0.9992,
+        "cert_rows": 2000,
+        "cert_accepted": 564,
+        "cert_cp_lower": 0.9947
+      },
+      "32-nearest": {
+        "accuracy": 0.9323,
+        "ece_test": 0.0072,
+        "temperature": 1.174,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-8": {
+        "accuracy": 0.8607,
+        "ece_test": 0.0691,
+        "temperature": 1.039,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      },
+      "vote-32": {
+        "accuracy": 0.8518,
+        "ece_test": 0.0467,
+        "temperature": 0.775,
+        "certified_coverage_test": 0.0,
+        "precision_auto_test": null,
+        "cert_rows": 2000,
+        "cert_accepted": 0,
+        "cert_cp_lower": 0.0
+      }
+    }
+  }
+}

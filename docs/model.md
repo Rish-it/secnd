@@ -1,6 +1,23 @@
 # Ren: a decision model built for Meta apps
 
-## Current 150M reader: clean split and corrected certification
+## Latest 400M reader: wider, licence-checked training
+
+The [wider-pool round](results/s2/wide-round.md) retrained the 400M reader without changing any
+evaluation set. The best pool that can ship adds 23 written fine-grained taxonomies to licensed
+public decision data. With eight nearest examples it measured **92.93%** on MTOP and **90.62%** on
+BANKING77; with no examples, **78.64%** and **68.90%**. Earlier pools that scored higher on MTOP used
+a dataset with no licence or rows traced to real posts, and are not shipped.
+
+Certified MTOP coverage at eight examples measured 28.59% at 99.92% accepted precision on raw labels.
+Two seeds of one pool measured 32.22% and 51.62%, so a single run does not establish a coverage
+change. BANKING77 certifies zero on raw labels, and its top-confidence errors are mostly dataset label
+noise. With full history a logistic head beats the reader on both sets (93.00% and 92.50% on the
+clean pool); with 200 labels the reader wins by 13.7 and 17.0 points.
+
+Typed-decisions seeds across these pools measured 78.95% to 80.90% on the fixed 2,000-row test, with
+a ±1.7 point margin. These weights are not yet released.
+
+## 150M reader: clean split and corrected certification
 
 Ren's experimental reader is `ic-ettin-150m-s6000-near`, distinct from the released
 encoder plus linear head documented below. #27 measured encoder tuning, #28

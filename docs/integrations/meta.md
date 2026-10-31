@@ -80,7 +80,7 @@ are configured. Messenger replies remain dry-run previews; a Page token/sender
 adapter is not included. The integration never calls a teacher model to answer.
 
 Uncertain items and random spot-checks return `status: queued` and appear in the
-ordinary workspace queue. Answer from the Companion UI, or use the returned
+ordinary workspace queue. Answer from the inbox, or use the returned
 `item_id` with a valid workspace label:
 
 ```sh
@@ -134,7 +134,7 @@ SECND_META_WORKSPACE_ACCOUNTS={"whatsapp:100000000000002":"messages","messenger:
 
 Keys identify the receiving phone-number ID, Page ID or Instagram professional
 account ID; values identify an existing workspace. Tokens remain in backend Settings.
-The Teach screen shows connection status without exposing credentials. Verification
+The Connections screen shows connection status without exposing credentials. Verification
 credentials are redacted from the Uvicorn access log.
 
 Provenance is saved as `source_app` in each prediction. The decision inbox uses it
@@ -165,7 +165,7 @@ read access for insights; execution needs the appropriate separate account permi
 The container reads runtime `.env` settings through Compose's optional `env_file`
 (Compose 2.24 or newer). No secret is baked into an image or returned to the app.
 
-The Teach screen can fetch campaign or ad set insights for a completed date range.
+The API can fetch campaign or ad set insights for a completed date range.
 `POST /api/v1/workspaces/ads/integrations/ads/insights:sync` accepts `level`, `since`
 and `until`. Spend, action-specific CPA and CTR become a typed, immutable Ren
 proposal. Missing CPA stays unavailable. The proposal's source is Ads. Uncertain
@@ -181,7 +181,7 @@ The default is proposals only. A mutation requires **all** of:
   account, and its daily budget still matches the saved snapshot.
 
 Confirming an uncertified proposal updates history; it does not bypass these execution
-conditions. Toggle auto-act under Teach. `PUT /integrations/ads/preferences` saves the
+conditions. `PUT /integrations/ads/preferences` saves the
 workspace preference; `POST /integrations/ads/proposals/{item_id}:execute` checks an
 existing proposal. Sync also attempts eligible proposals when both switches are on.
 

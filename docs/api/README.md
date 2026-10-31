@@ -1,8 +1,10 @@
 # Workspace API
 
-The versioned API is under `/api/v1/workspaces/{ws}`; use `default` locally.
+The versioned API is under `/api/v1/workspaces/{ws}`. Requests need a session: register at
+`/api/v1/auth/register`, create a workspace at `/api/v1/workspaces`, and send the session
+cookie. [The README walkthrough](../../README.md#csv-to-a-live-decision) shows each step.
 The [OpenAPI contract](openapi.json) defines every request and response.
-`/api/health` and `/api/preview` retain their existing behavior.
+`/api/health` stays public. `/api/preview` also needs a session.
 
 **Import, predict, feed, queue and answers use WorkspaceService.** Import saves
 historical labels and a fixed calibration holdout; predictions and human answers
@@ -38,7 +40,8 @@ Install dependencies using the root README, then start an API process:
 uv run uvicorn backend.api:app --host 127.0.0.1 --port 8016
 ```
 
-In a second terminal, set `API=http://127.0.0.1:8016/api/v1/workspaces/default`.
+In a second terminal, sign in and create a workspace, set
+`API=http://127.0.0.1:8016/api/v1/workspaces/<id>`, and add `-b <cookie file>` to each request.
 Use your own historical CSV with `text` or `description`, a separate target
 column, and optional `item_id` (or `id`), `amount` and ISO `date`. IDs must be
 unique and labels nonempty. At least two labels must remain in training after
@@ -233,8 +236,8 @@ thread; subsequent answer fitting stays off the request path.
 
 ## Decision inbox
 
-The app opens the selected workspace's inbox. `?workspace=<id>` selects a workspace;
-Teach and Metrics use that same workspace. Source badges distinguish WhatsApp,
+The app opens the selected workspace's inbox. `?workspace=<id>` selects a workspace.
+Source badges distinguish WhatsApp,
 Messenger, Instagram, Ads and workspace submissions.
 
 Existing `/queue`, `/feed`, `/predict`, `/answers`, `/models` and rollback routes

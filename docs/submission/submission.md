@@ -38,6 +38,11 @@ fixed public history and does not establish performance on a new business.
 The separate missing-intent audit includes a wrong acceptance at this operating
 point (`docs/results/s3r/README.md`).
 
+The latest retraining on licence-checked data measured **92.93%** on MTOP and **90.62%**
+on BANKING77 with eight examples (`docs/results/s2/wide-round.md`). Those weights are not
+the ones behind the 13.89% result, and they are not yet released. BANKING77 certifies no
+automatic coverage on raw labels.
+
 Measured 400M latency for the submitted product build: **TBD**.
 Measured customer time saved or advertising lift: **TBD**.
 Live Meta OAuth and delivery verification for this submission: **TBD**.

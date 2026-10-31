@@ -12,6 +12,6 @@ twice (196 tests), then from a clean committed revision. Container code hashes
 match the committed source files. No GPU job, merge, deployment or real outbound
 message was part of this rehearsal.
 
-The [script](demo-draft.md) separates the illustrative live workspace from the
-recorded [MTOP handoff](../s5/handoff.json). Narration timing, recording and final
-submission remain human steps. The model-document draft still awaits review.
+This rehearsal predates the harness. The current product demo, video script and
+verification notes are in [docs/submission](../../submission/submission.md). Recording
+and final submission remain human steps.

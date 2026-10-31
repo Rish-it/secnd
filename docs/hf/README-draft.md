@@ -1,90 +1,68 @@
 ---
 language:
   - en
+license: cc-by-sa-4.0
 pipeline_tag: text-classification
-base_model: sentence-transformers/all-MiniLM-L6-v2
+base_model: jhu-clsp/ettin-encoder-400m
 tags:
   - selective-classification
   - calibration
   - secnd
 ---
 
-# Ren — secnd-ren-1 (DRAFT)
+# Ren, 400M reader (DRAFT)
 
-**Release status: RELEASE_TODO. No downloadable artifact is claimed by this draft.**
-Version: **RELEASE_TODO (`ren-1.<n>`)**. Release license: **RELEASE_TODO**.
+**Release status: RELEASE_TODO. No downloadable reader is claimed by this draft.**
+The public encoder at this repository's `v1.0.0` tag is a separate artifact.
 
-Ren learns a workspace's recurring decisions using a sentence encoder, numeric/date
-features, merchant-memory features and a logistic-regression classifier head.
-A temperature and automatic-answer threshold are fitted on held-out calibration
-rows. Decisions below the threshold, and sampled automatic spot-checks, go to a
-person. Muse is used for teaching/explanation work, not the automatic classifier.
+Built with Muse Spark Open. Ren is independently developed for Meta's platform and is not an official
+Meta product.
 
-## Intended use
+Ren reads a question, its options, a message and a person's nearest past decisions, then scores each
+option. It is trained once; a new business supplies history, not a new training run. A temperature and
+threshold come from held-out calibration rows, and a Clopper–Pearson lower bound decides whether any
+answer may be automatic. Anything below it goes to a person. English only.
 
-English text classification over the ordered labels supplied with this release.
-The demo's headline benchmark is Meta's MTOP English assistant intents. Expense
-categorisation uses IPSA and can honestly certify no automatic answers. This is
-not a general chat model. A new workspace needs its own labels, calibration and
-release checks; benchmark precision is not a promise for arbitrary future inputs.
+## Results for the current candidate
 
-## Weights and runtime
+Fixed official test sets, one training seed, raw labels. **RELEASE_TODO: replace with results for the
+exact uploaded weights, across seeds.** [Full tables](https://github.com/Rish-it/secnd/blob/main/docs/results/s2/wide-round.md).
 
-The reviewed bundle contains `model.pkl` (trusted-source classifier/calibration
-artifact), `card.json` (the matching EvalCard), `runtime.json` (ordered labels,
-featurizer, version and merchant-memory snapshot) and this reviewed `README.md`.
-The upload helper copies none of the source datasets or training caches and
-never deserialises the pickle. Load pickles only from a trusted release.
+| Set | No examples | 8 nearest | 32 nearest | Certified coverage at 8 |
+| --- | ---: | ---: | ---: | ---: |
+| MTOP | 78.64% | 92.93% | 93.23% | 28.59%, 99.92% accepted precision |
+| BANKING77 | 68.90% | 90.62% | 87.44% | 0% |
 
-The current reference encoder is
-[sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2),
-revision `1110a243fdf4706b3f48f1d95db1a4f5529b4d41`, under Apache 2.0. It is
-loaded separately on CPU; this head bundle does not include a fine-tuned encoder.
-Update this section and packaging if the final chosen encoder differs.
+## Limits
 
-Before release, verify runtime labels, merchant memory, encoder revision and
-preprocessing match the exact saved classifier. The current registry's small
-candidate artifact is not by itself a complete portable inference bundle.
-Record the source commit, dependency lockfile, artifact hashes, dataset/split
-hashes and seed. **RELEASE_TODO: provide a verified load/predict example and its
-round-trip output from the final bundle.**
+- Coverage moved 19 points between two seeds of one pool. Report a range, never a single best run.
+- With the correct intent missing from the options, the gate can accept wrong answers.
+- BANKING77 certifies zero on raw labels. With no examples on BANKING77 this model has no lead.
+- With thousands of labels, a logistic head on retrieval vectors beats the reader.
+- Written training rows come from one model and carry its style.
+- Benchmark numbers are not a promise about a new business or future traffic.
 
-## Evaluation reference, not an assertion about unpublished weights
+## Training data
 
-The published MTOP reference at 2,000 labels and seed 0 answers 31.68% of the fixed
-test set automatically at 99.62% precision. The claim holds in 99.05% of 2,000
-re-splits. [Measured card](https://github.com/Rish-it/secnd/blob/secnd-bootstrap/docs/results/s3/card-mtop-minilm%2Blr-b2000.json).
-At the same label budget, BANKING77 answers 36.9% automatically at 99.03%
-fixed-test precision ([card](https://github.com/Rish-it/secnd/blob/secnd-bootstrap/docs/results/s3/card-banking77-minilm%2Blr-b2000.json)).
-The claim holds in 98.95% of 2,000 re-splits
-([robustness run](https://github.com/Rish-it/secnd/blob/secnd-bootstrap/docs/results/s3/robustness-banking77-minilm%2Blr-b2000.json)).
-IPSA has zero automatic coverage at that budget. Do not substitute one dataset's result for another's.
+Excluded: all MTOP and BANKING77 texts, calibration rows, test rows, real customer text, rows traced to
+real posts, ATIS and the FEVER mirror (no licence found).
 
-**RELEASE_TODO:** replace this reference with results tied to the exact artifact
-being uploaded, and attach the full card. Include calibration lower bound,
-threshold, coverage/precision, re-split pass rate, calibration error, latency,
-artifact size and provenance. Missing measurements stay null.
+| Source | Licence |
+| --- | --- |
+| Ettin encoder 400M (base weights) | MIT |
+| TOPv2 | CC BY-SA 4.0 |
+| CLINC150 | CC BY 3.0 |
+| MASSIVE (English) | CC BY 4.0 |
+| Snips | Apache 2.0 |
+| GoEmotions | Apache 2.0 |
+| Bitext customer support | CDLA-Sharing 1.0 |
+| DBpedia-14 | CC BY-SA 3.0 |
+| Civil Comments | CC0 |
+| PAWS | Free use, with attribution |
+| SMS Spam (UCI) | CC BY 4.0 |
+| SQuAD | CC BY-SA 4.0 |
+| WANLI | CC BY 4.0 |
+| Written Meta-app tasks and 23 taxonomies | Written and labelled with Muse Spark Open |
 
-## Training, data and limitations
-
-Seed/stream labels train the model; calibration and test rows never do. Human
-answers/spot-checks have weight 1; Muse cold-start labels have weight 0.3. Any
-paraphrases must join only the selected training texts for that split.
-
-MTOP comes from [Meta's published archive](https://dl.fbaipublicfiles.com/mtop/mtop.zip)
-(CC BY-SA 4.0, `mtop/LICENSE.txt`); see
-[Li et al., MTOP](https://arxiv.org/abs/2008.09335). BANKING77 is CC BY 4.0;
-IPSA is OGL v3. Retain the notices applicable to the released artifact/data.
-The release license has not been chosen in this draft.
-
-Coverage can remain zero. Fixed-test precision can miss the target despite a
-high re-split pass rate. Label noise, unseen categories and future distribution
-changes need human review and monitoring. The 95% bound is statistical evidence,
-not an unconditional guarantee.
-
-## Release procedure
-
-Follow the [release preparation notes](../results/final/model-release.md).
-The [Hub model-card guide](https://huggingface.co/docs/huggingface_hub/guides/model-cards)
-defines the README metadata. Review all RELEASE_TODO fields, set the release
-license and remove DRAFT only after the model/bundle checks are complete.
+**RELEASE_TODO:** confirm each licence notice against the source, and that CC BY-SA 4.0 suits every
+source before upload.
