@@ -1,0 +1,66 @@
+backend/modal_bench.py
+  s_9245a16bb07969::t_522e13ce0f4a28 111-115,120
+  s_9245a16bb07969::t_d0b3a5bb2fda74 190-201,223-229
+  s_9245a16bb07969::t_307a4e8ec4aff1 129,131
+  s_9245a16bb07969::t_8f00c125b26f4e 62-64,75-76,82,119,124-126
+  s_9245a16bb07969::t_fbee08538d7c6f 93
+  s_9245a16bb07969::t_f30c57a3d99b89 81,116,128
+  s_9245a16bb07969::t_10274a68919ef8 73
+  s_9245a16bb07969::t_b8d785cec50693 202-222
+  s_9245a16bb07969::t_cbbcead85d2e09 74,117
+  s_9245a16bb07969::t_e74cd756faf4db 100-104,118,121-123,127,180-184
+  s_9245a16bb07969::t_db030dbff62f2a 230-231
+backend/typed.py
+  s_9245a16bb07969::t_ade51ce302f20c 151-153
+  s_9245a16bb07969::t_1764157a89d8ec 251-254
+  s_9245a16bb07969::t_b8d785cec50693 198,204,258,270
+backend/incontext.py
+  s_9245a16bb07969::t_70ffc720a7aac9 582,590,595
+  s_9245a16bb07969::t_59840dc2108d97 233,235
+  s_9245a16bb07969::t_61cc84dab1ef53 591-593,596
+  s_9245a16bb07969::t_beb9f63bd13cda 59-67,71
+  s_9245a16bb07969::t_f30c57a3d99b89 68-70,234,238,580,594
+  s_9245a16bb07969::t_cbbcead85d2e09 186-188,240-241,581,588
+  s_9245a16bb07969::t_d9530ae12dfa5d 236-237,239
+backend/panel_tasks.py
+  s_9245a16bb07969::t_5a66c80c8557b3 18-19
+  s_9245a16bb07969::t_87d85a84eb4650 27
+  s_9245a16bb07969::t_1227acdb5aaf10 64-84
+  s_9245a16bb07969::t_1c75c1fdd08472 11
+  s_9245a16bb07969::t_242af7bd7d92e3 93,95-106
+  s_9245a16bb07969::t_e74410bd2b2cdd 1-10,12-17,20-26,28-63,85-92,94
+docs/results/s2/typed-ic-ettin-400m-s6000-near-e8-s0-rerun.json
+  s_9245a16bb07969::t_307a4e8ec4aff1 1-83
+docs/results/s2/incontext-ic-ettin-400m-s6000-near-wide-clean-seed1.json
+  s_9245a16bb07969::t_e055dd58933188 1-152
+docs/results/s2/incontext-ic-ettin-400m-s6000-near-wide-clean.json
+  s_9245a16bb07969::t_f6a1014d113d0d 1-152
+docs/results/s2/incontext-ic-ettin-400m-s6000-near-wide-muse-clean.json
+  s_9245a16bb07969::t_9b00927b1abfd3 1-294
+docs/results/s2/incontext-ic-ettin-400m-s6000-near-wide-muse.json
+  s_9245a16bb07969::t_1f1b705083174a 1-154
+docs/results/s2/typed-ic-ettin-400m-s6000-near-wide-clean-e8-s0.json
+  s_9245a16bb07969::t_1e622ad52b778b 1-83
+docs/results/s2/typed-ic-ettin-400m-s6000-near-wide-e8-s0.json
+  s_9245a16bb07969::t_4a2363d67543ad 1-83
+docs/results/s2/typed-ic-ettin-400m-s6000-near-wide-e8-s3.json
+  s_9245a16bb07969::t_0a7971882cc6de 1-83
+docs/results/s2/typed-ic-ettin-400m-s6000-near-wide-muse-e8-s0.json
+  s_9245a16bb07969::t_e201e46e573eb0 1-83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8648949d3812da39d734f359976c8199983b92d5",
+  "prompts": {},
+  "sessions": {
+    "s_9245a16bb07969": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "93ee4a6a-8d15-410c-a3f5-3ffe3056d331",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
