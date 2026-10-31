@@ -4,18 +4,19 @@
 
 The [wider-pool round](results/s2/wide-round.md) retrained the 400M reader without changing any
 evaluation set. The best pool that can ship adds 23 written fine-grained taxonomies to licensed
-public decision data. With eight nearest examples it measured **92.93%** on MTOP and **90.62%** on
-BANKING77; with no examples, **78.64%** and **68.90%**. Earlier pools that scored higher on MTOP used
+public decision data. Its ship candidate, seed 1, was chosen on calibration. With eight nearest examples it measured
+**92.38%** on MTOP and **89.90%** on BANKING77; with no examples, **75.99%** and **68.99%**. Earlier pools that scored higher on MTOP used
 a dataset with no licence or rows traced to real posts, and are not shipped.
 
-Certified MTOP coverage at eight examples measured 28.59% at 99.92% accepted precision on raw labels.
-Two seeds of one pool measured 32.22% and 51.62%, so a single run does not establish a coverage
-change. BANKING77 certifies zero on raw labels, and its top-confidence errors are mostly dataset label
-noise. With full history a logistic head beats the reader on both sets (93.00% and 92.50% on the
-clean pool); with 200 labels the reader wins by 13.7 and 17.0 points.
+Certified MTOP coverage measured 33.22% at eight examples and 47.51% at 32, at 99.93% and 99.90%
+accepted precision on raw labels. Two seeds of the clean pool measured 32.22% and 51.62%, so a single
+run does not establish a coverage change. BANKING77 certifies zero at the 99% bar, on raw labels and
+after a model audit, with 12.56% coverage at 99.74% precision at a 98% bar. With full history a
+logistic head beats the reader on both sets (93.00% and 92.50%); with 200 labels the reader wins by
+13.0 and 21.2 points.
 
-Typed-decisions seeds across these pools measured 78.95% to 80.90% on the fixed 2,000-row test, with
-a ±1.7 point margin. These weights are not yet released.
+Typed-decisions seeds across these pools measured 78.80% to 80.90% on the fixed 2,000-row test, with
+a ±1.7 point margin; validation picks 79.70% for the ship candidate. These weights are not yet released.
 
 ## 150M reader: clean split and corrected certification
 

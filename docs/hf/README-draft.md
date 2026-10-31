@@ -25,19 +25,19 @@ answer may be automatic. Anything below it goes to a person. English only.
 
 ## Results for the current candidate
 
-Fixed official test sets, one training seed, raw labels. **RELEASE_TODO: replace with results for the
+Fixed official test sets, seed 1 of two, chosen on calibration, raw labels. **RELEASE_TODO: replace with results for the
 exact uploaded weights, across seeds.** [Full tables](https://github.com/Rish-it/secnd/blob/main/docs/results/s2/wide-round.md).
 
 | Set | No examples | 8 nearest | 32 nearest | Certified coverage at 8 |
 | --- | ---: | ---: | ---: | ---: |
-| MTOP | 78.64% | 92.93% | 93.23% | 28.59%, 99.92% accepted precision |
-| BANKING77 | 68.90% | 90.62% | 87.44% | 0% |
+| MTOP | 75.99% | 92.38% | 93.59% | 33.22%, 99.93% accepted precision |
+| BANKING77 | 68.99% | 89.90% | 86.23% | 0% |
 
 ## Limits
 
 - Coverage moved 19 points between two seeds of one pool. Report a range, never a single best run.
 - With the correct intent missing from the options, the gate can accept wrong answers.
-- BANKING77 certifies zero on raw labels. With no examples on BANKING77 this model has no lead.
+- BANKING77 certifies zero at the 99% bar, even after a model audit. With no examples on BANKING77 this model has no lead.
 - With thousands of labels, a logistic head on retrieval vectors beats the reader.
 - Written training rows come from one model and carry its style.
 - Benchmark numbers are not a promise about a new business or future traffic.

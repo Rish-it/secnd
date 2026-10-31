@@ -1,0 +1,83 @@
+{
+  "init": "ic-ettin-400m-s6000-near-wide-fine",
+  "seed": 0,
+  "epochs": 8,
+  "parameters": 395834369,
+  "device": "cuda",
+  "split": {
+    "fit": 5400,
+    "val": 600,
+    "test": 2000
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "val_accuracy": 0.7433,
+      "seconds": 203
+    },
+    {
+      "epoch": 2,
+      "val_accuracy": 0.7833,
+      "seconds": 408
+    },
+    {
+      "epoch": 3,
+      "val_accuracy": 0.795,
+      "seconds": 614
+    },
+    {
+      "epoch": 4,
+      "val_accuracy": 0.7967,
+      "seconds": 819
+    },
+    {
+      "epoch": 5,
+      "val_accuracy": 0.8183,
+      "seconds": 1024
+    },
+    {
+      "epoch": 6,
+      "val_accuracy": 0.81,
+      "seconds": 1230
+    },
+    {
+      "epoch": 7,
+      "val_accuracy": 0.8,
+      "seconds": 1435
+    },
+    {
+      "epoch": 8,
+      "val_accuracy": 0.8,
+      "seconds": 1640
+    }
+  ],
+  "temperatures": {
+    "choice": 0.421,
+    "noul": 0.506,
+    "score": 0.461
+  },
+  "val": {
+    "decisions": 600,
+    "accuracy": 0.8183,
+    "per_type": {
+      "choice": 0.8389,
+      "noul": 0.8667,
+      "score": 0.7667
+    },
+    "brier": 0.1009,
+    "soft_accuracy": 0.637,
+    "ece": 0.0309
+  },
+  "test": {
+    "decisions": 2000,
+    "accuracy": 0.788,
+    "per_type": {
+      "choice": 0.7467,
+      "noul": 0.865,
+      "score": 0.7612
+    },
+    "brier": 0.1004,
+    "soft_accuracy": 0.6283,
+    "ece": 0.0147
+  }
+}

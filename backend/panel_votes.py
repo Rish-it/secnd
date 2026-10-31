@@ -87,7 +87,7 @@ def tally(rows, votes, key, panel=PANEL):
 
 
 def call(client, model, prompt, key, meta_key):
-    """One vote's request and its cost; Muse needs a low reasoning effort to leave room to answer."""
+    """One vote and its cost; Muse needs a low reasoning effort to leave room to answer."""
     body = dict(model=model, messages=[dict(role="user", content=prompt)], temperature=0)
     if model.startswith("muse-"):
         response = client.post(

@@ -76,11 +76,11 @@ full fixed public history and do not certify a new business or future traffic.
 The separate missing-intent audit contains a wrong acceptance for this condition.
 Source: `docs/results/s3r/README.md`.
 
-The latest retraining added wider, licence-checked data. Its best shippable reader
-measured **90.62%** on BANKING77 and **92.93%** on MTOP with eight examples, and
-**68.90%** and **78.64%** with none. On raw labels, BANKING77 still certifies no
-automatic coverage, and MTOP coverage moved 19 points between seeds of one pool, so
-one run cannot prove a coverage gain. These weights are not released yet.
+The latest retraining added wider, licence-checked data. Its ship candidate measured
+**89.90%** on BANKING77 and **92.38%** on MTOP with eight examples, and **68.99%** and
+**75.99%** with none. At the 99% bar, MTOP certifies **33.22%** on raw labels and
+BANKING77 certifies none, even after a model audit. MTOP coverage moved 19 points between
+seeds of one pool, so one run cannot prove a coverage gain. These weights are not released yet.
 [Wider training pools](docs/results/s2/wide-round.md).
 
 Personal reviews are labelled “Measured on your own reviews”. Audited public
