@@ -1,0 +1,117 @@
+frontend/src/Harness.tsx
+  s_e80029a4b70864::t_04d704d6f50eca 33-36
+  s_adfb46eddf0a71::t_03f3d27cbcf4eb 61,289
+  s_e80029a4b70864::t_b1b829bf54fe24 183,208,222-227,247,293-294,297-298,301,333,335,348,392,451,455,465-476,491-492,496,556,558-559
+  s_adfb46eddf0a71::t_da89309381d10f 9
+  s_e80029a4b70864::t_32c17833ff298c 4-7,13,16,20,23,27-32,37,41-60,62-83,91,93,95-113
+  s_adfb46eddf0a71::t_650a2eccc1be56 8,148
+frontend/src/MetaConnections.css
+  s_e80029a4b70864::t_b9f17a7e4260f2 1-5
+docs/submission/video-script.md
+  s_e80029a4b70864::t_18e90e8b1b68c7 1-35
+frontend/src/Companion.tsx
+  s_adfb46eddf0a71::t_c37c77ab59e5bf 5-6,28,37-38,97,166,192,229,232-254,257-258,261-265,271,299,301,342,345-347,357,370,388,401-402,411-412,415,424,522,524-525
+  s_e80029a4b70864::t_4c7ff082afe4c4 176
+frontend/src/Harness.css
+  s_e80029a4b70864::t_b9f17a7e4260f2 1-71
+backend/tests/test_product_demo.py
+  s_e80029a4b70864::t_22f72b8931dafb 1-103
+docs/submission/submission.md
+  s_e80029a4b70864::t_18e90e8b1b68c7 1-56
+frontend/src/App.css
+  s_e80029a4b70864::t_b9f17a7e4260f2 1-38
+frontend/src/Companion.css
+  s_e80029a4b70864::t_b9f17a7e4260f2 1-53
+frontend/src/App.tsx
+  s_e80029a4b70864::t_45dd6eb2d578db 3-4,8,11-12,14,16-23,25,27,29-37,39-41,43-48,50-55,57-75,78,81-84,86-88,90-98
+  s_adfb46eddf0a71::t_03f3d27cbcf4eb 15,49
+  s_adfb46eddf0a71::t_da89309381d10f 9-10
+  s_adfb46eddf0a71::t_0fa9d9c3ae00a4 38,42,56
+frontend/tests/inbox.spec.ts
+  s_e80029a4b70864::t_22f72b8931dafb 4,34,64,67,103-105
+frontend/src/Product.css
+  s_e80029a4b70864::t_b9f17a7e4260f2 1-4
+  s_e80029a4b70864::t_1a81254b4d9786 5
+frontend/src/index.css
+  s_e80029a4b70864::t_b9f17a7e4260f2 2-60
+frontend/src/MetaConnections.tsx
+  s_e80029a4b70864::t_b1b829bf54fe24 1-3,5,13-25
+frontend/scripts/demo.mjs
+  s_e80029a4b70864::t_62fc5934466cea 1-9
+frontend/index.html
+  s_adfb46eddf0a71::t_03f3d27cbcf4eb 7,9,12,15
+frontend/package.json
+  s_e80029a4b70864::t_62fc5934466cea 10
+  s_e80029a4b70864::t_4c7ff082afe4c4 11
+  s_e80029a4b70864::t_04d704d6f50eca 12
+frontend/src/SourceIcon.tsx
+  s_e80029a4b70864::t_32c17833ff298c 1-7
+frontend/src/api.ts
+  s_adfb46eddf0a71::t_da89309381d10f 133,135
+  s_adfb46eddf0a71::t_c37c77ab59e5bf 9-14,16-17
+frontend/tests/harness.spec.ts
+  s_e80029a4b70864::t_22f72b8931dafb 2,19-84,86-100,102-109,111-120,123-147,149-205,209-210
+  s_e80029a4b70864::t_4c438b7e0f0d4b 3-4,6-16
+  s_adfb46eddf0a71::t_7d7acd9d76d08a 148
+frontend/src/decisionBasis.ts
+  s_e80029a4b70864::t_4c7ff082afe4c4 2,8-14,17,21-23,25,27-33
+  s_adfb46eddf0a71::t_da89309381d10f 6-7,15-16,20,26
+  s_e80029a4b70864::t_25f1a20a1bdf77 1,3-5,18-19,24,34
+frontend/src/permissionLedger.ts
+  s_adfb46eddf0a71::t_92c13076fdaea0 1-22
+frontend/src/FirstRun.tsx
+  s_adfb46eddf0a71::t_03f3d27cbcf4eb 1,17,24,66,93
+  s_e80029a4b70864::t_32c17833ff298c 2-16,18-23,25-65,67-92,94-95
+docs/submission/verification.md
+  s_adfb46eddf0a71::t_03f3d27cbcf4eb 1-53
+docs/submission/implementation-notes.md
+  s_e80029a4b70864::t_1a81254b4d9786 61-65
+  s_e80029a4b70864::t_18e90e8b1b68c7 1-60,66-78
+frontend/playwright.demo.config.ts
+  s_adfb46eddf0a71::t_03f3d27cbcf4eb 11
+  s_e80029a4b70864::t_4c438b7e0f0d4b 2,4-6,8-10,12
+  s_e80029a4b70864::t_22f72b8931dafb 1,3,7,13-14
+frontend/src/PermissionHistory.tsx
+  s_e80029a4b70864::t_b1b829bf54fe24 1-2,5-12,21-31
+  s_adfb46eddf0a71::t_da89309381d10f 3-4
+  s_adfb46eddf0a71::t_6597204f12024b 13-20
+README.md
+  s_e80029a4b70864::t_18e90e8b1b68c7 1-100,236
+frontend/src/business.ts
+  s_adfb46eddf0a71::t_da89309381d10f 10
+  s_e80029a4b70864::t_32c17833ff298c 1-9,11-15
+backend/demo_seed.py
+  s_e80029a4b70864::t_3aa9a56a334a74 265,287,495-507
+  s_e80029a4b70864::t_81c6784dd36445 288
+  s_e80029a4b70864::t_04d704d6f50eca 508-537
+  s_adfb46eddf0a71::t_03f3d27cbcf4eb 545
+  s_e80029a4b70864::t_62fc5934466cea 1-26,33-35,54-56,173-176,184-189,199,220-238,254-256,268-273,283-286,292,296-297,323-325,335,341-343,349-353,366-367,371-372,383-385,387,434,465,472-485,492-494,538,549,558,566,575-576,584-597,601-605
+  s_e80029a4b70864::t_27ecaaaeaa54c4 27-32,36-53,57-64,67-172,177-183,190-198,200-204,207-219,239-253,257-263,266-267,274-282,289-291,293-295,298-322,326-334,336-340,344-348,354-365,368-370,373-382,386,388-433,435-457,466-471,486-491,539-544,546-548,550-557,559-560,563-565,567-574,577-578,581-583,598-600
+  s_adfb46eddf0a71::t_915bcb537d676b 65-66,205-206,264,458-464,561-562,579-580
+frontend/unit/evidence.test.ts
+  s_e80029a4b70864::t_6575fcf6d90717 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a0abaf02aafa12228b9a40895ce095bf8ef23fdb",
+  "prompts": {},
+  "sessions": {
+    "s_adfb46eddf0a71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1900f-fa59-7282-9379-590aef5fc194",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    },
+    "s_e80029a4b70864": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a1900f-fa59-7282-9379-590aef5fc194",
+        "model": "unknown"
+      },
+      "human_author": "Rishit Sharma <rishitsharmar89@gmail.com>"
+    }
+  }
+}
