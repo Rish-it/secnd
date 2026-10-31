@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import logging
 from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Annotated, Literal
@@ -21,6 +22,21 @@ AdAction = Literal["pause", "keep", "raise budget", "lower budget"]
 ACTIONS = ["pause", "keep", "raise budget", "lower budget"]
 MetaId = Annotated[str, Field(pattern=r"^\d{1,32}$")]
 Money = Annotated[Decimal, Field(ge=0, allow_inf_nan=False, max_digits=20, decimal_places=6)]
+
+
+logger = logging.getLogger(__name__)
+
+
+def graph_error(failure) -> str:
+    """Only Meta's numeric status and error codes, which name the cause and carry no secret."""
+    if not isinstance(failure, httpx.HTTPStatusError):
+        return type(failure).__name__
+    try:
+        error = failure.response.json()["error"]
+        codes = (int(error.get("code", 0)), int(error.get("error_subcode", 0)))
+    except (ValueError, KeyError, TypeError, AttributeError):
+        codes = (0, 0)
+    return f"status {failure.response.status_code} code {codes[0]} subcode {codes[1]}"
 
 
 class AdsUnavailable(RuntimeError):
@@ -136,8 +152,9 @@ class MarketingClient:
                 if not isinstance(payload, dict) or "error" in payload:
                     raise ValueError
                 return payload
-        except (httpx.HTTPError, ValueError):
+        except (httpx.HTTPError, ValueError) as failure:
             # Never expose Graph bodies, request headers, tokens, or provider exception text.
+            logger.warning("Graph %s %s refused: %s", method, path, graph_error(failure))
             raise AdsUnavailable(
                 "Meta Ads request failed. Check sandbox access and permissions."
             ) from None

@@ -51,20 +51,6 @@ class Settings(BaseSettings):
     meta_redirect_uri: str = ""
     meta_public_url: str = ""
     meta_token_key: SecretStr = SecretStr("")
-    meta_scopes: list[str] = Field(
-        default_factory=lambda: [
-            "ads_read",
-            "ads_management",
-            "business_management",
-            "pages_show_list",
-            "pages_manage_metadata",
-            "pages_messaging",
-            "instagram_basic",
-            "instagram_manage_messages",
-            "whatsapp_business_management",
-            "whatsapp_business_messaging",
-        ]
-    )
     meta_verify_token: SecretStr = SecretStr("")
     whatsapp_token: SecretStr = SecretStr("")
     whatsapp_send_enabled: bool = False
