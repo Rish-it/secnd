@@ -16,8 +16,17 @@ and provider writes are blocked, synthetic selection saves, and the stop state
 persists in its database. These checks do not verify a real Meta integration or
 model quality.
 
-Not run: live OAuth, live sends, paid generation, actual 400M serving, visual
-review, video recording or upload, and hosting.
+## Live Meta run
+
+On 2026-10-31 a real Facebook Login for Business sign-in ran against the app through a temporary
+HTTPS tunnel. It connected, stored the token encrypted and listed the person's one ad account. The
+real selection path saved that account to a workspace, and a live insights request succeeded and
+returned zero rows, because the account has no campaigns and has spent nothing. So the path is
+proven; Ren has not decided on real ad data. The account has no Pages, so no webhook or message
+reached the app. Ad changes stayed off and no send was attempted.
+
+Not run: Meta messaging, live sends, ad changes, proposals from real ad data, paid generation, actual
+400M serving, visual review, video recording or upload, and fixed hosting.
 
 Before submission, run:
 

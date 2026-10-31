@@ -45,7 +45,9 @@ automatic coverage at the 99% bar.
 
 Measured 400M latency for the submitted product build: **TBD**.
 Measured customer time saved or advertising lift: **TBD**.
-Live Meta OAuth and delivery verification for this submission: **TBD**.
+Live Meta sign-in ran on 2026-10-31: it connected, listed and saved one ad account, and read its
+insights, which were empty because the account has no campaigns (`docs/submission/verification.md`).
+Live message delivery was not tested.
 Public product URL: **TBD**. Video URL: **TBD**.
 
 Run from the repository root after installing the locked dependencies:
